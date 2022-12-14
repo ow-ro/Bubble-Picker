@@ -3,13 +3,10 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
 
     }
     buildTypes {
@@ -21,15 +18,21 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+    namespace 'com.igalata.bubblepicker'
+
+    configurations {
+        runtime.exclude group: "org.slf4j", module: "jetified-slf4j-api-1.7.22"
+    }
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    //implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    compile files('libs/jbox2d-library-2.1.2.2.jar')
-    compile files('libs/slf4j-api-1.7.22.jar')
+    implementation group: 'org.jbox2d', name: 'jbox2d-library', version: '2.1.2.3'
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'
 }
 repositories {
     mavenCentral()

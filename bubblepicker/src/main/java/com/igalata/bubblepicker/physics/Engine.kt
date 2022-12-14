@@ -4,12 +4,14 @@ import com.igalata.bubblepicker.rendering.Item
 import com.igalata.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
+import org.jbox2d.pooling.IWorldPool
 import java.util.*
 
 /**
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
+    var isAlwaysSelected = true
 
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
@@ -45,10 +47,11 @@ object Engine {
 
     fun build(bodiesCount: Int, scaleX: Float, scaleY: Float): List<CircleBody> {
         val density = interpolate(0.8f, 0.2f, radius / 100f)
-        for (i in 0..bodiesCount - 1) {
+        for (i in 0 until bodiesCount) {
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
-            bodies.add(CircleBody(world, Vec2(x, y), bubbleRadius * scaleX, (bubbleRadius * scaleX) * 1.3f, density))
+            bodies.add(CircleBody(world, Vec2(x, y), bubbleRadius * scaleX, (bubbleRadius * scaleX) * 1.3f, density,
+                isAlwaysSelected))
         }
         this.scaleX = scaleX
         this.scaleY = scaleY
@@ -102,8 +105,8 @@ object Engine {
 
     private fun createBorders() {
         borders = arrayListOf(
-                Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
-                Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL)
+            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
+            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL)
         )
     }
 

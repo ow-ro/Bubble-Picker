@@ -1,5 +1,6 @@
 package com.igalata.bubblepicker.rendering
 
+import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.opengl.GLES20.*
@@ -7,17 +8,20 @@ import android.opengl.Matrix
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import com.igalata.bubblepicker.model.BubbleGradient
 import com.igalata.bubblepicker.model.PickerItem
 import com.igalata.bubblepicker.physics.CircleBody
 import com.igalata.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.igalata.bubblepicker.toTexture
 import org.jbox2d.common.Vec2
+import java.lang.ref.WeakReference
 
 /**
  * Created by irinagalata on 1/19/17.
  */
-data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
+data class Item(val context: WeakReference<Context>,
+                val pickerItem: PickerItem, val circleBody: CircleBody, val isAlwaysSelected: Boolean) {
 
     val x: Float
         get() = circleBody.physicalBody.position.x
@@ -36,20 +40,25 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
 
     private var isVisible = true
         get() = circleBody.isVisible
+
     private var texture: Int = 0
+
     private var imageTexture: Int = 0
+
     private val currentTexture: Int
         get() = if (circleBody.increased || circleBody.isIncreasing) imageTexture else texture
+
     private val bitmapSize = 256f
+
     private val gradient: LinearGradient?
         get() {
             return pickerItem.gradient?.let {
                 val horizontal = it.direction == BubbleGradient.HORIZONTAL
                 LinearGradient(if (horizontal) 0f else bitmapSize / 2f,
-                        if (horizontal) bitmapSize / 2f else 0f,
-                        if (horizontal) bitmapSize else bitmapSize / 2f,
-                        if (horizontal) bitmapSize / 2f else bitmapSize,
-                        it.startColor, it.endColor, Shader.TileMode.CLAMP)
+                    if (horizontal) bitmapSize / 2f else 0f,
+                    if (horizontal) bitmapSize else bitmapSize / 2f,
+                    if (horizontal) bitmapSize / 2f else bitmapSize,
+                    it.startColor, it.endColor, Shader.TileMode.CLAMP)
             }
         }
 
@@ -70,6 +79,7 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
     private fun createBitmap(isSelected: Boolean): Bitmap {
         var bitmap = Bitmap.createBitmap(bitmapSize.toInt(), bitmapSize.toInt(), Bitmap.Config.ARGB_4444)
         val bitmapConfig: Bitmap.Config = bitmap.config ?: Bitmap.Config.ARGB_8888
+
         bitmap = bitmap.copy(bitmapConfig, true)
 
         val canvas = Canvas(bitmap)
@@ -87,15 +97,23 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
         bgPaint.style = Paint.Style.FILL
         pickerItem.color?.let { bgPaint.color = pickerItem.color!! }
         pickerItem.gradient?.let { bgPaint.shader = gradient }
-        if (withImage) bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
+        if (withImage) {
+            bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
+        }
         canvas.drawRect(0f, 0f, bitmapSize, bitmapSize, bgPaint)
     }
 
     private fun drawText(canvas: Canvas) {
-        if (pickerItem.title == null || pickerItem.textColor == null) return
+        if (pickerItem.title == null) return
 
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = pickerItem.textColor!!
+
+            color = if (pickerItem.textColor == null) {
+                Color.parseColor("#ffffff")
+            } else {
+                pickerItem.textColor!!
+            }
+
             textSize = pickerItem.textSize
             typeface = pickerItem.typeface
         }
@@ -122,7 +140,7 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
 
     private fun placeText(paint: TextPaint): StaticLayout {
         return StaticLayout(pickerItem.title, paint, (bitmapSize * 0.9).toInt(),
-                Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false)
+            Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false)
     }
 
     private fun drawIcon(canvas: Canvas) {
@@ -146,7 +164,7 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
     }
 
     private fun drawImage(canvas: Canvas) {
-        pickerItem.backgroundImage?.let {
+        pickerItem.imgDrawable?.let {
             val height = (it as BitmapDrawable).bitmap.height.toFloat()
             val width = it.bitmap.width.toFloat()
             val ratio = Math.max(height, width) / Math.min(height, width)
@@ -166,7 +184,7 @@ data class Item(val pickerItem: PickerItem, val circleBody: CircleBody) {
     private fun calculateMatrix(scaleX: Float, scaleY: Float) = FloatArray(16).apply {
         Matrix.setIdentityM(this, 0)
         Matrix.translateM(this, 0, currentPosition.x * scaleX - initialPosition.x,
-                currentPosition.y * scaleY - initialPosition.y, 0f)
+            currentPosition.y * scaleY - initialPosition.y, 0f)
     }
 
 }

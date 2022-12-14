@@ -16,12 +16,9 @@ object BubbleShader {
     // language=GLSL
     val vertexShader = """
         uniform mat4 u_Matrix;
-
         attribute vec4 a_Position;
         attribute vec2 a_UV;
-
         varying vec2 v_UV;
-
         void main()
         {
             gl_Position = u_Matrix * a_Position;
@@ -32,13 +29,10 @@ object BubbleShader {
     // language=GLSL
     val fragmentShader = """
         precision mediump float;
-
         uniform vec4 u_Background;
         uniform sampler2D u_Texture;
         uniform int u_Visibility;
-
         varying vec2 v_UV;
-
         void main()
         {
             float distance = distance(vec2(0.5, 0.5), v_UV);

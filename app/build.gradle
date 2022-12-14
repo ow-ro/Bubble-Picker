@@ -1,15 +1,18 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdk compileSdkVersion
     defaultConfig {
         applicationId "com.igalata.bubblepickerdemo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 4
+        compileSdkVersion  33
+        buildToolsVersion  '30.0.3'
+        minSdkVersion  16
         versionName "0.1.1"
     }
     buildTypes {
@@ -21,13 +24,18 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+    namespace 'com.igalata.bubblepickerdemo'
+
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "com.android.support:appcompat-v7:$supportLibVersion"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile project(':bubblepicker')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.20"
+    implementation project(':bubblepicker')
 }
 repositories {
     mavenCentral()

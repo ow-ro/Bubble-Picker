@@ -24,9 +24,9 @@ fun FloatBuffer.passToShader(programId: Int, name: String) {
 }
 
 fun FloatArray.toFloatBuffer() = ByteBuffer
-        .allocateDirect(size * FLOAT_SIZE)
-        .order(ByteOrder.nativeOrder())
-        .asFloatBuffer()?.put(this)
+    .allocateDirect(size * FLOAT_SIZE)
+    .order(ByteOrder.nativeOrder())
+    .asFloatBuffer()?.put(this)
 
 fun FloatArray.passTextureVertices(index: Int) = put(index * 8, TEXTURE_VERTICES)
 
@@ -42,8 +42,24 @@ fun Bitmap.toTexture(textureUnit: Int) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     GLUtils.texImage2D(GL_TEXTURE_2D, 0, this, 0)
-    recycle()
+    if (!isRecycled) {
+        recycle()
+    }
     glBindTexture(GL_TEXTURE_2D, 0)
 }
 
 fun Int.even() = this % 2 == 0
+
+fun Bitmap.resizeBitmap(newWidth: Int, newHeight: Int): Bitmap {
+    val width = this.width
+    val height = this.height
+    val scaleWidth = newWidth.toFloat() / width
+    val scaleHeight = newHeight.toFloat() / height
+
+    val matrix = android.graphics.Matrix()
+    matrix.postScale(scaleWidth, scaleHeight)
+
+    val resizedBitmap = Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
+    this.recycle()
+    return resizedBitmap
+}

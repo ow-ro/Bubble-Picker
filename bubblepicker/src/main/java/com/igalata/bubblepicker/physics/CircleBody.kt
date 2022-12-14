@@ -7,7 +7,8 @@ import org.jbox2d.dynamics.*
 /**
  * Created by irinagalata on 1/26/17.
  */
-class CircleBody(val world: World, var position: Vec2, var radius: Float, var increasedRadius: Float, var density: Float) {
+class CircleBody(val world: World, var position: Vec2, var radius: Float, var increasedRadius: Float, var density: Float,
+                 val isAlwaysSelected: Boolean) {
 
     val decreasedRadius: Float = radius
 
@@ -67,7 +68,15 @@ class CircleBody(val world: World, var position: Vec2, var radius: Float, var in
         }
     }
 
-    fun resize(step: Float) = if (increased) decrease(step) else increase(step)
+    fun resize(step: Float) {
+        if (isAlwaysSelected) {
+            if (!increased) {
+                increase(step)
+            }
+        } else {
+            if (increased) decrease(step) else increase(step)
+        }
+    }
 
     fun decrease(step: Float) {
         isDecreasing = true

@@ -14,6 +14,7 @@ import com.igalata.bubblepicker.rendering.BubbleShader.U_BACKGROUND
 import com.igalata.bubblepicker.rendering.BubbleShader.fragmentShader
 import com.igalata.bubblepicker.rendering.BubbleShader.vertexShader
 import org.jbox2d.common.Vec2
+import java.lang.ref.WeakReference
 import java.nio.FloatBuffer
 import java.util.*
 import javax.microedition.khronos.egl.EGLConfig
@@ -24,19 +25,31 @@ import javax.microedition.khronos.opengles.GL10
  */
 class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
 
+    var isAlwaysSelected = true
+        set(value) {
+            field = value
+            Engine.isAlwaysSelected = value
+        }
+
     var backgroundColor: Color? = null
+
     var maxSelectedCount: Int? = null
         set(value) {
             Engine.maxSelectedCount = value
         }
+
     var bubbleSize = 50
         set(value) {
             Engine.radius = value
         }
+
     var listener: BubblePickerListener? = null
-    lateinit var items: ArrayList<PickerItem>
+
+    var pickerList: List<PickerItem> = ArrayList()
+
     val selectedItems: List<PickerItem?>
         get() = Engine.selectedBodies.map { circles.firstOrNull { circle -> circle.circleBody == it }?.pickerItem }
+
     var centerImmediately = false
         set(value) {
             field = value
@@ -52,13 +65,15 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
 
     private val scaleX: Float
         get() = if (glView.width < glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
+
     private val scaleY: Float
         get() = if (glView.width < glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
+
     private val circles = ArrayList<Item>()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         glClearColor(backgroundColor?.red ?: 1f, backgroundColor?.green ?: 1f,
-                backgroundColor?.blue ?: 1f, backgroundColor?.alpha ?: 1f)
+            backgroundColor?.blue ?: 1f, backgroundColor?.alpha ?: 1f)
         enableTransparency()
     }
 
@@ -74,13 +89,27 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
     }
 
     private fun initialize() {
-        clear()
-        Engine.centerImmediately = centerImmediately
-        Engine.build(items.size, scaleX, scaleY).forEachIndexed { index, body ->
-            circles.add(Item(items[index], body))
+        if (pickerList.isEmpty()) {
+            return
         }
-        items.forEach { if (it.isSelected) Engine.resize(circles.first { circle -> circle.pickerItem == it }) }
-        if (textureIds == null) textureIds = IntArray(circles.size * 2)
+        clear()
+
+        Engine.centerImmediately = centerImmediately
+
+        Engine.build(pickerList.size, scaleX, scaleY)
+            .forEachIndexed { index, body ->
+                circles.add(Item(WeakReference(glView.context), pickerList[index], body, isAlwaysSelected))
+            }
+
+        pickerList.forEach {
+            if (circles.isNotEmpty() && (it.isSelected || isAlwaysSelected)) {
+                Engine.resize(circles.first { circle -> circle.pickerItem == it })
+            }
+        }
+
+        if (textureIds == null) {
+            textureIds = IntArray(circles.size * 2)
+        }
         initializeArrays()
     }
 
@@ -110,7 +139,7 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
 
         body.initialPosition.apply {
             vertices?.put(8 * index, floatArrayOf(x - radiusX, y + radiusY, x - radiusX, y - radiusY,
-                    x + radiusX, y + radiusY, x + radiusX, y - radiusY))
+                x + radiusX, y + radiusY, x + radiusX, y - radiusY))
         }
     }
 
@@ -130,7 +159,7 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
 
     private fun attachShaders() {
         programId = createProgram(createShader(GL_VERTEX_SHADER, vertexShader),
-                createShader(GL_FRAGMENT_SHADER, fragmentShader))
+            createShader(GL_FRAGMENT_SHADER, fragmentShader))
         glUseProgram(programId)
     }
 
@@ -146,7 +175,7 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
     }
 
     fun swipe(x: Float, y: Float) = Engine.swipe(x.convertValue(glView.width, scaleX),
-            y.convertValue(glView.height, scaleY))
+        y.convertValue(glView.height, scaleY))
 
     fun release() = Engine.release()
 
@@ -159,12 +188,12 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
         if (Engine.resize(this)) {
             listener?.let {
-                if (circleBody.increased) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(pickerItem)
+                if (circleBody.increased && !isAlwaysSelected) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(pickerItem)
             }
         }
     }
 
-    private fun clear() {
+    fun clear() {
         circles.clear()
         Engine.clear()
     }

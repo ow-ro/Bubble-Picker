@@ -3,7 +3,7 @@ package com.igalata.bubblepicker.rendering
 import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
 import com.igalata.bubblepicker.BubblePickerListener
@@ -15,42 +15,50 @@ import com.igalata.bubblepicker.model.PickerItem
 /**
  * Created by irinagalata on 1/19/17.
  */
-class BubblePicker : GLSurfaceView {
+class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+    private lateinit var renderer: PickerRenderer
 
-    @ColorInt var background: Int = 0
+    @ColorInt
+    var background: Int = 0
         set(value) {
             field = value
             renderer.backgroundColor = Color(value)
         }
-    @Deprecated(level = DeprecationLevel.WARNING,
-            message = "Use BubblePickerAdapter for the view setup instead")
-    var items: ArrayList<PickerItem>? = null
+
+    var datas: List<PickerItem> = ArrayList()
         set(value) {
             field = value
-            renderer.items = value ?: ArrayList()
+            renderer.pickerList = value
+            super.onResume()
         }
+
     var adapter: BubblePickerAdapter? = null
         set(value) {
             field = value
             if (value != null) {
-                renderer.items = ArrayList((0..value.totalCount - 1)
-                        .map { value.getItem(it) }.toList())
+                renderer.pickerList = ArrayList((0 until value.totalCount)
+                    .map { value.getItem(it) }.toList())
             }
+            super.onResume()
         }
+
     var maxSelectedCount: Int? = null
         set(value) {
             renderer.maxSelectedCount = value
         }
+
     var listener: BubblePickerListener? = null
         set(value) {
             renderer.listener = value
         }
+
     var bubbleSize = 50
         set(value) {
             if (value in 1..100) {
                 renderer.bubbleSize = value
             }
         }
+
     val selectedItems: List<PickerItem?>
         get() = renderer.selectedItems
 
@@ -60,21 +68,33 @@ class BubblePicker : GLSurfaceView {
             renderer.centerImmediately = value
         }
 
-    private val renderer = PickerRenderer(this)
+    var isAlwaysSelected = true
+        set(value) {
+            field = value
+            renderer.isAlwaysSelected = value
+        }
+
+    var swipeMoveSpeed = 1.5f
+
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
 
-    constructor(context: Context?) : this(context, null)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+    init {
+        init()
+        attrs?.let { retrieveAttrubutes(attrs) }
+    }
+
+    private fun init() {
+        renderer = PickerRenderer(this)
+
         setZOrderOnTop(true)
         setEGLContextClientVersion(2)
         setEGLConfigChooser(8, 8, 8, 8, 16, 0)
         holder.setFormat(PixelFormat.RGBA_8888)
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
-        attrs?.let { retrieveAttrubutes(attrs) }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -91,7 +111,7 @@ class BubblePicker : GLSurfaceView {
             }
             MotionEvent.ACTION_MOVE -> {
                 if (isSwipe(event)) {
-                    renderer.swipe(previousX - event.x, previousY - event.y)
+                    renderer.swipe((previousX - event.x) * swipeMoveSpeed, (previousY - event.y) * swipeMoveSpeed)
                     previousX = event.x
                     previousY = event.y
                 } else {
@@ -122,6 +142,19 @@ class BubblePicker : GLSurfaceView {
         }
 
         array.recycle()
+    }
+
+    override fun onResume() {
+        if (renderer.pickerList.isNotEmpty()) {
+            super.onResume()
+        }
+    }
+
+    override fun onPause() {
+        if (renderer.pickerList.isNotEmpty()) {
+            super.onPause()
+            renderer.clear()
+        }
     }
 
 }
