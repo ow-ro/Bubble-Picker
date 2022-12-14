@@ -4,7 +4,6 @@ import com.igalata.bubblepicker.rendering.Item
 import com.igalata.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
-import org.jbox2d.pooling.IWorldPool
 import java.util.*
 
 /**
@@ -92,7 +91,9 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedBodies.size >= maxSelectedCount ?: bodies.size && !item.circleBody.increased) return false
+        if (selectedBodies.size >= (maxSelectedCount
+                ?: bodies.size) && !item.circleBody.increased
+        ) return false
 
         if (item.circleBody.isBusy) return false
 

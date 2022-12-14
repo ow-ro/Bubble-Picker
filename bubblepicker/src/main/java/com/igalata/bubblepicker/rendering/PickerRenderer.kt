@@ -1,6 +1,5 @@
 package com.igalata.bubblepicker.rendering
 
-import android.opengl.GLES20
 import android.opengl.GLES20.*
 import android.opengl.GLSurfaceView
 import android.view.View
@@ -16,14 +15,14 @@ import com.igalata.bubblepicker.rendering.BubbleShader.vertexShader
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 import java.nio.FloatBuffer
-import java.util.*
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.math.sqrt
 
 /**
  * Created by irinagalata on 1/19/17.
  */
-class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
+class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
     var isAlwaysSelected = true
         set(value) {
@@ -34,14 +33,8 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
     var backgroundColor: Color? = null
 
     var maxSelectedCount: Int? = null
-        set(value) {
-            Engine.maxSelectedCount = value
-        }
 
-    var bubbleSize = 50
-        set(value) {
-            Engine.radius = value
-        }
+    var bubbleSize = 10
 
     var listener: BubblePickerListener? = null
 
@@ -152,8 +145,8 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
     }
 
     private fun enableTransparency() {
-        glEnable(GLES20.GL_BLEND)
-        glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         attachShaders()
     }
 
@@ -169,26 +162,30 @@ class PickerRenderer(val glView: View) : GLSurfaceView.Renderer {
         glLinkProgram(this)
     }
 
-    fun createShader(type: Int, shader: String) = GLES20.glCreateShader(type).apply {
+    fun createShader(type: Int, shader: String) = glCreateShader(type).apply {
         glShaderSource(this, shader)
         glCompileShader(this)
     }
 
-    fun swipe(x: Float, y: Float) = Engine.swipe(x.convertValue(glView.width, scaleX),
-        y.convertValue(glView.height, scaleY))
+    fun swipe(x: Float, y: Float) = Engine.swipe(
+        x.convertValue(glView.width, scaleX),
+        y.convertValue(glView.height, scaleY)
+    )
 
     fun release() = Engine.release()
 
-    private fun getItem(position: Vec2) = position.let {
-        val x = it.x.convertPoint(glView.width, scaleX)
-        val y = it.y.convertPoint(glView.height, scaleY)
-        circles.find { Math.sqrt(((x - it.x).sqr() + (y - it.y).sqr()).toDouble()) <= it.radius }
+    private fun getItem(position: Vec2) = position.let { vec2 ->
+        val x = vec2.x.convertPoint(glView.width, scaleX)
+        val y = vec2.y.convertPoint(glView.height, scaleY)
+        circles.find { sqrt(((x - it.x).sqr() + (y - it.y).sqr()).toDouble()) <= it.radius }
     }
 
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
         if (Engine.resize(this)) {
             listener?.let {
-                if (circleBody.increased && !isAlwaysSelected) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(pickerItem)
+                if (circleBody.increased && !isAlwaysSelected) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(
+                    pickerItem
+                )
             }
         }
     }

@@ -2,37 +2,30 @@ package com.igalata.bubblepickerdemo
 
 import android.content.res.TypedArray
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.igalata.bubblepicker.BubblePickerListener
 import com.igalata.bubblepicker.adapter.BubblePickerAdapter
 import com.igalata.bubblepicker.model.BubbleGradient
 import com.igalata.bubblepicker.model.PickerItem
 import com.igalata.bubblepicker.rendering.BubblePicker
-import com.igalata.bubblepickerdemo.databinding.ActivityDemoBinding
 
 /**
  * Created by irinagalata on 1/19/17.
  */
 class DemoActivity : AppCompatActivity() {
 
-    private val boldTypeface by lazy { Typeface.createFromAsset(assets, ROBOTO_BOLD) }
     private val mediumTypeface by lazy { Typeface.createFromAsset(assets, ROBOTO_MEDIUM) }
-    private val regularTypeface by lazy { Typeface.createFromAsset(assets, ROBOTO_REGULAR) }
 
     companion object {
         private const val ROBOTO_BOLD = "roboto_bold.ttf"
         private const val ROBOTO_MEDIUM = "roboto_medium.ttf"
         private const val ROBOTO_REGULAR = "roboto_regular.ttf"
     }
-
-    lateinit var binding: ActivityDemoBinding
-
 
     lateinit var images: TypedArray
     lateinit var colors: TypedArray
@@ -70,9 +63,9 @@ class DemoActivity : AppCompatActivity() {
             }
 
             setContentView(picker)
-            picker.maxSelectedCount = 10
-            picker.bubbleSize = 10
+            picker.bubbleSize = 1
             picker.swipeMoveSpeed = 10f
+            picker.isAlwaysSelected = false
             picker.listener = object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 

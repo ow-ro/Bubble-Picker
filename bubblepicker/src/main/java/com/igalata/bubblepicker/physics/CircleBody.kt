@@ -3,6 +3,7 @@ package com.igalata.bubblepicker.physics
 import org.jbox2d.collision.shapes.CircleShape
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.*
+import kotlin.math.abs
 
 /**
  * Created by irinagalata on 1/26/17.
@@ -83,7 +84,7 @@ class CircleBody(val world: World, var position: Vec2, var radius: Float, var in
         radius -= step
         reset()
 
-        if (Math.abs(radius - decreasedRadius) < step) {
+        if (abs(radius - decreasedRadius) < step) {
             increased = false
             clear()
         }
@@ -94,7 +95,7 @@ class CircleBody(val world: World, var position: Vec2, var radius: Float, var in
         radius += step
         reset()
 
-        if (Math.abs(radius - increasedRadius) < step) {
+        if (abs(radius - increasedRadius) < step) {
             increased = true
             clear()
         }

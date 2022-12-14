@@ -1,11 +1,12 @@
 package com.igalata.bubblepicker.rendering
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
-import androidx.annotation.ColorInt
 import android.util.AttributeSet
 import android.view.MotionEvent
+import androidx.annotation.ColorInt
 import com.igalata.bubblepicker.BubblePickerListener
 import com.igalata.bubblepicker.R
 import com.igalata.bubblepicker.adapter.BubblePickerAdapter
@@ -45,17 +46,20 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     var maxSelectedCount: Int? = null
         set(value) {
             renderer.maxSelectedCount = value
+            field = value
         }
 
     var listener: BubblePickerListener? = null
         set(value) {
             renderer.listener = value
+            field = value
         }
 
-    var bubbleSize = 50
+    var bubbleSize = 10
         set(value) {
             if (value in 1..100) {
                 renderer.bubbleSize = value
+                field = value
             }
         }
 
@@ -83,7 +87,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     init {
         init()
-        attrs?.let { retrieveAttrubutes(attrs) }
+        attrs?.let { retrieveAttributes(attrs) }
     }
 
     private fun init() {
@@ -97,6 +101,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         renderMode = RENDERMODE_CONTINUOUSLY
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -130,7 +135,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     private fun isSwipe(event: MotionEvent) = Math.abs(event.x - previousX) > 20 && Math.abs(event.y - previousY) > 20
 
-    private fun retrieveAttrubutes(attrs: AttributeSet) {
+    private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
 
         if (array.hasValue(R.styleable.BubblePicker_maxSelectedCount)) {
