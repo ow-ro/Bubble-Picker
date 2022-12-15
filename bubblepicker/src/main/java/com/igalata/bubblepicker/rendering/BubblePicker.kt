@@ -27,13 +27,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             renderer.backgroundColor = Color(value)
         }
 
-    var datas: List<PickerItem> = ArrayList()
-        set(value) {
-            field = value
-            renderer.pickerList = value
-            super.onResume()
-        }
-
     var adapter: BubblePickerAdapter? = null
         set(value) {
             field = value
@@ -56,40 +49,42 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
         }
 
-    // Bubble Size in view
-    var bubbleSize = 10
-        set(value) {
-            if (value in 1..100) {
-                renderer.bubbleSize = value
-                field = value
-            }
-        }
-
-    val selectedItems: List<PickerItem?>
-        get() = renderer.selectedItems
-
-    var centerImmediately = false
-        set(value) {
-            field = value
-            renderer.centerImmediately = value
-        }
-
-    var isAlwaysSelected = true
-        set(value) {
-            field = value
-            renderer.isAlwaysSelected = value
-        }
-
-    // Set speed for draw to center screen
-    var speedBackToCenter = 50f
-        set(value) {
-            field = value
-            renderer.speedBackToCenter = value
-        }
+    // List Item selected
+    fun selectedItems(): List<PickerItem?> = renderer.selectedItems
 
     // Margin of item
-    public fun configMargin(marginItem: Float) {
+    fun configMargin(marginItem: Float) {
         renderer.marginBetweenItem = marginItem
+    }
+
+    // Config all item is selected
+    fun configAlwaysSelected(isSelectedAll: Boolean) {
+        renderer.isAlwaysSelected = isSelectedAll
+    }
+
+    // Config speed draw and move iem
+    fun configSpeedMoveOfItem(speed: Float) {
+        renderer.speedBackToCenter = speed
+    }
+
+    // Config Center Immediately
+    fun configCenterImmediately(center: Boolean) {
+        renderer.centerImmediately = center
+    }
+
+    // Config size of bubble
+    fun configBubbleSize(bubbleSize: Int) {
+        if (bubbleSize in 1..100) {
+            renderer.bubbleSize = bubbleSize
+        } else {
+            renderer.bubbleSize = 50
+        }
+    }
+
+    // Config size of image
+    fun configSizeOfImage(width: Float, height: Float) {
+        renderer.widthImage = width
+        renderer.heightImage = height
     }
 
     var swipeMoveSpeed = 1.5f

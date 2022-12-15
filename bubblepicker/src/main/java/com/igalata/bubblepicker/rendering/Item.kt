@@ -8,8 +8,6 @@ import android.opengl.Matrix
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import androidx.core.graphics.drawable.toBitmap
-import com.bumptech.glide.Glide
 import com.igalata.bubblepicker.model.BubbleGradient
 import com.igalata.bubblepicker.model.PickerItem
 import com.igalata.bubblepicker.physics.CircleBody
@@ -26,7 +24,9 @@ data class Item(
     val context: WeakReference<Context>,
     val pickerItem: PickerItem,
     val circleBody: CircleBody,
-    val isAlwaysSelected: Boolean
+    val isAlwaysSelected: Boolean,
+    val widthImage: Float,
+    val heightImage: Float,
 ) {
 
     val x: Float
@@ -41,10 +41,10 @@ data class Item(
     val initialPosition: Vec2
         get() = circleBody.position
 
-    val currentPosition: Vec2
+    private val currentPosition: Vec2
         get() = circleBody.physicalBody.position
 
-    private var isVisible = true
+    private val isVisible
         get() = circleBody.isVisible
 
     private var texture: Int = 0
@@ -54,17 +54,18 @@ data class Item(
     private val currentTexture: Int
         get() = if (circleBody.increased || circleBody.isIncreasing) imageTexture else texture
 
-    private val bitmapSize = 256f
 
     private val gradient: LinearGradient?
         get() {
             return pickerItem.gradient?.let {
                 val horizontal = it.direction == BubbleGradient.HORIZONTAL
-                LinearGradient(if (horizontal) 0f else bitmapSize / 2f,
-                    if (horizontal) bitmapSize / 2f else 0f,
-                    if (horizontal) bitmapSize else bitmapSize / 2f,
-                    if (horizontal) bitmapSize / 2f else bitmapSize,
-                    it.startColor, it.endColor, Shader.TileMode.CLAMP)
+                LinearGradient(
+                    if (horizontal) 0f else heightImage / 2f,
+                    if (horizontal) widthImage / 2f else 0f,
+                    if (horizontal) widthImage else heightImage / 2f,
+                    if (horizontal) widthImage / 2f else heightImage,
+                    it.startColor, it.endColor, Shader.TileMode.CLAMP
+                )
             }
         }
 
@@ -83,30 +84,12 @@ data class Item(
     }
 
     private fun createBitmap(isSelected: Boolean): Bitmap {
-        var bitmap: Bitmap? = null
-        if (pickerItem.isUseImgUrl && !pickerItem.imgUrl.isNullOrEmpty()) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val job = async {
-                    return@async Glide
-                        .with(context.get()!!)
-                        .load(pickerItem.imgUrl)
-                        .centerCrop()
-                        .submit()
-                }
-                val result = job.await()
-                bitmap = withContext(Dispatchers.IO) {
-                    result.get()
-                }.toBitmap()
-            }
+        var bitmap: Bitmap =
+            Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_4444)
 
-        } else {
-            bitmap =
-                Bitmap.createBitmap(bitmapSize.toInt(), bitmapSize.toInt(), Bitmap.Config.ARGB_4444)
-        }
+        val bitmapConfig: Bitmap.Config = bitmap.config ?: Bitmap.Config.ARGB_8888
 
-        val bitmapConfig: Bitmap.Config = bitmap?.config ?: Bitmap.Config.ARGB_8888
-
-        bitmap = bitmap?.copy(bitmapConfig, true)
+        bitmap = bitmap.copy(bitmapConfig, true)
 
         val canvas = bitmap?.let { Canvas(it) }
 
@@ -121,7 +104,7 @@ data class Item(
             drawText(canvas)
         }
 
-        return bitmap!!
+        return bitmap
     }
 
     private fun drawBackground(canvas: Canvas, withImage: Boolean) {
@@ -132,7 +115,7 @@ data class Item(
         if (withImage) {
             bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
         }
-        canvas.drawRect(0f, 0f, bitmapSize, bitmapSize, bgPaint)
+        canvas.drawRect(0f, 0f, widthImage, heightImage, bgPaint)
     }
 
     private fun drawText(canvas: Canvas) {
@@ -150,7 +133,7 @@ data class Item(
             typeface = pickerItem.typeface
         }
 
-        val maxTextHeight = if (pickerItem.icon == null) bitmapSize / 2f else bitmapSize / 2.7f
+        val maxTextHeight = if (pickerItem.icon == null) heightImage / 2f else heightImage / 2.7f
 
         var textLayout = placeText(paint)
 
@@ -160,11 +143,17 @@ data class Item(
         }
 
         if (pickerItem.icon == null) {
-            canvas.translate((bitmapSize - textLayout.width) / 2f, (bitmapSize - textLayout.height) / 2f)
+            canvas.translate(
+                (widthImage - textLayout.width) / 2f,
+                (heightImage - textLayout.height) / 2f
+            )
         } else if (pickerItem.iconOnTop) {
-            canvas.translate((bitmapSize - textLayout.width) / 2f, bitmapSize / 2f)
+            canvas.translate((widthImage - textLayout.width) / 2f, heightImage / 2f)
         } else {
-            canvas.translate((bitmapSize - textLayout.width) / 2f, bitmapSize / 2 - textLayout.height)
+            canvas.translate(
+                (widthImage - textLayout.width) / 2f,
+                heightImage / 2 - textLayout.height
+            )
         }
 
         textLayout.draw(canvas)
@@ -172,8 +161,10 @@ data class Item(
 
     @Suppress("DEPRECATION")
     private fun placeText(paint: TextPaint): StaticLayout {
-        return StaticLayout(pickerItem.title, paint, (bitmapSize * 0.9).toInt(),
-            Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false)
+        return StaticLayout(
+            pickerItem.title, paint, (widthImage * 0.9).toInt(),
+            Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false
+        )
     }
 
     private fun drawIcon(canvas: Canvas) {
@@ -181,15 +172,22 @@ data class Item(
             val width = it.intrinsicWidth
             val height = it.intrinsicHeight
 
-            val left = (bitmapSize / 2 - width / 2).toInt()
-            val right = (bitmapSize / 2 + width / 2).toInt()
+            val left = (widthImage / 2 - width / 2).toInt()
+            val right = (widthImage / 2 + width / 2).toInt()
 
             if (pickerItem.title == null) {
-                it.bounds = Rect(left, (bitmapSize / 2 - height / 2).toInt(), right, (bitmapSize / 2 + height / 2).toInt())
+                it.bounds = Rect(
+                    left,
+                    (widthImage / 2 - height / 2).toInt(),
+                    right,
+                    (heightImage / 2 + height / 2).toInt()
+                )
             } else if (pickerItem.iconOnTop) {
-                it.bounds = Rect(left, (bitmapSize / 2 - height).toInt(), right, (bitmapSize / 2).toInt())
+                it.bounds =
+                    Rect(left, (widthImage / 2 - height).toInt(), right, (heightImage / 2).toInt())
             } else {
-                it.bounds = Rect(left, (bitmapSize / 2).toInt(), right, (bitmapSize / 2 + height).toInt())
+                it.bounds =
+                    Rect(left, (widthImage / 2).toInt(), right, (heightImage / 2 + height).toInt())
             }
 
             it.draw(canvas)
@@ -201,8 +199,8 @@ data class Item(
             val height = (it as BitmapDrawable).bitmap.height.toFloat()
             val width = it.bitmap.width.toFloat()
             val ratio = height.coerceAtLeast(width) / height.coerceAtMost(width)
-            val bitmapHeight = if (height < width) bitmapSize else bitmapSize * ratio
-            val bitmapWidth = if (height < width) bitmapSize * ratio else bitmapSize
+            val bitmapHeight = if (height < width) widthImage else heightImage * ratio
+            val bitmapWidth = if (height < width) widthImage * ratio else heightImage
             it.bounds = Rect(0, 0, bitmapWidth.toInt(), bitmapHeight.toInt())
             it.draw(canvas)
         }

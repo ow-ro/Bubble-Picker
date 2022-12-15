@@ -53,6 +53,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
             Engine.centerImmediately = value
         }
 
+    // Image size
+    var widthImage = 256f
+    var heightImage = 256f
+
     private var programId = 0
     private var verticesBuffer: FloatBuffer? = null
     private var uvBuffer: FloatBuffer? = null
@@ -116,7 +120,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
                         WeakReference(glView.context),
                         pickerList[index],
                         body,
-                        isAlwaysSelected
+                        isAlwaysSelected,
+                        widthImage, heightImage
                     )
                 )
             }
