@@ -85,6 +85,7 @@ class DemoFragment : Fragment() {
                             this@DemoFragment.requireContext(),
                             images.getResourceId(position, 0)
                         )
+                        overlayAlpha = 0.01f
                     }
                 }
             }

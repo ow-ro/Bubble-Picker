@@ -68,7 +68,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var scaleX: Float = 1f
 
     // Change size y
-    var scaleY: Float = 0.52f
+    var scaleY: Float = 0.515f
 
     private val circles = ArrayList<Item>()
 

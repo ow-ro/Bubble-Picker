@@ -79,7 +79,7 @@ data class Item(
     }
 
     fun bindTextures(textureIds: IntArray, index: Int) {
-        texture = bindTexture(textureIds, index * 2, false)
+        texture = bindTexture(textureIds, index * 2, pickerItem.showImageOnUnSelected)
         imageTexture = bindTexture(textureIds, index * 2 + 1, true)
     }
 
