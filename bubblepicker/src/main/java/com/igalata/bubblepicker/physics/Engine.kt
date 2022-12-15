@@ -5,6 +5,7 @@ import com.igalata.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
+import kotlin.math.abs
 
 /**
  * Created by irinagalata on 1/26/17.
@@ -17,16 +18,16 @@ object Engine {
     var maxSelectedCount: Int? = null
     var radius = 50
         set(value) {
-            field = value
             bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
             gravity = interpolate(20f, 80f, value / 100f)
             standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
+            field = value
         }
     var centerImmediately = false
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var bubbleRadius = 0.17f
 
-    private val world = World(Vec2(0f, 0f), false)
+    private var world = World(Vec2(0f, 0f), false)
     private val step = 0.0005f
     private val bodies: ArrayList<CircleBody> = ArrayList()
     private var borders: ArrayList<Border> = ArrayList()
@@ -63,7 +64,7 @@ object Engine {
         toBeResized.forEach { it.circleBody.resize(resizeStep) }
         world.step(if (centerImmediately) 0.035f else step, 11, 11)
         bodies.forEach { move(it) }
-        toBeResized.removeAll(toBeResized.filter { it.circleBody.finished })
+        toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
         stepsCount++
         if (stepsCount >= 10) {
             centerImmediately = false
@@ -71,9 +72,9 @@ object Engine {
     }
 
     fun swipe(x: Float, y: Float) {
-        if (Math.abs(gravityCenter.x) < 2) gravityCenter.x += -x
-        if (Math.abs(gravityCenter.y) < 0.5f / scaleY) gravityCenter.y += y
-        increasedGravity = standardIncreasedGravity * Math.abs(x * 13) * Math.abs(y * 13)
+        if (abs(gravityCenter.x) < 2) gravityCenter.x += -x
+        if (abs(gravityCenter.y) < 0.5f / scaleY) gravityCenter.y += y
+        increasedGravity = standardIncreasedGravity * abs(x * 13) * abs(y * 13)
         touch = true
     }
 
@@ -86,6 +87,7 @@ object Engine {
     fun clear() {
         borders.forEach { world.destroyBody(it.itemBody) }
         bodies.forEach { world.destroyBody(it.physicalBody) }
+        world = World(Vec2(0f, 0f), false)
         borders.clear()
         bodies.clear()
     }

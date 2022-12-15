@@ -12,6 +12,7 @@ import com.igalata.bubblepicker.R
 import com.igalata.bubblepicker.adapter.BubblePickerAdapter
 import com.igalata.bubblepicker.model.Color
 import com.igalata.bubblepicker.model.PickerItem
+import kotlin.math.abs
 
 /**
  * Created by irinagalata on 1/19/17.
@@ -131,9 +132,11 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     private fun release() = postDelayed({ renderer.release() }, 0)
 
-    private fun isClick(event: MotionEvent) = Math.abs(event.x - startX) < 20 && Math.abs(event.y - startY) < 20
+    private fun isClick(event: MotionEvent) =
+        abs(event.x - startX) < 20 && abs(event.y - startY) < 20
 
-    private fun isSwipe(event: MotionEvent) = Math.abs(event.x - previousX) > 20 && Math.abs(event.y - previousY) > 20
+    private fun isSwipe(event: MotionEvent) =
+        abs(event.x - previousX) > 20 && abs(event.y - previousY) > 20
 
     private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)

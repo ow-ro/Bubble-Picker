@@ -7,7 +7,7 @@
         android:icon="@mipmap/icon">
 
         <activity
-            android:name=".DemoActivity"
+            android:name=".MainActivity"
             android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/AppTheme">
@@ -16,6 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".DemoActivity"
+            android:screenOrientation="portrait"
+            android:exported="false"
+            android:theme="@style/AppTheme"></activity>
 
     </application>
 
