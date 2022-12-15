@@ -15,6 +15,7 @@ object Engine {
 
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
+
     var maxSelectedCount: Int? = null
     var radius = 50
         set(value) {

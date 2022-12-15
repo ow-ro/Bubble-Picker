@@ -69,12 +69,12 @@ class DemoActivity : AppCompatActivity() {
             picker.configSpeedMoveOfItem(20f)
             picker.configAlwaysSelected(false)
             picker.configMargin(0.01f)
-            picker.listener = object : BubblePickerListener {
+            picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
-            }
+            })
         }, 300)
     }
 
@@ -97,7 +97,6 @@ class DemoActivity : AppCompatActivity() {
         colors.resources
         images.resources
     }
-
 
     private fun toast(text: String) = Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 

@@ -95,12 +95,12 @@ class DemoFragment : Fragment() {
             picker.configSpeedMoveOfItem(20f)
             picker.configAlwaysSelected(false)
             picker.configMargin(0.001f)
-            picker.listener = object : BubblePickerListener {
+            picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
-            }
+            })
         }, 300)
     }
 

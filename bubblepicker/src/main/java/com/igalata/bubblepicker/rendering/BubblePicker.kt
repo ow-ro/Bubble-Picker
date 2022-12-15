@@ -37,56 +37,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             super.onResume()
         }
 
-    var maxSelectedCount: Int? = null
-        set(value) {
-            renderer.maxSelectedCount = value
-            field = value
-        }
-
-    var listener: BubblePickerListener? = null
-        set(value) {
-            renderer.listener = value
-            field = value
-        }
-
-    // List Item selected
-    fun selectedItems(): List<PickerItem?> = renderer.selectedItems
-
-    // Margin of item
-    fun configMargin(marginItem: Float) {
-        renderer.marginBetweenItem = marginItem
-    }
-
-    // Config all item is selected
-    fun configAlwaysSelected(isSelectedAll: Boolean) {
-        renderer.isAlwaysSelected = isSelectedAll
-    }
-
-    // Config speed draw and move iem
-    fun configSpeedMoveOfItem(speed: Float) {
-        renderer.speedBackToCenter = speed
-    }
-
-    // Config Center Immediately
-    fun configCenterImmediately(center: Boolean) {
-        renderer.centerImmediately = center
-    }
-
-    // Config size of bubble
-    fun configBubbleSize(bubbleSize: Int) {
-        if (bubbleSize in 1..100) {
-            renderer.bubbleSize = bubbleSize
-        } else {
-            renderer.bubbleSize = 50
-        }
-    }
-
-    // Config size of image
-    fun configSizeOfImage(width: Float, height: Float) {
-        renderer.widthImage = width
-        renderer.heightImage = height
-    }
-
     var swipeMoveSpeed = 1.5f
 
     private var startX = 0f
@@ -150,7 +100,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
 
         if (array.hasValue(R.styleable.BubblePicker_maxSelectedCount)) {
-            maxSelectedCount = array.getInt(R.styleable.BubblePicker_maxSelectedCount, -1)
+            renderer.maxSelectedCount = array.getInt(R.styleable.BubblePicker_maxSelectedCount, -1)
         }
 
         if (array.hasValue(R.styleable.BubblePicker_backgroundColor)) {
@@ -158,6 +108,54 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         }
 
         array.recycle()
+    }
+
+    // Config listener
+    fun configListenerForBubble(listener: BubblePickerListener) {
+        renderer.listener = listener
+    }
+
+    // Max select allow select
+    fun configMaxSelectedCount(maxSelect: Int) {
+        renderer.maxSelectedCount = maxSelect
+    }
+
+    // List Item selected
+    fun selectedItems(): List<PickerItem?> = renderer.selectedItems
+
+    // Margin of item
+    fun configMargin(marginItem: Float) {
+        renderer.marginBetweenItem = marginItem
+    }
+
+    // Config all item is selected
+    fun configAlwaysSelected(isSelectedAll: Boolean) {
+        renderer.isAlwaysSelected = isSelectedAll
+    }
+
+    // Config speed draw and move iem
+    fun configSpeedMoveOfItem(speed: Float) {
+        renderer.speedBackToCenter = speed
+    }
+
+    // Config Center Immediately
+    fun configCenterImmediately(center: Boolean) {
+        renderer.centerImmediately = center
+    }
+
+    // Config size of bubble
+    fun configBubbleSize(bubbleSize: Int) {
+        if (bubbleSize in 1..100) {
+            renderer.bubbleSize = bubbleSize
+        } else {
+            renderer.bubbleSize = 50
+        }
+    }
+
+    // Config size of image
+    fun configSizeOfImage(width: Float, height: Float) {
+        renderer.widthImage = width
+        renderer.heightImage = height
     }
 
     override fun onResume() {
