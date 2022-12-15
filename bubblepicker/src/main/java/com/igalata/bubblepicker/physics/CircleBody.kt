@@ -8,8 +8,14 @@ import kotlin.math.abs
 /**
  * Created by irinagalata on 1/26/17.
  */
-class CircleBody(val world: World, var position: Vec2, var radius: Float, var increasedRadius: Float, var density: Float,
-                 val isAlwaysSelected: Boolean) {
+class CircleBody(
+    val world: World, var position: Vec2,
+    var radius: Float,
+    var increasedRadius: Float,
+    var density: Float,
+    val isAlwaysSelected: Boolean,
+    private val marinItem: Float = 0.001f
+) {
 
     val decreasedRadius: Float = radius
 
@@ -33,11 +39,10 @@ class CircleBody(val world: World, var position: Vec2, var radius: Float, var in
 
     var isVisible = true
 
-    private val margin = 0.01f
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
-            m_radius = radius + margin
+            m_radius = radius + marinItem
             m_p.setZero()
         }
 
@@ -102,7 +107,7 @@ class CircleBody(val world: World, var position: Vec2, var radius: Float, var in
     }
 
     private fun reset() {
-        physicalBody.fixtureList?.shape?.m_radius = radius + margin
+        physicalBody.fixtureList?.shape?.m_radius = radius + marinItem
     }
 
     fun defineState() {

@@ -20,9 +20,9 @@ class Border(world: World, var position: Vec2, var view: Int) {
         get() {
             return PolygonShape().apply {
                 if (view == HORIZONTAL) {
-                    setAsEdge(Vec2(-100f, position.y), Vec2(100f, position.y))
+                    setAsEdge(Vec2(-1f, position.y), Vec2(1f, position.y))
                 } else {
-                    setAsEdge(Vec2(position.x, -100f), Vec2(position.x, 100f))
+                    setAsEdge(Vec2(position.x, -1f), Vec2(position.x, 1f))
                 }
             }
         }

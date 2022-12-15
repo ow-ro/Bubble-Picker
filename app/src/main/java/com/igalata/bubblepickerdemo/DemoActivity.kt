@@ -63,9 +63,11 @@ class DemoActivity : AppCompatActivity() {
             }
 
             setContentView(picker)
-            picker.bubbleSize = 1
-            picker.swipeMoveSpeed = 10f
+            picker.bubbleSize = 50
+            picker.swipeMoveSpeed = 1f
+            picker.speedBackToCenter = 20f
             picker.isAlwaysSelected = false
+            picker.configMargin(0.01f)
             picker.listener = object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 

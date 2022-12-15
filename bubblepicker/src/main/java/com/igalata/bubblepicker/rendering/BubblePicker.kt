@@ -56,6 +56,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
         }
 
+    // Bubble Size in view
     var bubbleSize = 10
         set(value) {
             if (value in 1..100) {
@@ -78,6 +79,18 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
             renderer.isAlwaysSelected = value
         }
+
+    // Set speed for draw to center screen
+    var speedBackToCenter = 50f
+        set(value) {
+            field = value
+            renderer.speedBackToCenter = value
+        }
+
+    // Margin of item
+    public fun configMargin(marginItem: Float) {
+        renderer.marginBetweenItem = marginItem
+    }
 
     var swipeMoveSpeed = 1.5f
 

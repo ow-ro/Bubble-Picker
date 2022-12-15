@@ -8,20 +8,26 @@ import android.opengl.Matrix
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import android.text.TextUtils
+import androidx.core.graphics.drawable.toBitmap
+import com.bumptech.glide.Glide
 import com.igalata.bubblepicker.model.BubbleGradient
 import com.igalata.bubblepicker.model.PickerItem
 import com.igalata.bubblepicker.physics.CircleBody
 import com.igalata.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.igalata.bubblepicker.toTexture
+import kotlinx.coroutines.*
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 
 /**
  * Created by irinagalata on 1/19/17.
  */
-data class Item(val context: WeakReference<Context>,
-                val pickerItem: PickerItem, val circleBody: CircleBody, val isAlwaysSelected: Boolean) {
+data class Item(
+    val context: WeakReference<Context>,
+    val pickerItem: PickerItem,
+    val circleBody: CircleBody,
+    val isAlwaysSelected: Boolean
+) {
 
     val x: Float
         get() = circleBody.physicalBody.position.x
@@ -77,19 +83,45 @@ data class Item(val context: WeakReference<Context>,
     }
 
     private fun createBitmap(isSelected: Boolean): Bitmap {
-        var bitmap = Bitmap.createBitmap(bitmapSize.toInt(), bitmapSize.toInt(), Bitmap.Config.ARGB_4444)
-        val bitmapConfig: Bitmap.Config = bitmap.config ?: Bitmap.Config.ARGB_8888
+        var bitmap: Bitmap? = null
+        if (pickerItem.isUseImgUrl && !pickerItem.imgUrl.isNullOrEmpty()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val job = async {
+                    return@async Glide
+                        .with(context.get()!!)
+                        .load(pickerItem.imgUrl)
+                        .centerCrop()
+                        .submit()
+                }
+                val result = job.await()
+                bitmap = withContext(Dispatchers.IO) {
+                    result.get()
+                }.toBitmap()
+            }
 
-        bitmap = bitmap.copy(bitmapConfig, true)
+        } else {
+            bitmap =
+                Bitmap.createBitmap(bitmapSize.toInt(), bitmapSize.toInt(), Bitmap.Config.ARGB_4444)
+        }
 
-        val canvas = Canvas(bitmap)
+        val bitmapConfig: Bitmap.Config = bitmap?.config ?: Bitmap.Config.ARGB_8888
 
-        if (isSelected) drawImage(canvas)
-        drawBackground(canvas, isSelected)
-        drawIcon(canvas)
-        drawText(canvas)
+        bitmap = bitmap?.copy(bitmapConfig, true)
 
-        return bitmap
+        val canvas = bitmap?.let { Canvas(it) }
+
+        if (isSelected) canvas?.let { drawImage(it) }
+        if (canvas != null) {
+            drawBackground(canvas, isSelected)
+        }
+        if (canvas != null) {
+            drawIcon(canvas)
+        }
+        if (canvas != null) {
+            drawText(canvas)
+        }
+
+        return bitmap!!
     }
 
     private fun drawBackground(canvas: Canvas, withImage: Boolean) {
@@ -138,6 +170,7 @@ data class Item(val context: WeakReference<Context>,
         textLayout.draw(canvas)
     }
 
+    @Suppress("DEPRECATION")
     private fun placeText(paint: TextPaint): StaticLayout {
         return StaticLayout(pickerItem.title, paint, (bitmapSize * 0.9).toInt(),
             Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false)
@@ -167,7 +200,7 @@ data class Item(val context: WeakReference<Context>,
         pickerItem.imgDrawable?.let {
             val height = (it as BitmapDrawable).bitmap.height.toFloat()
             val width = it.bitmap.width.toFloat()
-            val ratio = Math.max(height, width) / Math.min(height, width)
+            val ratio = height.coerceAtLeast(width) / height.coerceAtMost(width)
             val bitmapHeight = if (height < width) bitmapSize else bitmapSize * ratio
             val bitmapWidth = if (height < width) bitmapSize * ratio else bitmapSize
             it.bounds = Rect(0, 0, bitmapWidth.toInt(), bitmapHeight.toInt())

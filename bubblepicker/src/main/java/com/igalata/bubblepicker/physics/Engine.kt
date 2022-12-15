@@ -19,7 +19,7 @@ object Engine {
     var radius = 50
         set(value) {
             bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
-            gravity = interpolate(20f, 80f, value / 100f)
+            speedToCenter = interpolate(20f, 80f, value / 100f)
             standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
             field = value
         }
@@ -28,30 +28,39 @@ object Engine {
     private var bubbleRadius = 0.17f
 
     private var world = World(Vec2(0f, 0f), false)
-    private val step = 0.0005f
+    private val step = 0.0009f
     private val bodies: ArrayList<CircleBody> = ArrayList()
     private var borders: ArrayList<Border> = ArrayList()
-    private val resizeStep = 0.005f
+    private val resizeStep = 0.009f
     private var scaleX = 0f
     private var scaleY = 0f
     private var touch = false
-    private var gravity = 6f
+    var speedToCenter = 16f
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
     private val currentGravity: Float
-        get() = if (touch) increasedGravity else gravity
+        get() = if (touch) increasedGravity else speedToCenter
     private val toBeResized = ArrayList<Item>()
     private val startX
         get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
+    var marginItem = 0.001f
 
     fun build(bodiesCount: Int, scaleX: Float, scaleY: Float): List<CircleBody> {
         val density = interpolate(0.8f, 0.2f, radius / 100f)
         for (i in 0 until bodiesCount) {
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
-            bodies.add(CircleBody(world, Vec2(x, y), bubbleRadius * scaleX, (bubbleRadius * scaleX) * 1.3f, density,
-                isAlwaysSelected))
+            bodies.add(
+                CircleBody(
+                    world, Vec2(x, y),
+                    bubbleRadius * scaleX,
+                    (bubbleRadius * scaleX) * 1.3f,
+                    density = density,
+                    isAlwaysSelected = isAlwaysSelected,
+                    marinItem = marginItem
+                )
+            )
         }
         this.scaleX = scaleX
         this.scaleY = scaleY
@@ -120,7 +129,7 @@ object Engine {
             val distance = direction.length()
             val gravity = if (body.increased) 1.3f * currentGravity else currentGravity
             if (distance > step * 200) {
-                applyForce(direction.mul(gravity / distance.sqr()), position)
+                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
         }
     }

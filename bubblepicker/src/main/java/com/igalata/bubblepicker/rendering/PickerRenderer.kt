@@ -35,6 +35,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var maxSelectedCount: Int? = null
 
     var bubbleSize = 10
+        set(value) {
+            field = value
+            Engine.radius = value
+        }
 
     var listener: BubblePickerListener? = null
 
@@ -56,17 +60,33 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
 
-    private val scaleX: Float
-        get() = if (glView.width < glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
+    // Change size x
+    var scaleX: Float = 1f
 
-    private val scaleY: Float
-        get() = if (glView.width < glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
+    // Change size y
+    var scaleY: Float = 0.52f
 
     private val circles = ArrayList<Item>()
 
+    // Speed item back or come to center view
+    var speedBackToCenter = 50f
+        set(value) {
+            field = value
+            Engine.speedToCenter = value
+        }
+
+    // Margin item
+    var marginBetweenItem = 0.001f
+        set(value) {
+            field = value
+            Engine.marginItem = value
+        }
+
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        glClearColor(backgroundColor?.red ?: 1f, backgroundColor?.green ?: 1f,
-            backgroundColor?.blue ?: 1f, backgroundColor?.alpha ?: 1f)
+        glClearColor(
+            backgroundColor?.red ?: 1f, backgroundColor?.green ?: 1f,
+            backgroundColor?.blue ?: 1f, backgroundColor?.alpha ?: 1f
+        )
         enableTransparency()
     }
 
@@ -91,7 +111,14 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
         Engine.build(pickerList.size, scaleX, scaleY)
             .forEachIndexed { index, body ->
-                circles.add(Item(WeakReference(glView.context), pickerList[index], body, isAlwaysSelected))
+                circles.add(
+                    Item(
+                        WeakReference(glView.context),
+                        pickerList[index],
+                        body,
+                        isAlwaysSelected
+                    )
+                )
             }
 
         pickerList.forEach {
