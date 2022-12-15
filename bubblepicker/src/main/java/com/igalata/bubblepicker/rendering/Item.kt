@@ -85,7 +85,7 @@ data class Item(
 
     private fun createBitmap(isSelected: Boolean): Bitmap {
         var bitmap: Bitmap =
-            Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_4444)
+            Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
 
         val bitmapConfig: Bitmap.Config = bitmap.config ?: Bitmap.Config.ARGB_8888
 
@@ -94,6 +94,7 @@ data class Item(
         val canvas = bitmap?.let { Canvas(it) }
 
         if (isSelected) canvas?.let { drawImage(it) }
+        if (pickerItem.isViewBorderSelected) canvas?.let { drawStrokeSelect(it) }
         if (canvas != null) {
             drawBackground(canvas, isSelected)
         }
@@ -105,6 +106,24 @@ data class Item(
         }
 
         return bitmap
+    }
+
+    private fun drawStrokeSelect(canvas: Canvas) {
+        val strokePaint = Paint()
+        strokePaint.style = Paint.Style.STROKE
+        if (pickerItem.colorBorderSelected != null) {
+            strokePaint.color = pickerItem.colorBorderSelected!!
+        } else {
+            strokePaint.color = Color.BLACK
+        }
+
+        strokePaint.strokeWidth = pickerItem.strokeWidthBorder
+        canvas.drawCircle(
+            widthImage / 2,
+            heightImage / 2,
+            widthImage / 2 - (pickerItem.strokeWidthBorder / 2f),
+            strokePaint
+        )
     }
 
     private fun drawBackground(canvas: Canvas, withImage: Boolean) {
