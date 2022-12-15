@@ -12,26 +12,28 @@ Read how we did it [on Medium](https://medium.com/@igalata13/how-to-create-a-bub
 
 ## Requirements
 - Android SDK 16+
+- Support run on fragment.
+- Max target is 33.
 
 ## Usage
 
 Add to your root build.gradle:
 ```Groovy
-Clone and
-add module to project
+'Clone andadd module to project.'
 ```
 
 Add the dependency:
 ```Groovy
-N / A
+'N/A.'
 ```
 
 ## How to use this library
 
-Don't add `BubblePicker` to your xml layout. Please using it on code.
+Don't add `BubblePicker` to your xml layout. Please using it on code. Only init and add it to view.
 
-```xml
-
+```kotlin 
+picker = BubblePicker(this.requireContext(), null)
+view.add(picker)
 ```
 
 Override onResume() and onPause() methods to call the same methods from the `BubblePicker`
