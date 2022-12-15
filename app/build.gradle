@@ -13,7 +13,7 @@ android {
         compileSdkVersion  33
         buildToolsVersion  '30.0.3'
         minSdkVersion  16
-        versionName "0.1.1"
+        versionName "1.0"
     }
     buildTypes {
         release {

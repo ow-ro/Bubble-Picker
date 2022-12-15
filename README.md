@@ -1,7 +1,6 @@
 # Bubble-Picker
 
 [![License](http://img.shields.io/badge/license-MIT-green.svg?style=flat)]()
-[![](https://jitpack.io/v/igalata/Bubble-Picker.svg)](https://jitpack.io/#igalata/Bubble-Picker)
 
 <a href='https://play.google.com/store/apps/details?id=com.igalata.bubblepickerdemo&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png' height="70" width="180"/></a>
 
@@ -18,39 +17,21 @@ Read how we did it [on Medium](https://medium.com/@igalata13/how-to-create-a-bub
 
 Add to your root build.gradle:
 ```Groovy
-allprojects {
-	repositories {
-	...
-	maven { url "https://jitpack.io" }
-	}
-}
+Clone and
+add module to project
 ```
 
 Add the dependency:
 ```Groovy
-dependencies {
-	compile 'com.github.igalata:Bubble-Picker:v0.2.4'
-}
+N / A
 ```
 
 ## How to use this library
 
-Add `BubblePicker` to your xml layout
+Don't add `BubblePicker` to your xml layout. Please using it on code.
 
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <com.igalata.bubblepicker.rendering.BubblePicker
-        android:id="@+id/picker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:backgroundColor="@android:color/white" />
-
-</FrameLayout>
 ```
 
 Override onResume() and onPause() methods to call the same methods from the `BubblePicker`
@@ -65,21 +46,6 @@ override fun onResume() {
 override fun onPause() {
       super.onPause()
       picker.onPause()
-}
-```
-
-Java
-```java
-@Override
-protected void onResume() {
-      super.onResume();
-      picker.onResume();
-}
-
-@Override
-protected void onPause() {
-      super.onPause();
-      picker.onPause();
 }
 ```
 
@@ -108,33 +74,6 @@ picker.adapter = object : BubblePickerAdapter {
 }
 ```
 
-Java
-```java
-final String[] titles = getResources().getStringArray(R.array.countries);
-final TypedArray colors = getResources().obtainTypedArray(R.array.colors);
-final TypedArray images = getResources().obtainTypedArray(R.array.images);
-
-picker.setAdapter(new BubblePickerAdapter() {
-            @Override
-            public int getTotalCount() {
-                return titles.length;
-            }
-
-            @NotNull
-            @Override
-            public PickerItem getItem(int position) {
-                PickerItem item = new PickerItem();
-                item.setTitle(titles[position]);
-                item.setGradient(new BubbleGradient(colors.getColor((position * 2) % 8, 0),
-                        colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL));
-                item.setTypeface(mediumTypeface);
-                item.setTextColor(ContextCompat.getColor(DemoActivity.this, android.R.color.white));
-                item.setBackgroundImage(ContextCompat.getDrawable(DemoActivity.this, images.getResourceId(position, 0)));
-                return item;
-            }
-});
-```
-
 Specify the `BubblePickerListener` to get notified about events
 
 Kotlin
@@ -150,46 +89,15 @@ picker.listener = object : BubblePickerListener {
 }
 ```
 
-Java
-```java
-picker.setListener(new BubblePickerListener() {
-            @Override
-            public void onBubbleSelected(@NotNull PickerItem item) {
-                
-            }
-
-            @Override
-            public void onBubbleDeselected(@NotNull PickerItem item) {
-
-            }
-});
-```
-
 To get all selected items use `picker.selectedItems` variable in Kotlin or `picker.getSelectedItems()` method in Java.
 
 For more usage examples please review the sample app
 
 ## Changelog
 
-### Version: 0.2.4
+### Version: 1.0
 
 * Added a possibility to setup the `BubblePicker` using `BubblePickerAdapter`
-
-### Version: 0.2.3
-
-* Fixed black textures issue on some devices
-
-### Version: 0.2.1
-
-* `BubblePicker.centerImmediately` veriable added, so it's possible to place the bubbles 
- in the center of the view immediately
-
-### Version: 0.2
-
-* `icon` parameter added to place an image on a bubble along with the title 
-* `iconOnTop` parameter added to control position of the icon on a bubble
-* `textSize` parameter added
-* `BubblePicker.bubbleSize` variable now can be changed from 1 to 100
 
 ## Known iOS versions of the animation
 
