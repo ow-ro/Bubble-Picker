@@ -7,7 +7,7 @@
         android:icon="@mipmap/icon">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.dongnh.bubblepickerdemo.MainActivity"
             android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/AppTheme">
@@ -18,7 +18,7 @@
         </activity>
 
         <activity
-            android:name=".DemoActivity"
+            android:name="com.dongnh.bubblepickerdemo.DemoActivity"
             android:screenOrientation="portrait"
             android:exported="false"
             android:theme="@style/AppTheme"></activity>

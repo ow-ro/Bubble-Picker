@@ -1,10 +1,10 @@
-package com.igalata.bubblepicker
+package com.dongnh.bubblepicker
 
 import android.graphics.Bitmap
 import android.opengl.GLES20.*
 import android.opengl.GLUtils
-import com.igalata.bubblepicker.Constant.FLOAT_SIZE
-import com.igalata.bubblepicker.Constant.TEXTURE_VERTICES
+import com.dongnh.bubblepicker.Constant.FLOAT_SIZE
+import com.dongnh.bubblepicker.Constant.TEXTURE_VERTICES
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer

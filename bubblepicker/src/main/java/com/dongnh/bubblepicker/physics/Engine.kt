@@ -1,7 +1,7 @@
-package com.igalata.bubblepicker.physics
+package com.dongnh.bubblepicker.physics
 
-import com.igalata.bubblepicker.rendering.Item
-import com.igalata.bubblepicker.sqr
+import com.dongnh.bubblepicker.rendering.Item
+import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
@@ -63,8 +63,8 @@ object Engine {
                 )
             )
         }
-        this.scaleX = scaleX
-        this.scaleY = scaleY
+        Engine.scaleX = scaleX
+        Engine.scaleY = scaleY
         createBorders()
 
         return bodies

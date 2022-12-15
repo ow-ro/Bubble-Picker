@@ -1,10 +1,10 @@
-package com.igalata.bubblepickerdemo
+package com.dongnh.bubblepickerdemo
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentTransaction
-import com.igalata.bubblepickerdemo.databinding.ActivityMainBinding
+import com.dongnh.bubblepickerdemo.databinding.ActivityMainBinding
 
 
 /**

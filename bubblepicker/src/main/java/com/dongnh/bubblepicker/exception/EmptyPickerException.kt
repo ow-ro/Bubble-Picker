@@ -1,4 +1,4 @@
-package com.igalata.bubblepicker.exception
+package com.dongnh.bubblepicker.exception
 
 /**
  * Created by irinagalata on 1/19/17.

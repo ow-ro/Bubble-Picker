@@ -1,70 +1,46 @@
-package com.igalata.bubblepickerdemo
+package com.dongnh.bubblepickerdemo
 
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import com.igalata.bubblepicker.BubblePickerListener
-import com.igalata.bubblepicker.adapter.BubblePickerAdapter
-import com.igalata.bubblepicker.model.BubbleGradient
-import com.igalata.bubblepicker.model.PickerItem
-import com.igalata.bubblepicker.rendering.BubblePicker
-import com.igalata.bubblepickerdemo.databinding.FragmentDemoBinding
+import com.dongnh.bubblepicker.BubblePickerListener
+import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
+import com.dongnh.bubblepicker.model.BubbleGradient
+import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.rendering.BubblePicker
 
 /**
- * Project : Bubble-Picker
- * Created by DongNH on 15/12/2022.
- * Email : hoaidongit5@gmail.com or hoaidongit5@dnkinno.com.
- * Phone : +84397199197.
+ * Created by irinagalata on 1/19/17.
  */
-class DemoFragment : Fragment() {
+class DemoActivity : AppCompatActivity() {
 
-    lateinit var binding: FragmentDemoBinding
+    private val mediumTypeface by lazy { Typeface.createFromAsset(assets, ROBOTO_MEDIUM) }
+
+    companion object {
+        private const val ROBOTO_BOLD = "roboto_bold.ttf"
+        private const val ROBOTO_MEDIUM = "roboto_medium.ttf"
+        private const val ROBOTO_REGULAR = "roboto_regular.ttf"
+    }
 
     lateinit var images: TypedArray
     lateinit var colors: TypedArray
     lateinit var picker: BubblePicker
 
-    private val mediumTypeface by lazy {
-        Typeface.createFromAsset(
-            requireActivity().assets,
-            ROBOTO_MEDIUM
-        )
-    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_demo)
 
-    companion object {
-        private const val ROBOTO_MEDIUM = "roboto_medium.ttf"
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentDemoBinding.inflate(inflater, container, false)
-        //configView()
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        configView()
-    }
-
-    private fun configView() {
         val titles = resources.getStringArray(R.array.countries)
         colors = resources.obtainTypedArray(R.array.colors)
         images = resources.obtainTypedArray(R.array.images)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            picker = BubblePicker(this.requireContext(), null)
+            picker = BubblePicker(this, null)
             picker.adapter = object : BubblePickerAdapter {
 
                 override val totalCount = titles.size
@@ -77,25 +53,22 @@ class DemoFragment : Fragment() {
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
                         )
                         typeface = mediumTypeface
-                        textColor = ContextCompat.getColor(
-                            this@DemoFragment.requireContext(),
-                            android.R.color.white
-                        )
+                        textColor = ContextCompat.getColor(this@DemoActivity, android.R.color.white)
+                        // If you want to use image url, you need using glide load it and pass to this param
                         imgDrawable = ContextCompat.getDrawable(
-                            this@DemoFragment.requireContext(),
+                            this@DemoActivity,
                             images.getResourceId(position, 0)
                         )
-                        overlayAlpha = 0.01f
                     }
                 }
             }
 
-            binding.root.addView(picker)
-            picker.configBubbleSize(100)
+            setContentView(picker)
+            picker.configBubbleSize(50)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
             picker.configAlwaysSelected(false)
-            picker.configMargin(0.001f)
+            picker.configMargin(0.01f)
             picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 
@@ -125,8 +98,6 @@ class DemoFragment : Fragment() {
         images.resources
     }
 
-
-    private fun toast(text: String) =
-        Toast.makeText(this.requireContext(), text, Toast.LENGTH_SHORT).show()
+    private fun toast(text: String) = Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
 
 }

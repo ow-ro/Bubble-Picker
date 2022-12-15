@@ -1,4 +1,4 @@
-package com.igalata.bubblepicker.rendering
+package com.dongnh.bubblepicker.rendering
 
 import android.content.Context
 import android.graphics.*
@@ -8,11 +8,11 @@ import android.opengl.Matrix
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import com.igalata.bubblepicker.model.BubbleGradient
-import com.igalata.bubblepicker.model.PickerItem
-import com.igalata.bubblepicker.physics.CircleBody
-import com.igalata.bubblepicker.rendering.BubbleShader.U_MATRIX
-import com.igalata.bubblepicker.toTexture
+import com.dongnh.bubblepicker.model.BubbleGradient
+import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.physics.CircleBody
+import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
+import com.dongnh.bubblepicker.toTexture
 import kotlinx.coroutines.*
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference

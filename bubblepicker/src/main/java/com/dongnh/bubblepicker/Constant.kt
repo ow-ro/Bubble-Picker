@@ -1,4 +1,4 @@
-package com.igalata.bubblepicker
+package com.dongnh.bubblepicker
 
 /**
  * Created by irinagalata on 3/8/17.

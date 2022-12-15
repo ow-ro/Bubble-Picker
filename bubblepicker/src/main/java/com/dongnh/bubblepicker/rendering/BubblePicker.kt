@@ -1,4 +1,4 @@
-package com.igalata.bubblepicker.rendering
+package com.dongnh.bubblepicker.rendering
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -7,11 +7,11 @@ import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.annotation.ColorInt
-import com.igalata.bubblepicker.BubblePickerListener
-import com.igalata.bubblepicker.R
-import com.igalata.bubblepicker.adapter.BubblePickerAdapter
-import com.igalata.bubblepicker.model.Color
-import com.igalata.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.BubblePickerListener
+import com.dongnh.bubblepicker.R
+import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
+import com.dongnh.bubblepicker.model.Color
+import com.dongnh.bubblepicker.model.PickerItem
 import kotlin.math.abs
 
 /**

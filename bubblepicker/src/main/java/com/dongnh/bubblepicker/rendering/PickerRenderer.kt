@@ -1,17 +1,17 @@
-package com.igalata.bubblepicker.rendering
+package com.dongnh.bubblepicker.rendering
 
 import android.opengl.GLES20.*
 import android.opengl.GLSurfaceView
 import android.view.View
-import com.igalata.bubblepicker.*
-import com.igalata.bubblepicker.model.Color
-import com.igalata.bubblepicker.model.PickerItem
-import com.igalata.bubblepicker.physics.Engine
-import com.igalata.bubblepicker.rendering.BubbleShader.A_POSITION
-import com.igalata.bubblepicker.rendering.BubbleShader.A_UV
-import com.igalata.bubblepicker.rendering.BubbleShader.U_BACKGROUND
-import com.igalata.bubblepicker.rendering.BubbleShader.fragmentShader
-import com.igalata.bubblepicker.rendering.BubbleShader.vertexShader
+import com.dongnh.bubblepicker.*
+import com.dongnh.bubblepicker.model.Color
+import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.physics.Engine
+import com.dongnh.bubblepicker.rendering.BubbleShader.A_POSITION
+import com.dongnh.bubblepicker.rendering.BubbleShader.A_UV
+import com.dongnh.bubblepicker.rendering.BubbleShader.U_BACKGROUND
+import com.dongnh.bubblepicker.rendering.BubbleShader.fragmentShader
+import com.dongnh.bubblepicker.rendering.BubbleShader.vertexShader
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 import java.nio.FloatBuffer

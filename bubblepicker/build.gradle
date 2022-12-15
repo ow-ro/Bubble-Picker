@@ -18,12 +18,7 @@ android {
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-    namespace 'com.igalata.bubblepicker'
-
-    configurations {
-        runtime.exclude group: "org.slf4j", module: "jetified-slf4j-api-1.7.22"
-    }
-
+    namespace 'com.dongnh.bubblepicker'
 }
 
 dependencies {
@@ -31,13 +26,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    implementation 'com.github.bumptech.glide:glide:4.14.2'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
-
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
-
 
     implementation group: 'org.jbox2d', name: 'jbox2d-library', version: '2.1.2.3'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'

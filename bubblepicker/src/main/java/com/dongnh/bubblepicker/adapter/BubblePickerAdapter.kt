@@ -1,6 +1,6 @@
-package com.igalata.bubblepicker.adapter
+package com.dongnh.bubblepicker.adapter
 
-import com.igalata.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.PickerItem
 
 /**
  * Created by irinagalata on 5/22/17.
