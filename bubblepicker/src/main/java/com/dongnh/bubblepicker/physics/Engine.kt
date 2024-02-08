@@ -1,5 +1,6 @@
 package com.dongnh.bubblepicker.physics
 
+import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
@@ -11,7 +12,7 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
-    var isAlwaysSelected = true
+    var isAlwaysSelected = false
 
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
@@ -47,14 +48,16 @@ object Engine {
     private var stepsCount = 0
     var marginItem = 0.001f
 
-    fun build(bodiesCount: Int, scaleX: Float, scaleY: Float): List<CircleBody> {
-        val density = interpolate(0.8f, 0.2f, radius / 100f)
-        for (i in 0 until bodiesCount) {
+    fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
+        pickerItems.forEach {
+            val density = getDensity(it)
+            val bubbleRadius = getRadius(it)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
             bodies.add(
                 CircleBody(
-                    world, Vec2(x, y),
+                    world,
+                    Vec2(x, y),
                     bubbleRadius * scaleX,
                     (bubbleRadius * scaleX) * 1.3f,
                     density = density,
@@ -114,6 +117,22 @@ object Engine {
         toBeResized.add(item)
 
         return true
+    }
+
+    private fun getRadius(item: PickerItem): Float {
+        return if (item.radius != null) {
+            interpolate(0.1f, 0.25f, item.radius!! / 100f)
+        } else {
+            bubbleRadius
+        }
+    }
+
+    private fun getDensity(item: PickerItem): Float {
+        return if (item.radius != null) {
+            interpolate(0.8f, 0.2f, item.radius!! / 100f)
+        } else {
+            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
+        }
     }
 
     private fun createBorders() {

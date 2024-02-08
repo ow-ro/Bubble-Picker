@@ -24,7 +24,7 @@ import kotlin.math.sqrt
  */
 class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
-    var isAlwaysSelected = true
+    var isAlwaysSelected = false
         set(value) {
             field = value
             Engine.isAlwaysSelected = value
@@ -64,11 +64,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
 
-    // Change size x
-    var scaleX: Float = 1f
-
-    // Change size y
-    var scaleY: Float = 0.515f
+    private val scaleX: Float
+        get() = if (glView.width < glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
+    private val scaleY: Float
+        get() = if (glView.width < glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
 
     private val circles = ArrayList<Item>()
 
@@ -113,7 +112,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
         Engine.centerImmediately = centerImmediately
 
-        Engine.build(pickerList.size, scaleX, scaleY)
+        Engine.build(pickerList, scaleX, scaleY)
             .forEachIndexed { index, body ->
                 circles.add(
                     Item(
