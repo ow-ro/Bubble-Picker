@@ -129,9 +129,9 @@ object Engine {
 
     private fun getDensity(item: PickerItem): Float {
         return if (item.radius != null) {
-            interpolate(0.8f, 0.2f, item.radius!! / 100f)
+            interpolate(0.8f, 0.2f, item.radius!! / 50f)
         } else {
-            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
+            interpolate(0.8f, 0.2f, bubbleRadius / 50f)
         }
     }
 
