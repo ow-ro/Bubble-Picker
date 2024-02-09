@@ -72,7 +72,7 @@ class DemoFragment : Fragment() {
                 override fun getItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         title = titles[position]
-                        radius = 10f + (position * 5) // Used to resize the bubble to sizes based on position
+                        radius = 0.0001f + (position * 0.001f) // Used to resize the bubble to sizes based on position
                         gradient = BubbleGradient(
                             colors.getColor((position * 2) % 8, 0),
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
@@ -93,7 +93,6 @@ class DemoFragment : Fragment() {
 
             binding.root.addView(picker)
             picker.swipeMoveSpeed = 1f
-            picker.configSpeedMoveOfItem(20f)
             picker.configAlwaysSelected(false)
             picker.configCenterImmediately(true)
             picker.configMargin(0.001f)

@@ -31,31 +31,31 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         }
 
     var backgroundColor: Color? = null
-
     var maxSelectedCount: Int? = null
-
-    var bubbleSize = 10
+        set(value) {
+            field = value
+            Engine.maxSelectedCount = value
+        }
+    var bubbleSize = 50
         set(value) {
             field = value
             Engine.radius = value
         }
-
-    var listener: BubblePickerListener? = null
-
-    var pickerList: List<PickerItem> = ArrayList()
-
-    val selectedItems: List<PickerItem?>
-        get() = Engine.selectedBodies.map { circles.firstOrNull { circle -> circle.circleBody == it }?.pickerItem }
-
     var centerImmediately = false
         set(value) {
             field = value
             Engine.centerImmediately = value
         }
+    var gravity: Float = 6f
+        set(value) {
+            field = value
+            Engine.gravity = value
+        }
 
-    // Image size
-    var widthImage = 256f
-    var heightImage = 256f
+    var listener: BubblePickerListener? = null
+    lateinit var items: ArrayList<PickerItem>
+    val selectedItems: List<PickerItem?>
+        get() = Engine.selectedBodies.map { circles.firstOrNull { circle -> circle.circleBody == it }?.pickerItem }
 
     private var programId = 0
     private var verticesBuffer: FloatBuffer? = null
@@ -68,21 +68,16 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         get() = if (glView.width < glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
     private val scaleY: Float
         get() = if (glView.width < glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
-
     private val circles = ArrayList<Item>()
 
-    // Speed item back or come to center view
-    var speedBackToCenter = 50f
-        set(value) {
-            field = value
-            Engine.speedToCenter = value
-        }
-
+    // Image size
+    var widthImage = 256f
+    var heightImage = 256f
     // Margin item
     var marginBetweenItem = 0.001f
         set(value) {
             field = value
-            Engine.marginItem = value
+            Engine.margin = value
         }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -105,19 +100,19 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     }
 
     private fun initialize() {
-        if (pickerList.isEmpty()) {
+        if (items.isEmpty()) {
             return
         }
         clear()
 
         Engine.centerImmediately = centerImmediately
 
-        Engine.build(pickerList, scaleX, scaleY)
+        Engine.build(items, scaleX, scaleY)
             .forEachIndexed { index, body ->
                 circles.add(
                     Item(
                         WeakReference(glView.context),
-                        pickerList[index],
+                        items[index],
                         body,
                         isAlwaysSelected,
                         widthImage, heightImage
@@ -125,7 +120,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
                 )
             }
 
-        pickerList.forEach {
+        items.forEach {
             if (circles.isNotEmpty() && (it.isSelected || isAlwaysSelected)) {
                 Engine.resize(circles.first { circle -> circle.pickerItem == it })
             }

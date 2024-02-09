@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.MotionEvent
 import androidx.annotation.ColorInt
 import com.dongnh.bubblepicker.BubblePickerListener
@@ -31,7 +32,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                renderer.pickerList = ArrayList((0 until value.totalCount)
+                renderer.items = ArrayList((0 until value.totalCount)
                     .map { value.getItem(it) }.toList())
             }
             super.onResume()
@@ -110,6 +111,11 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         array.recycle()
     }
 
+    // Config default gravity
+    fun configDefaultGravity(gravity: Float) {
+        renderer.gravity = gravity
+    }
+
     // Config listener
     fun configListenerForBubble(listener: BubblePickerListener) {
         renderer.listener = listener
@@ -124,18 +130,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     fun selectedItems(): List<PickerItem?> = renderer.selectedItems
 
     // Margin of item
-    fun configMargin(marginItem: Float) {
-        renderer.marginBetweenItem = marginItem
+    fun configMargin(margin: Float) {
+        renderer.marginBetweenItem = margin
     }
 
     // Config all item is selected
     fun configAlwaysSelected(isSelectedAll: Boolean) {
         renderer.isAlwaysSelected = isSelectedAll
-    }
-
-    // Config speed draw and move iem
-    fun configSpeedMoveOfItem(speed: Float) {
-        renderer.speedBackToCenter = speed
     }
 
     // Config Center Immediately
@@ -159,13 +160,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     }
 
     override fun onResume() {
-        if (renderer.pickerList.isNotEmpty()) {
+        if (renderer.items.isNotEmpty()) {
             super.onResume()
         }
     }
 
     override fun onPause() {
-        if (renderer.pickerList.isNotEmpty()) {
+        if (renderer.items.isNotEmpty()) {
             super.onPause()
             renderer.clear()
         }

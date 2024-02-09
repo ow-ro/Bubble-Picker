@@ -16,37 +16,35 @@ object Engine {
 
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
-
     var maxSelectedCount: Int? = null
     var radius = 50
         set(value) {
-            bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
-            speedToCenter = interpolate(20f, 80f, value / 100f)
-            standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
             field = value
+            bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
+            standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
         }
     var centerImmediately = false
+    var gravity = 6f
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var bubbleRadius = 0.17f
 
     private var world = World(Vec2(0f, 0f), false)
-    private val step = 0.0009f
+    private val step = 0.0005f
     private val bodies: ArrayList<CircleBody> = ArrayList()
     private var borders: ArrayList<Border> = ArrayList()
-    private val resizeStep = 0.009f
+    private val resizeStep = 0.005f
     private var scaleX = 0f
     private var scaleY = 0f
     private var touch = false
-    var speedToCenter = 16f
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
     private val currentGravity: Float
-        get() = if (touch) increasedGravity else speedToCenter
+        get() = if (touch) increasedGravity else gravity
     private val toBeResized = ArrayList<Item>()
     private val startX
         get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
-    var marginItem = 0.001f
+    var margin = 0.001f
 
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         pickerItems.forEach {
@@ -62,12 +60,12 @@ object Engine {
                     (bubbleRadius * scaleX) * 1.3f,
                     density = density,
                     isAlwaysSelected = isAlwaysSelected,
-                    marinItem = marginItem
+                    margin = margin
                 )
             )
         }
-        Engine.scaleX = scaleX
-        Engine.scaleY = scaleY
+        this.scaleX = scaleX
+        this.scaleY = scaleY
         createBorders()
 
         return bodies
