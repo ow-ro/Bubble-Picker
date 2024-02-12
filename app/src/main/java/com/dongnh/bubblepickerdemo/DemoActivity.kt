@@ -65,6 +65,7 @@ class DemoActivity : AppCompatActivity() {
 
             setContentView(picker)
             picker.configBubbleSize(50)
+            picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
             picker.configAlwaysSelected(false)
