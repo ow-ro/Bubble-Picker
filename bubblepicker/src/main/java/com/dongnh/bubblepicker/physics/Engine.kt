@@ -12,8 +12,6 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
-    var isAlwaysSelected = false
-
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
     var maxSelectedCount: Int? = null
@@ -59,7 +57,6 @@ object Engine {
                     bubbleRadius * scaleX,
                     (bubbleRadius * scaleX) * 1.3f,
                     density = density,
-                    isAlwaysSelected = isAlwaysSelected,
                     margin = margin
                 )
             )
@@ -136,7 +133,9 @@ object Engine {
     private fun createBorders() {
         borders = arrayListOf(
             Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
-            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL)
+            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
+            Border(world, Vec2(0.5f / scaleY, 0f), Border.VERTICAL),
+            Border(world, Vec2(-0.5f / scaleY, 0f), Border.VERTICAL)
         )
     }
 

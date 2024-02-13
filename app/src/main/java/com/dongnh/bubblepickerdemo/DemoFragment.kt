@@ -65,6 +65,7 @@ class DemoFragment : Fragment() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this.requireContext(), null)
+            picker.configArea(resources.displayMetrics.widthPixels.toFloat(), resources.displayMetrics.heightPixels.toFloat())
             picker.adapter = object : BubblePickerAdapter {
 
                 override val totalCount = titles.size
@@ -93,7 +94,6 @@ class DemoFragment : Fragment() {
 
             binding.root.addView(picker)
             picker.swipeMoveSpeed = 1f
-            picker.configAlwaysSelected(false)
             picker.configCenterImmediately(true)
             picker.configMargin(0.001f)
             picker.configListenerForBubble(object : BubblePickerListener {

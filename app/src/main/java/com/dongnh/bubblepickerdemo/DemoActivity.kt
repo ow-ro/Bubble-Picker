@@ -41,6 +41,7 @@ class DemoActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this, null)
+            picker.configArea(resources.displayMetrics.widthPixels.toFloat(), resources.displayMetrics.heightPixels.toFloat())
             picker.adapter = object : BubblePickerAdapter {
 
                 override val totalCount = titles.size
@@ -66,7 +67,6 @@ class DemoActivity : AppCompatActivity() {
             setContentView(picker)
             picker.configBubbleSize(50)
             picker.swipeMoveSpeed = 1f
-            picker.configAlwaysSelected(false)
             picker.configMargin(0.01f)
             picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
