@@ -94,6 +94,7 @@ class DemoFragment : Fragment() {
 
             binding.root.addView(picker)
             picker.swipeMoveSpeed = 1f
+            picker.configMaxSelectedCount(1)
             picker.configCenterImmediately(true)
             picker.configMargin(0.001f)
             picker.configListenerForBubble(object : BubblePickerListener {

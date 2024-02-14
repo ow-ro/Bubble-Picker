@@ -30,6 +30,7 @@ object Engine {
     private val step = 0.0005f
     private val bodies: ArrayList<CircleBody> = ArrayList()
     private var borders: ArrayList<Border> = ArrayList()
+    private var selectedItems: ArrayList<Item> = ArrayList()
     private val resizeStep = 0.005f
     private var scaleX = 0f
     private var scaleY = 0f
@@ -101,15 +102,20 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedBodies.size >= (maxSelectedCount
-                ?: bodies.size) && !item.circleBody.increased
-        ) return false
+        if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased) {
+            val firstSelected = selectedItems.first()
+            firstSelected.circleBody.defineState()
+            toBeResized.add(firstSelected)
+            selectedItems.remove(firstSelected)
+        }
 
         if (item.circleBody.isBusy) return false
 
         item.circleBody.defineState()
 
         toBeResized.add(item)
+
+        selectedItems.add(item)
 
         return true
     }

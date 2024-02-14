@@ -66,6 +66,7 @@ class DemoActivity : AppCompatActivity() {
 
             setContentView(picker)
             picker.configBubbleSize(50)
+            picker.configMaxSelectedCount(2)
             picker.swipeMoveSpeed = 1f
             picker.configMargin(0.01f)
             picker.configListenerForBubble(object : BubblePickerListener {
