@@ -99,14 +99,16 @@ object Engine {
         world = World(Vec2(0f, 0f), false)
         borders.clear()
         bodies.clear()
+        selectedItems.clear()
     }
 
     fun resize(item: Item): Boolean {
         if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased) {
-            val firstSelected = selectedItems.first()
-            firstSelected.circleBody.defineState()
-            toBeResized.add(firstSelected)
-            selectedItems.remove(firstSelected)
+            selectedItems.firstOrNull()?.let {
+                it.circleBody.defineState()
+                toBeResized.add(it)
+                selectedItems.remove(it)
+            }
         }
 
         if (item.circleBody.isBusy) return false
@@ -115,7 +117,11 @@ object Engine {
 
         toBeResized.add(item)
 
-        selectedItems.add(item)
+        if (item !in selectedItems) {
+            selectedItems.add(item)
+        } else {
+            selectedItems.remove(item)
+        }
 
         return true
     }
