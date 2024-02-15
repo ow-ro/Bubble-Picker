@@ -58,12 +58,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
 
-    // Change size x
-    var scaleX: Float = 1f
-
-    // Change size y
-    var scaleY: Float = 0.515f
-
+    private val scaleX: Float
+        get() = if (glView.width > glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
+    private val scaleY: Float
+        get() = if (glView.width > glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
     private val circles = ArrayList<Item>()
 
     // Speed item back or come to center view
