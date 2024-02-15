@@ -62,10 +62,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
 
-    private val scaleX: Float
-        get() = if (glView.width > glView.height) glView.height.toFloat() / glView.width.toFloat() else 1f
-    private val scaleY: Float
-        get() = if (glView.width > glView.height) 1f else glView.width.toFloat() / glView.height.toFloat()
+    private val scaleX: Float get() = getProperScaleX()
+    private val scaleY: Float get() = getProperScaleY()
     private val circles = ArrayList<Item>()
 
     // Speed item back or come to center view
@@ -223,4 +221,35 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         Engine.clear()
     }
 
+    private fun getProperScaleX(): Float {
+        return if (glView.width < glView.height) {
+            if (glView.width > glView.height) {
+                glView.height.toFloat() / glView.width.toFloat()
+            } else {
+                1f
+            }
+        } else {
+            if (glView.width < glView.height) {
+                glView.height.toFloat() / glView.width.toFloat()
+            } else {
+                1f
+            }
+        }
+    }
+
+    private fun getProperScaleY(): Float {
+        return if (glView.width > glView.height) {
+            if (glView.width < glView.height) {
+                1f
+            } else {
+                glView.width.toFloat() / glView.height.toFloat()
+            }
+        } else {
+            if (glView.width > glView.height) {
+                1f
+            } else {
+                glView.width.toFloat() / glView.height.toFloat()
+            }
+        }
+    }
 }

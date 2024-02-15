@@ -1,7 +1,6 @@
 package com.dongnh.bubblepickerdemo
 
 import android.content.res.TypedArray
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -14,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
-import com.dongnh.bubblepicker.model.BubbleGradient
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.BubblePicker
 import com.dongnh.bubblepickerdemo.databinding.FragmentDemoBinding
@@ -27,11 +25,11 @@ import com.dongnh.bubblepickerdemo.databinding.FragmentDemoBinding
  */
 class DemoFragment : Fragment() {
 
-    lateinit var binding: FragmentDemoBinding
+    private lateinit var binding: FragmentDemoBinding
 
     lateinit var images: TypedArray
-    lateinit var colors: TypedArray
-    lateinit var picker: BubblePicker
+    private lateinit var colors: TypedArray
+    private lateinit var picker: BubblePicker
 
     private val mediumTypeface by lazy {
         Typeface.createFromAsset(
