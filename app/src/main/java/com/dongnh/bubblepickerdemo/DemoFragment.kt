@@ -76,6 +76,7 @@ class DemoFragment : Fragment() {
                             colors.getColor((position * 2) % 8, 0),
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
                         )
+                        radius = 30f + (position * 5)
                         typeface = mediumTypeface
                         textColor = ContextCompat.getColor(
                             this@DemoFragment.requireContext(),
@@ -91,7 +92,6 @@ class DemoFragment : Fragment() {
             }
 
             binding.root.addView(picker)
-            picker.configBubbleSize(100)
             picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)

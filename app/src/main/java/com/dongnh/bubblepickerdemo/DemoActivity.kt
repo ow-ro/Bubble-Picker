@@ -52,6 +52,7 @@ class DemoActivity : AppCompatActivity() {
                             colors.getColor((position * 2) % 8, 0),
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
                         )
+                        radius = 50f + (position * 10)
                         typeface = mediumTypeface
                         textColor = ContextCompat.getColor(this@DemoActivity, android.R.color.white)
                         // If you want to use image url, you need using glide load it and pass to this param
@@ -64,11 +65,10 @@ class DemoActivity : AppCompatActivity() {
             }
 
             setContentView(picker)
-            picker.configBubbleSize(50)
             picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
-            picker.configMargin(0.01f)
+            picker.configMargin(0.001f)
             picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 

@@ -105,7 +105,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
         Engine.centerImmediately = centerImmediately
 
-        Engine.build(pickerList.size, scaleX, scaleY)
+        Engine.build(pickerList, scaleX, scaleY)
             .forEachIndexed { index, body ->
                 circles.add(
                     Item(

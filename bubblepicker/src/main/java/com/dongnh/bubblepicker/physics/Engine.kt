@@ -1,5 +1,6 @@
 package com.dongnh.bubblepicker.physics
 
+import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
@@ -45,9 +46,10 @@ object Engine {
     private var stepsCount = 0
     var margin = 0.001f
 
-    fun build(bodiesCount: Int, scaleX: Float, scaleY: Float): List<CircleBody> {
-        val density = interpolate(0.8f, 0.2f, radius / 100f)
-        for (i in 0 until bodiesCount) {
+    fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
+        pickerItems.forEach {
+            val density = getDensity(it)
+            val bubbleRadius = getRadius(it)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
             bodies.add(
@@ -55,7 +57,7 @@ object Engine {
                     world,
                     Vec2(x, y),
                     bubbleRadius * scaleX,
-                    (bubbleRadius * scaleX) * 1.3f,
+                    (bubbleRadius * scaleX) * 1.2f,
                     density = density,
                     margin = margin
                 )
@@ -113,6 +115,23 @@ object Engine {
         return true
     }
 
+    private fun getRadius(item: PickerItem): Float {
+        return if (item.radius != 0f) {
+            interpolate(0.1f, 0.25f, item.radius / 100f)
+        } else {
+            bubbleRadius
+        }
+    }
+
+    private fun getDensity(item: PickerItem): Float {
+        return if (item.radius != 0f) {
+            interpolate(0.8f, 0.2f, item.radius / 100f)
+        } else {
+            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
+        }
+    }
+
+
     private fun createBorders() {
         borders = arrayListOf(
             Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
@@ -127,7 +146,7 @@ object Engine {
             body.isVisible = centerImmediately.not()
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
-            val gravity = if (body.increased) 1.3f * currentGravity else currentGravity
+            val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
             if (distance > step * 200) {
                 applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
