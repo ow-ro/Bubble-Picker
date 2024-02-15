@@ -13,7 +13,7 @@ class CircleBody(
     var radius: Float,
     var increasedRadius: Float,
     var density: Float,
-    private val marinItem: Float = 0.001f
+    private val margin: Float = 0.001f
 ) {
 
     val decreasedRadius: Float = radius
@@ -41,7 +41,7 @@ class CircleBody(
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
-            m_radius = radius + marinItem
+            m_radius = radius + margin
             m_p.setZero()
         }
 
@@ -100,7 +100,7 @@ class CircleBody(
     }
 
     private fun reset() {
-        physicalBody.fixtureList?.shape?.m_radius = radius + marinItem
+        physicalBody.fixtureList?.shape?.m_radius = radius + margin
     }
 
     fun defineState() {
