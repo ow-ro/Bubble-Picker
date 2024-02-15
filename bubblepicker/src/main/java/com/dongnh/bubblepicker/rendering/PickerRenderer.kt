@@ -75,7 +75,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var marginBetweenItem = 0.001f
         set(value) {
             field = value
-            Engine.marginItem = value
+            Engine.margin = value
         }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {

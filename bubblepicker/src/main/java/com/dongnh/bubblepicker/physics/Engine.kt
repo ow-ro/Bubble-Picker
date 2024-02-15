@@ -1,6 +1,5 @@
 package com.dongnh.bubblepicker.physics
 
-import android.content.res.Resources
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
@@ -44,7 +43,7 @@ object Engine {
     private val startX
         get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
-    var marginItem = 0.001f
+    var margin = 0.001f
 
     fun build(bodiesCount: Int, scaleX: Float, scaleY: Float): List<CircleBody> {
         val density = interpolate(0.8f, 0.2f, radius / 100f)
@@ -53,11 +52,12 @@ object Engine {
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
             bodies.add(
                 CircleBody(
-                    world, Vec2(x, y),
+                    world,
+                    Vec2(x, y),
                     bubbleRadius * scaleX,
                     (bubbleRadius * scaleX) * 1.3f,
                     density = density,
-                    marinItem = marginItem
+                    margin = margin
                 )
             )
         }
@@ -101,9 +101,8 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedBodies.size >= (maxSelectedCount
-                ?: bodies.size) && !item.circleBody.increased
-        ) return false
+        if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased)
+            return false
 
         if (item.circleBody.isBusy) return false
 
