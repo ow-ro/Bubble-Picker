@@ -58,8 +58,8 @@ object Engine {
                 CircleBody(
                     world,
                     Vec2(x, y),
-                    bubbleRadius * scaleX,
-                    (bubbleRadius * scaleX) * 1.2f,
+                    bubbleRadius * if (scaleY > scaleX) scaleY else scaleX,
+                    (bubbleRadius * if (scaleY > scaleX) scaleY else scaleX) * 1.2f,
                     density = density,
                     margin = margin
                 )
