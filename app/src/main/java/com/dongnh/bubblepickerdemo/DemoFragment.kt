@@ -1,6 +1,7 @@
 package com.dongnh.bubblepickerdemo
 
 import android.content.res.TypedArray
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
@@ -82,6 +83,7 @@ class DemoFragment : Fragment() {
 
             binding.root.addView(picker)
             picker.configCenterImmediately(true)
+            picker.configMaxSelectedCount(1)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
             picker.configMargin(0.001f)

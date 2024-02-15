@@ -27,6 +27,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var backgroundColor: Color? = null
 
     var maxSelectedCount: Int? = null
+        set(value) {
+            field = value
+            Engine.maxSelectedCount = value
+        }
 
     var bubbleSize = 10
         set(value) {

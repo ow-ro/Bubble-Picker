@@ -6,6 +6,7 @@ import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 /**
@@ -14,6 +15,7 @@ import kotlin.math.abs
 object Engine {
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
+    private var selectedItems: ArrayList<Item> = ArrayList()
 
     var maxSelectedCount: Int? = null
     var radius = 50
@@ -103,14 +105,25 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased)
-            return false
+        if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased) {
+            selectedItems.firstOrNull()?.let {
+                it.circleBody.defineState()
+                toBeResized.add(it)
+                selectedItems.removeFirst()
+            }
+        }
 
         if (item.circleBody.isBusy) return false
 
         item.circleBody.defineState()
 
         toBeResized.add(item)
+
+        if (item !in selectedItems) {
+            selectedItems.add(item)
+        } else {
+            selectedItems.remove(item)
+        }
 
         return true
     }
