@@ -71,22 +71,11 @@ class DemoFragment : Fragment() {
 
                 override fun getItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        title = titles[position]
-                        gradient = BubbleGradient(
-                            colors.getColor((position * 2) % 8, 0),
-                            colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
-                        )
                         radius = 30f + (position * 5)
-                        typeface = mediumTypeface
-                        textColor = ContextCompat.getColor(
-                            this@DemoFragment.requireContext(),
-                            android.R.color.white
-                        )
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
                             images.getResourceId(position, 0)
                         )
-                        overlayAlpha = 0.01f
                     }
                 }
             }

@@ -13,7 +13,6 @@ import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.CircleBody
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.dongnh.bubblepicker.toTexture
-import kotlinx.coroutines.*
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 
@@ -50,8 +49,9 @@ data class Item(
 
     private var imageTexture: Int = 0
 
-    private val currentTexture: Int
-        get() = if (circleBody.increased || circleBody.isIncreasing) imageTexture else texture
+    private val currentTexture: Int get () = imageTexture
+
+//        get() = if (circleBody.increased || circleBody.isIncreasing) imageTexture else texture
 
 
     private val gradient: LinearGradient?
@@ -92,16 +92,12 @@ data class Item(
 
         val canvas = bitmap?.let { Canvas(it) }
 
-        if (isSelected) canvas?.let { drawImage(it) }
-        if (pickerItem.isViewBorderSelected) canvas?.let { drawStrokeSelect(it) }
-        if (canvas != null) {
-            drawBackground(canvas, isSelected)
-        }
-        if (canvas != null) {
-            drawIcon(canvas)
-        }
-        if (canvas != null) {
-            drawText(canvas)
+        canvas?.let {
+            drawImage(it)
+            if (pickerItem.isViewBorderSelected) drawStrokeSelect(it)
+            drawBackground(it, isSelected)
+            drawIcon(it)
+            drawText(it)
         }
 
         return bitmap
