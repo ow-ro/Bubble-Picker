@@ -128,11 +128,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         renderer.marginBetweenItem = marginItem
     }
 
-    // Config all item is selected
-    fun configAlwaysSelected(isSelectedAll: Boolean) {
-        renderer.isAlwaysSelected = isSelectedAll
-    }
-
     // Config speed draw and move iem
     fun configSpeedMoveOfItem(speed: Float) {
         renderer.speedBackToCenter = speed

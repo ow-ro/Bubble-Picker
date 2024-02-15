@@ -12,8 +12,6 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
-    var isAlwaysSelected = true
-
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
 
@@ -59,7 +57,6 @@ object Engine {
                     bubbleRadius * scaleX,
                     (bubbleRadius * scaleX) * 1.3f,
                     density = density,
-                    isAlwaysSelected = isAlwaysSelected,
                     marinItem = marginItem
                 )
             )

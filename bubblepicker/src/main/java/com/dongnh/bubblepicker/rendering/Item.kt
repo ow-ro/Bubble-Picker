@@ -24,7 +24,6 @@ data class Item(
     val context: WeakReference<Context>,
     val pickerItem: PickerItem,
     val circleBody: CircleBody,
-    val isAlwaysSelected: Boolean,
     val widthImage: Float,
     val heightImage: Float,
 ) {

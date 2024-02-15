@@ -24,12 +24,6 @@ import kotlin.math.sqrt
  */
 class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
-    var isAlwaysSelected = true
-        set(value) {
-            field = value
-            Engine.isAlwaysSelected = value
-        }
-
     var backgroundColor: Color? = null
 
     var maxSelectedCount: Int? = null
@@ -120,14 +114,14 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
                         WeakReference(glView.context),
                         pickerList[index],
                         body,
-                        isAlwaysSelected,
-                        widthImage, heightImage
+                        widthImage,
+                        heightImage
                     )
                 )
             }
 
         pickerList.forEach {
-            if (circles.isNotEmpty() && (it.isSelected || isAlwaysSelected)) {
+            if (circles.isNotEmpty() && it.isSelected) {
                 Engine.resize(circles.first { circle -> circle.pickerItem == it })
             }
         }
@@ -215,7 +209,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
         if (Engine.resize(this)) {
             listener?.let {
-                if (circleBody.increased && !isAlwaysSelected) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(
+                if (circleBody.increased) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(
                     pickerItem
                 )
             }

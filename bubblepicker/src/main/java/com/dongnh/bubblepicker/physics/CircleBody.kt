@@ -13,7 +13,6 @@ class CircleBody(
     var radius: Float,
     var increasedRadius: Float,
     var density: Float,
-    val isAlwaysSelected: Boolean,
     private val marinItem: Float = 0.001f
 ) {
 
@@ -75,13 +74,7 @@ class CircleBody(
     }
 
     fun resize(step: Float) {
-        if (isAlwaysSelected) {
-            if (!increased) {
-                increase(step)
-            }
-        } else {
-            if (increased) decrease(step) else increase(step)
-        }
+        if (increased) decrease(step) else increase(step)
     }
 
     fun decrease(step: Float) {

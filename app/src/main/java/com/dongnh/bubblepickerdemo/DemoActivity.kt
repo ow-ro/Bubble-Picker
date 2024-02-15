@@ -68,7 +68,6 @@ class DemoActivity : AppCompatActivity() {
             picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
-            picker.configAlwaysSelected(false)
             picker.configMargin(0.01f)
             picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
