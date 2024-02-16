@@ -71,6 +71,7 @@ class DemoFragment : Fragment() {
                 override fun getItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         radius = 30f + (position * 5)
+                        title = titles[position]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
                             images.getResourceId(position, 0)

@@ -6,6 +6,7 @@ import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
+import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
@@ -13,9 +14,10 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
+    lateinit var items: ArrayList<Item>
     val selectedBodies: List<CircleBody>
         get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
-    private var selectedItems: ArrayList<Item> = ArrayList()
+    private val selectedItems get() = items.filter { it.circleBody.increased || it.circleBody.toBeIncreased || it.circleBody.isIncreasing }
 
     var maxSelectedCount: Int? = null
     var radius = 50
@@ -42,7 +44,7 @@ object Engine {
     private var gravityCenter = Vec2(0f, 0f)
     private val currentGravity: Float
         get() = if (touch) increasedGravity else speedToCenter
-    private val toBeResized = ArrayList<Item>()
+    private val toBeResized = synchronizedSet(mutableSetOf<Item>())
     private val startX
         get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
@@ -73,10 +75,14 @@ object Engine {
     }
 
     fun move() {
-        toBeResized.forEach { it.circleBody.resize(resizeStep) }
+        for (it in toBeResized) {
+            it.circleBody.resize(resizeStep)
+        }
         world.step(if (centerImmediately) 0.035f else step, 11, 11)
         bodies.forEach { move(it) }
-        toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
+        for (it in toBeResized.filter { it.circleBody.finished }.toSet()) {
+            toBeResized.remove(it)
+        }
         stepsCount++
         if (stepsCount >= 10) {
             centerImmediately = false
@@ -105,11 +111,12 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedBodies.size >= (maxSelectedCount ?: bodies.size) && !item.circleBody.increased) {
-            selectedItems.firstOrNull()?.let {
-                it.circleBody.defineState()
-                toBeResized.add(it)
-                selectedItems.removeFirst()
+        if (selectedItems.isNotEmpty() && selectedItems.size >= (maxSelectedCount ?: bodies.size)) {
+            selectedItems.last().let {
+                if (!it.circleBody.isBusy && it != item) {
+                    it.circleBody.defineState()
+                    toBeResized.add(it)
+                }
             }
         }
 
@@ -118,12 +125,6 @@ object Engine {
         item.circleBody.defineState()
 
         toBeResized.add(item)
-
-        if (item !in selectedItems) {
-            selectedItems.add(item)
-        } else {
-            selectedItems.remove(item)
-        }
 
         return true
     }
