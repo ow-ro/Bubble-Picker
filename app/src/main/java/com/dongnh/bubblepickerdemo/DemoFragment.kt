@@ -66,15 +66,15 @@ class DemoFragment : Fragment() {
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = titles.size
+                override val totalCount = 250
 
                 override fun getItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        radius = 30f + (position * 5)
-                        title = titles[position]
+                        radius = 30f + (position % 16 * 5)
+                        title = titles[position % titles.size]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            images.getResourceId(position, 0)
+                            images.getResourceId(position % 16, 0)
                         )
                     }
                 }

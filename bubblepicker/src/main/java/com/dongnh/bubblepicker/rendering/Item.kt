@@ -45,7 +45,6 @@ data class Item(
     private val isVisible
         get() = circleBody.isVisible
 
-    private var texture: Int = 0
 
     private var imageTexture: Int = 0
 
@@ -78,11 +77,10 @@ data class Item(
     }
 
     fun bindTextures(textureIds: IntArray, index: Int) {
-        texture = bindTexture(textureIds, index * 2, pickerItem.showImageOnUnSelected)
-        imageTexture = bindTexture(textureIds, index * 2 + 1, true)
+        imageTexture = bindTexture(textureIds, index * 2 + 1)
     }
 
-    private fun createBitmap(isSelected: Boolean): Bitmap {
+    private fun createBitmap(): Bitmap {
         var bitmap: Bitmap =
             Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
 
@@ -95,7 +93,7 @@ data class Item(
         canvas?.let {
             drawImage(it)
             if (pickerItem.isViewBorderSelected) drawStrokeSelect(it)
-            drawBackground(it, isSelected)
+            drawBackground(it)
             drawIcon(it)
             drawText(it)
         }
@@ -121,14 +119,12 @@ data class Item(
         )
     }
 
-    private fun drawBackground(canvas: Canvas, withImage: Boolean) {
+    private fun drawBackground(canvas: Canvas) {
         val bgPaint = Paint()
         bgPaint.style = Paint.Style.FILL
         pickerItem.color?.let { bgPaint.color = pickerItem.color!! }
         pickerItem.gradient?.let { bgPaint.shader = gradient }
-        if (withImage) {
-            bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
-        }
+        bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
         canvas.drawRect(0f, 0f, widthImage, heightImage, bgPaint)
     }
 
@@ -220,9 +216,9 @@ data class Item(
         }
     }
 
-    private fun bindTexture(textureIds: IntArray, index: Int, withImage: Boolean): Int {
+    private fun bindTexture(textureIds: IntArray, index: Int): Int {
         glGenTextures(1, textureIds, index)
-        createBitmap(withImage).toTexture(textureIds[index])
+        createBitmap().toTexture(textureIds[index])
         return textureIds[index]
     }
 

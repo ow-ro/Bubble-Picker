@@ -148,10 +148,10 @@ object Engine {
 
     private fun createBorders() {
         borders = arrayListOf(
-            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
-            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
-            Border(world, Vec2(-0.5f / scaleX, 0f), Border.VERTICAL),
-            Border(world, Vec2(0.5f / scaleX, 0f), Border.VERTICAL)
+//            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
+//            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
+//            Border(world, Vec2(-0.5f / scaleX, 0f), Border.VERTICAL),
+//            Border(world, Vec2(0.5f / scaleX, 0f), Border.VERTICAL)
         )
     }
 

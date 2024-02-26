@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.ColorInt
 import com.dongnh.bubblepicker.BubblePickerListener
@@ -64,16 +65,19 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                Log.i("BubblePicker", "ACTION_DOWN")
                 startX = event.x
                 startY = event.y
                 previousX = event.x
                 previousY = event.y
             }
             MotionEvent.ACTION_UP -> {
+                Log.i("BubblePicker", "ACTION_UP")
                 if (isClick(event)) renderer.resize(event.x, event.y)
                 renderer.release()
             }
             MotionEvent.ACTION_MOVE -> {
+                Log.i("BubblePicker", "ACTION_MOVE")
                 if (isSwipe(event)) {
                     renderer.swipe((previousX - event.x) * swipeMoveSpeed, (previousY - event.y) * swipeMoveSpeed)
                     previousX = event.x
