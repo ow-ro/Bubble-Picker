@@ -66,7 +66,7 @@ class DemoFragment : Fragment() {
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = 250
+                override val totalCount = 50
 
                 override fun getItem(position: Int): PickerItem {
                     return PickerItem().apply {
@@ -92,6 +92,7 @@ class DemoFragment : Fragment() {
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
             })
+            picker.configHorizontalSwipeOnly(true)
         }, 300)
     }
 

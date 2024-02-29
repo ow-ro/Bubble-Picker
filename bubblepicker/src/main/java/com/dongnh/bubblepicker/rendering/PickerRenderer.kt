@@ -61,6 +61,11 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var vertices: FloatArray? = null
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
+    var horizontalSwipeOnly: Boolean = false
+        set(value) {
+            Engine.horizontalSwipeOnly = value
+            field = value
+        }
 
     private val scaleX: Float get() = if (glView.width < glView.height) {
             1f

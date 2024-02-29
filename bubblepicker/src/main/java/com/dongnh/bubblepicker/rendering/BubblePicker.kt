@@ -92,13 +92,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         return true
     }
 
-    private fun release() = postDelayed({ renderer.release() }, 0)
+    private fun release() = post { renderer.release() }
 
     private fun isClick(event: MotionEvent) =
-        abs(event.x - startX) < 20 && abs(event.y - startY) < 20
+        abs(event.x - startX) < 5 && abs(event.y - startY) < 5
 
     private fun isSwipe(event: MotionEvent) =
-        abs(event.x - previousX) > 20 && abs(event.y - previousY) > 20
+        abs(event.x - previousX) > 5 || abs(event.y - previousY) > 5
 
     private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
@@ -114,6 +114,10 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         array.recycle()
     }
 
+    fun configHorizontalSwipeOnly(horizOnly: Boolean) {
+        // Default false
+        renderer.horizontalSwipeOnly = horizOnly
+    }
     // Config listener
     fun configListenerForBubble(listener: BubblePickerListener) {
         renderer.listener = listener
