@@ -94,6 +94,8 @@ object Engine {
         gravityCenter.x += -x
         if (!horizontalSwipeOnly) {
             gravityCenter.y += y
+        } else {
+            gravityCenter.y = 0f
         }
         increasedGravity = standardIncreasedGravity * abs(x * 13) * abs(y * 13)
         touch = true
