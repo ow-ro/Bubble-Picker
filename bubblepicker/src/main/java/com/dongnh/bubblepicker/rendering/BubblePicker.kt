@@ -13,12 +13,19 @@ import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
 import com.dongnh.bubblepicker.model.PickerItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 /**
  * Created by irinagalata on 1/19/17.
  */
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
     private lateinit var renderer: PickerRenderer
 
     @ColorInt
@@ -44,6 +51,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
+    private var debounceRelease: Job? = null
 
     init {
         init()
@@ -66,6 +74,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 Log.i("BubblePicker", "ACTION_DOWN")
+                debounceRelease?.cancel()
                 startX = event.x
                 startY = event.y
                 previousX = event.x
@@ -75,6 +84,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                 Log.i("BubblePicker", "ACTION_UP")
                 if (isClick(event)) renderer.resize(event.x, event.y)
                 renderer.release()
+                releaseWithReset()
             }
             MotionEvent.ACTION_MOVE -> {
                 Log.i("BubblePicker", "ACTION_MOVE")
@@ -86,13 +96,24 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                     release()
                 }
             }
-            else -> release()
+            else -> {
+                release()
+                releaseWithReset()
+            }
         }
 
         return true
     }
 
     private fun release() = post { renderer.release() }
+
+    private fun releaseWithReset() {
+        debounceRelease?.cancel()
+        debounceRelease = coroutineScope.launch {
+            delay(1000)
+            renderer.releaseWithReset()
+        }
+    }
 
     private fun isClick(event: MotionEvent) =
         abs(event.x - startX) < 5 && abs(event.y - startY) < 5
@@ -173,5 +194,4 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             renderer.clear()
         }
     }
-
 }

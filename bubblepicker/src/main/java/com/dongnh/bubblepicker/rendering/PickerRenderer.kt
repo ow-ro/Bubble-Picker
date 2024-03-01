@@ -213,6 +213,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
     fun release() = Engine.release()
 
+    fun releaseWithReset() = Engine.releaseWithReset()
+
     private fun getItem(position: Vec2) = position.let { vec2 ->
         val x = vec2.x.convertPoint(glView.width, scaleX)
         val y = vec2.y.convertPoint(glView.height, scaleY)
