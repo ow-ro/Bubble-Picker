@@ -172,7 +172,7 @@ object Engine {
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
             if (distance > step * 200) {
-                applyForce(direction.mul(gravity * 2 / distance.sqr()), position)
+                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
         }
     }
