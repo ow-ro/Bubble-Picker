@@ -42,6 +42,7 @@ object Engine {
     var speedToCenter = 16f
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
+    var horizontalSwipeOnly = false
     private val currentGravity: Float
         get() = if (touch) increasedGravity else speedToCenter
     private val toBeResized = synchronizedSet(mutableSetOf<Item>())
@@ -90,13 +91,22 @@ object Engine {
     }
 
     fun swipe(x: Float, y: Float) {
-        if (abs(gravityCenter.x) < 2) gravityCenter.x += -x
-        if (abs(gravityCenter.y) < 0.5f / scaleY) gravityCenter.y += y
+        gravityCenter.x += -x
+        if (!horizontalSwipeOnly) {
+            gravityCenter.y += y
+        } else {
+            gravityCenter.y = 0f
+        }
         increasedGravity = standardIncreasedGravity * abs(x * 13) * abs(y * 13)
         touch = true
     }
 
     fun release() {
+        touch = false
+        increasedGravity = standardIncreasedGravity
+    }
+
+    fun releaseWithReset() {
         gravityCenter.setZero()
         touch = false
         increasedGravity = standardIncreasedGravity
@@ -148,8 +158,8 @@ object Engine {
 
     private fun createBorders() {
         borders = arrayListOf(
-//            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
-//            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
+            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
+            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
 //            Border(world, Vec2(-0.5f / scaleX, 0f), Border.VERTICAL),
 //            Border(world, Vec2(0.5f / scaleX, 0f), Border.VERTICAL)
         )

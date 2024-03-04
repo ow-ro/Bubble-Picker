@@ -61,6 +61,11 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private var vertices: FloatArray? = null
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
+    var horizontalSwipeOnly: Boolean = false
+        set(value) {
+            Engine.horizontalSwipeOnly = value
+            field = value
+        }
 
     private val scaleX: Float get() = if (glView.width < glView.height) {
             1f
@@ -207,6 +212,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     )
 
     fun release() = Engine.release()
+
+    fun releaseWithReset() = Engine.releaseWithReset()
 
     private fun getItem(position: Vec2) = position.let { vec2 ->
         val x = vec2.x.convertPoint(glView.width, scaleX)
