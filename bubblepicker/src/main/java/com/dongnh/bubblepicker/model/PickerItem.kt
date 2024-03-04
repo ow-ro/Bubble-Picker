@@ -3,6 +3,7 @@ package com.dongnh.bubblepicker.model
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import androidx.annotation.ColorInt
+import com.example.libavif.AvifLoader
 
 /**
  * Created by irinagalata on 1/19/17.
@@ -21,6 +22,7 @@ data class PickerItem @JvmOverloads constructor(
     @ColorInt var textColor: Int? = null,
     var textSize: Float = 40f,
     var imgDrawable: Drawable? = null,
+    var animatedFrames: List<AvifLoader.FrameInfo>? = null,
     var showImageOnUnSelected: Boolean = false,
     var isSelected: Boolean = false,
     var isViewBorderSelected: Boolean = false,

@@ -28,6 +28,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+    implementation 'com.github.RedHarvest:glide-avifs:24cdab47ae'
+    implementation 'org.aomedia.avif.android:avif:1.0.1.262e11d'
 
     implementation group: 'org.jbox2d', name: 'jbox2d-library', version: '2.1.2.3'
     implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.29'

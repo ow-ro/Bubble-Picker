@@ -4,15 +4,23 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.opengl.GLES20.*
+import android.opengl.GLUtils
 import android.opengl.Matrix
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.util.Log
 import com.dongnh.bubblepicker.model.BubbleGradient
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.CircleBody
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.dongnh.bubblepicker.toTexture
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 
@@ -53,6 +61,11 @@ data class Item(
 
     private val currentTexture: Int get () = imageTexture
 
+    private var currentFrameIndex: Int = 0
+    private var lastUpdateTime = System.currentTimeMillis()
+    private val frameDelay: Long get() = pickerItem.animatedFrames?.get(currentFrameIndex)?.duration ?: 40
+
+
     private val gradient: LinearGradient?
         get() {
             return pickerItem.gradient?.let {
@@ -67,13 +80,41 @@ data class Item(
             }
         }
 
+    private fun maybeUpdateAnimatedFrame() {
+        pickerItem.animatedFrames?.let {
+            if (it.size == 1) {
+                // Static image
+                val frame = it.first()
+                glBindTexture(GL_TEXTURE_2D, currentTexture)
+                GLUtils.texImage2D(GL_TEXTURE_2D, 0, frame.bitmap, 0)
+            } else {
+                // Animated image
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastUpdateTime >= frameDelay) {
+                    currentFrameIndex = (currentFrameIndex + 1) % it.size
+                    val frame = it[currentFrameIndex]
+                    glBindTexture(GL_TEXTURE_2D, currentTexture)
+                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, frame.bitmap, 0)
+                    lastUpdateTime = currentTime
+                }
+            }
+        }
+    }
+
     fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float) {
+        maybeUpdateAnimatedFrame()
         glActiveTexture(GL_TEXTURE)
         glBindTexture(GL_TEXTURE_2D, currentTexture)
         glUniform1i(glGetUniformLocation(programId, BubbleShader.U_TEXT), 0)
         glUniform1i(glGetUniformLocation(programId, BubbleShader.U_VISIBILITY), if (isVisible) 1 else -1)
         glUniformMatrix4fv(glGetUniformLocation(programId, U_MATRIX), 1, false, calculateMatrix(scaleX, scaleY), 0)
         glDrawArrays(GL_TRIANGLE_STRIP, index * 4, 4)
+    }
+
+    private fun bindTexture(textureIds: IntArray, index: Int): Int {
+        glGenTextures(1, textureIds, index)
+        createBitmap().toTexture(textureIds[index])
+        return textureIds[index]
     }
 
     fun bindTextures(textureIds: IntArray, index: Int) {
@@ -214,12 +255,6 @@ data class Item(
             it.bounds = Rect(0, 0, bitmapWidth.toInt(), bitmapHeight.toInt())
             it.draw(canvas)
         }
-    }
-
-    private fun bindTexture(textureIds: IntArray, index: Int): Int {
-        glGenTextures(1, textureIds, index)
-        createBitmap().toTexture(textureIds[index])
-        return textureIds[index]
     }
 
     private fun calculateMatrix(scaleX: Float, scaleY: Float) = FloatArray(16).apply {

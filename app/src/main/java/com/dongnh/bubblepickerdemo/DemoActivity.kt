@@ -2,17 +2,42 @@ package com.dongnh.bubblepickerdemo
 
 import android.content.res.TypedArray
 import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
+import com.bumptech.glide.RequestManager
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
+import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.BubbleGradient
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.BubblePicker
+import com.example.libavif.AvifDrawableTransformation
+import com.example.libavif.AvifLoader
+import com.example.libavif.Utils.loadAvif
+import com.example.libavif.Utils.toAvifSupportedSource
+import com.example.libavif.targets.AvifStreamTarget
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.executeAsync
+import java.nio.ByteBuffer
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created by irinagalata on 1/19/17.
@@ -30,12 +55,66 @@ class DemoActivity : AppCompatActivity() {
     lateinit var images: TypedArray
     lateinit var colors: TypedArray
     lateinit var picker: BubblePicker
+    lateinit var glide: RequestManager
+
+    private suspend fun preloadAvifFrames(avifStreamTarget: AvifStreamTarget) = suspendCoroutine {
+        avifStreamTarget.preloadAllFrames { result ->
+            it.resume(result)
+        }
+    }
+
+    private fun prefetchFrames(urls: List<String>, callback: (List<List<AvifLoader.FrameInfo>>) -> Unit) = MainScope().launch {
+        val imageData = urls.map { url ->
+            async {
+                when (val drawable = loadDrawableViaGlide(url)) {
+                    is AvifStreamTarget -> preloadAvifFrames(drawable)
+                    is BitmapDrawable -> listOf(AvifLoader.FrameInfo(0, Long.MAX_VALUE, drawable.bitmap))
+                    else -> null
+                }
+            }
+        }.awaitAll().filterNotNull()
+
+        callback.invoke(imageData)
+    }
+
+    private suspend fun loadDrawableViaGlide(url: String) = suspendCoroutine {
+        glide.asDrawable()
+            .load(url.toAvifSupportedSource)
+            .into(object : CustomTarget<Drawable>() {
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    it.resume(null)
+                }
+                override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                    it.resume(resource)
+                }
+                override fun onLoadCleared(placeholder: Drawable?) {}
+            })
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demo)
+        glide = Glide.with(this)
 
-        val titles = resources.getStringArray(R.array.countries)
+        val urls = listOf(
+            "https://raw.githubusercontent.com/ow-ro/HostedFiles/main/test-120w.avif",
+            "https://raw.githubusercontent.com/ow-ro/HostedFiles/main/walk-small.avif",
+            "https://aomedia.org/assets/images/blog/parrot-avif.avif",
+            "https://raw.githubusercontent.com/link-u/avif-sample-images/master/kimono.crop.avif",
+            "https://emoji.cdn.wemesh.com/emojis/astronaut/128.avif",
+            "https://emoji.cdn.wemesh.com/emojis/alien/128.avif",
+            "https://emoji.cdn.wemesh.com/emojis/dog/128.avif",
+            "https://www.gstatic.com/webp/gallery/1.webp",
+            "https://www.gstatic.com/webp/gallery/2.jpg",
+            "https://sample-videos.com/img/Sample-png-image-100kb.png"
+        )
+
+        prefetchFrames(urls) {
+            buildPicker(it)
+        }
+    }
+
+    private fun buildPicker(frameInfos: List<List<AvifLoader.FrameInfo>>) {
         colors = resources.obtainTypedArray(R.array.colors)
         images = resources.obtainTypedArray(R.array.images)
 
@@ -55,12 +134,12 @@ class DemoActivity : AppCompatActivity() {
                         )
                         value = 50f + (position * 10)
                         typeface = mediumTypeface
-                        textColor = ContextCompat.getColor(this@DemoActivity, android.R.color.white)
                         // If you want to use image url, you need using glide load it and pass to this param
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoActivity,
                             images.getResourceId(position, 0)
                         )
+                        animatedFrames = frameInfos[position]
                     }
                 }
             }

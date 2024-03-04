@@ -2,6 +2,7 @@ package com.dongnh.bubblepicker.rendering
 
 import android.opengl.GLES20.*
 import android.opengl.GLSurfaceView
+import android.util.Log
 import android.view.View
 import com.dongnh.bubblepicker.*
 import com.dongnh.bubblepicker.model.Color
