@@ -26,12 +26,6 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
     var backgroundColor: Color? = null
 
-    var maxSelectedCount: Int? = null
-        set(value) {
-            field = value
-            Engine.maxSelectedCount = value
-        }
-
     var bubbleSize = 10
         set(value) {
             field = value
@@ -41,9 +35,6 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var listener: BubblePickerListener? = null
 
     var pickerList: List<PickerItem> = ArrayList()
-
-    val selectedItems: List<PickerItem?>
-        get() = Engine.selectedBodies.map { circles.firstOrNull { circle -> circle.circleBody == it }?.pickerItem }
 
     var centerImmediately = false
         set(value) {
@@ -119,7 +110,6 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         clear()
 
         Engine.centerImmediately = centerImmediately
-        Engine.items = circles
         Engine.build(pickerList, scaleX, scaleY)
             .forEachIndexed { index, body ->
                 circles.add(

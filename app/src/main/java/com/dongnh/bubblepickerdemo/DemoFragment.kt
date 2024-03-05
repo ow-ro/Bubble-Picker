@@ -82,7 +82,6 @@ class DemoFragment : Fragment() {
 
             binding.root.addView(picker)
             picker.configCenterImmediately(true)
-            picker.configMaxSelectedCount(1)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
             picker.configMargin(0.001f)

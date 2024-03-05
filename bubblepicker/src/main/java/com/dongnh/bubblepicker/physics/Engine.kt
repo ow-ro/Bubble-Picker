@@ -14,12 +14,11 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
-    lateinit var items: ArrayList<Item>
-    val selectedBodies: List<CircleBody>
-        get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
-    private val selectedItems get() = items.filter { it.circleBody.increased || it.circleBody.toBeIncreased || it.circleBody.isIncreasing }
+//    val selectedBodies: List<CircleBody>
+//        get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
 
-    var maxSelectedCount: Int? = null
+    var selectedItem: Item? = null
+
     var radius = 50
         set(value) {
             bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
@@ -45,7 +44,7 @@ object Engine {
     var horizontalSwipeOnly = false
     private val currentGravity: Float
         get() = if (touch) increasedGravity else speedToCenter
-    private val toBeResized = synchronizedSet(mutableSetOf<Item>())
+    private val toBeResized = mutableSetOf<Item>()
     private val startX
         get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
@@ -76,14 +75,10 @@ object Engine {
     }
 
     fun move() {
-        for (it in toBeResized) {
-            it.circleBody.resize(resizeStep)
-        }
+        toBeResized.forEach { it.circleBody.resize(resizeStep) }
         world.step(if (centerImmediately) 0.035f else step, 11, 11)
         bodies.forEach { move(it) }
-        for (it in toBeResized.filter { it.circleBody.finished }.toSet()) {
-            toBeResized.remove(it)
-        }
+        toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
         stepsCount++
         if (stepsCount >= 10) {
             centerImmediately = false
@@ -121,12 +116,10 @@ object Engine {
     }
 
     fun resize(item: Item): Boolean {
-        if (selectedItems.isNotEmpty() && selectedItems.size >= (maxSelectedCount ?: bodies.size)) {
-            selectedItems.last().let {
-                if (!it.circleBody.isBusy && it != item) {
-                    it.circleBody.defineState()
-                    toBeResized.add(it)
-                }
+        if (item != selectedItem && selectedItem?.circleBody?.isBusy == false) {
+            selectedItem?.also {
+                it.circleBody.defineState()
+                toBeResized.add(it)
             }
         }
 
@@ -135,6 +128,12 @@ object Engine {
         item.circleBody.defineState()
 
         toBeResized.add(item)
+
+        selectedItem = if (item.circleBody.toBeIncreased) {
+            item
+        } else {
+            null
+        }
 
         return true
     }

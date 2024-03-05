@@ -124,10 +124,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
 
-        if (array.hasValue(R.styleable.BubblePicker_maxSelectedCount)) {
-            renderer.maxSelectedCount = array.getInt(R.styleable.BubblePicker_maxSelectedCount, -1)
-        }
-
         if (array.hasValue(R.styleable.BubblePicker_backgroundColor)) {
             background = array.getColor(R.styleable.BubblePicker_backgroundColor, -1)
         }
@@ -143,14 +139,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     fun configListenerForBubble(listener: BubblePickerListener) {
         renderer.listener = listener
     }
-
-    // Max select allow select
-    fun configMaxSelectedCount(maxSelect: Int) {
-        renderer.maxSelectedCount = maxSelect
-    }
-
-    // List Item selected
-    fun selectedItems(): List<PickerItem?> = renderer.selectedItems
 
     // Margin of item
     fun configMargin(marginItem: Float) {
