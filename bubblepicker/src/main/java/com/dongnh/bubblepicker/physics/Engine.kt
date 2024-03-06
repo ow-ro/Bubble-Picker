@@ -6,7 +6,6 @@ import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
-import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
@@ -76,7 +75,7 @@ object Engine {
 
     fun move() {
         toBeResized.forEach { it.circleBody.resize(resizeStep) }
-        world.step(if (centerImmediately) 0.035f else step, 11, 11)
+        world.step(step, 11, 11)
         bodies.forEach { move(it) }
         toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
         stepsCount++
@@ -170,8 +169,11 @@ object Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > step * 200) {
+            if (distance > step * 200 && body != selectedItem?.circleBody) {
                 applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+            }
+            if (body == selectedItem?.circleBody) {
+                applyForce(direction.mul(6f * increasedGravity), this.worldCenter)
             }
         }
     }
