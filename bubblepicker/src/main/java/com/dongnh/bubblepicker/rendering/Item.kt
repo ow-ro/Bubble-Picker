@@ -9,7 +9,7 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import com.dongnh.bubblepicker.model.BubbleGradient
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.BubblePickerItem
 import com.dongnh.bubblepicker.physics.CircleBody
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.dongnh.bubblepicker.toTexture
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference
  */
 data class Item(
     val context: WeakReference<Context>,
-    val pickerItem: PickerItem,
+    val bubblePickerItem: BubblePickerItem,
     val circleBody: CircleBody,
     val widthImage: Float,
     val heightImage: Float,
@@ -55,7 +55,7 @@ data class Item(
 
     private val gradient: LinearGradient?
         get() {
-            return pickerItem.gradient?.let {
+            return bubblePickerItem.gradient?.let {
                 val horizontal = it.direction == BubbleGradient.HORIZONTAL
                 LinearGradient(
                     if (horizontal) 0f else heightImage / 2f,
@@ -92,7 +92,7 @@ data class Item(
 
         canvas?.let {
             drawImage(it)
-            if (pickerItem.isViewBorderSelected) drawStrokeSelect(it)
+            if (bubblePickerItem.isViewBorderSelected) drawStrokeSelect(it)
             drawBackground(it)
             drawIcon(it)
             drawText(it)
@@ -104,17 +104,17 @@ data class Item(
     private fun drawStrokeSelect(canvas: Canvas) {
         val strokePaint = Paint()
         strokePaint.style = Paint.Style.STROKE
-        if (pickerItem.colorBorderSelected != null) {
-            strokePaint.color = pickerItem.colorBorderSelected!!
+        if (bubblePickerItem.colorBorderSelected != null) {
+            strokePaint.color = bubblePickerItem.colorBorderSelected!!
         } else {
             strokePaint.color = Color.BLACK
         }
 
-        strokePaint.strokeWidth = pickerItem.strokeWidthBorder
+        strokePaint.strokeWidth = bubblePickerItem.strokeWidthBorder
         canvas.drawCircle(
             widthImage / 2,
             heightImage / 2,
-            widthImage / 2 - (pickerItem.strokeWidthBorder / 2f),
+            widthImage / 2 - (bubblePickerItem.strokeWidthBorder / 2f),
             strokePaint
         )
     }
@@ -122,28 +122,28 @@ data class Item(
     private fun drawBackground(canvas: Canvas) {
         val bgPaint = Paint()
         bgPaint.style = Paint.Style.FILL
-        pickerItem.color?.let { bgPaint.color = pickerItem.color!! }
-        pickerItem.gradient?.let { bgPaint.shader = gradient }
-        bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
+        bubblePickerItem.color?.let { bgPaint.color = bubblePickerItem.color!! }
+        bubblePickerItem.gradient?.let { bgPaint.shader = gradient }
+        bgPaint.alpha = (bubblePickerItem.overlayAlpha * 255).toInt()
         canvas.drawRect(0f, 0f, widthImage, heightImage, bgPaint)
     }
 
     private fun drawText(canvas: Canvas) {
-        if (pickerItem.title == null) return
+        if (bubblePickerItem.title == null) return
 
         val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
 
-            color = if (pickerItem.textColor == null) {
+            color = if (bubblePickerItem.textColor == null) {
                 Color.parseColor("#ffffff")
             } else {
-                pickerItem.textColor!!
+                bubblePickerItem.textColor!!
             }
 
-            textSize = pickerItem.textSize
-            typeface = pickerItem.typeface
+            textSize = bubblePickerItem.textSize
+            typeface = bubblePickerItem.typeface
         }
 
-        val maxTextHeight = if (pickerItem.icon == null) heightImage / 2f else heightImage / 2.7f
+        val maxTextHeight = if (bubblePickerItem.icon == null) heightImage / 2f else heightImage / 2.7f
 
         var textLayout = placeText(paint)
 
@@ -152,12 +152,12 @@ data class Item(
             textLayout = placeText(paint)
         }
 
-        if (pickerItem.icon == null) {
+        if (bubblePickerItem.icon == null) {
             canvas.translate(
                 (widthImage - textLayout.width) / 2f,
                 (heightImage - textLayout.height) / 2f
             )
-        } else if (pickerItem.iconOnTop) {
+        } else if (bubblePickerItem.iconOnTop) {
             canvas.translate((widthImage - textLayout.width) / 2f, heightImage / 2f)
         } else {
             canvas.translate(
@@ -172,27 +172,27 @@ data class Item(
     @Suppress("DEPRECATION")
     private fun placeText(paint: TextPaint): StaticLayout {
         return StaticLayout(
-            pickerItem.title, paint, (widthImage * 0.9).toInt(),
+            bubblePickerItem.title, paint, (widthImage * 0.9).toInt(),
             Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false
         )
     }
 
     private fun drawIcon(canvas: Canvas) {
-        pickerItem.icon?.let {
+        bubblePickerItem.icon?.let {
             val width = it.intrinsicWidth
             val height = it.intrinsicHeight
 
             val left = (widthImage / 2 - width / 2).toInt()
             val right = (widthImage / 2 + width / 2).toInt()
 
-            if (pickerItem.title == null) {
+            if (bubblePickerItem.title == null) {
                 it.bounds = Rect(
                     left,
                     (widthImage / 2 - height / 2).toInt(),
                     right,
                     (heightImage / 2 + height / 2).toInt()
                 )
-            } else if (pickerItem.iconOnTop) {
+            } else if (bubblePickerItem.iconOnTop) {
                 it.bounds =
                     Rect(left, (widthImage / 2 - height).toInt(), right, (heightImage / 2).toInt())
             } else {
@@ -205,7 +205,7 @@ data class Item(
     }
 
     private fun drawImage(canvas: Canvas) {
-        pickerItem.imgDrawable?.let {
+        bubblePickerItem.imgDrawable?.let {
             val height = (it as BitmapDrawable).bitmap.height.toFloat()
             val width = it.bitmap.width.toFloat()
             val ratio = height.coerceAtLeast(width) / height.coerceAtMost(width)

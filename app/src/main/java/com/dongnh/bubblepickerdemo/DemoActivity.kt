@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.BubbleGradient
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.BubblePickerItem
 import com.dongnh.bubblepicker.rendering.BubblePicker
 
 /**
@@ -45,8 +45,8 @@ class DemoActivity : AppCompatActivity() {
 
                 override val totalCount = titles.size
 
-                override fun getItem(position: Int): PickerItem {
-                    return PickerItem().apply {
+                override fun getItem(position: Int): BubblePickerItem {
+                    return BubblePickerItem().apply {
                         title = titles[position]
                         gradient = BubbleGradient(
                             colors.getColor((position * 2) % 8, 0),
@@ -70,9 +70,9 @@ class DemoActivity : AppCompatActivity() {
             picker.configSpeedMoveOfItem(20f)
             picker.configMargin(0.001f)
             picker.configListenerForBubble(object : BubblePickerListener {
-                override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
+                override fun onBubbleSelected(item: BubblePickerItem) = toast("${item.title} selected")
 
-                override fun onBubbleDeselected(item: PickerItem) =
+                override fun onBubbleDeselected(item: BubblePickerItem) =
                     toast("${item.title} deselected")
             })
         }, 300)

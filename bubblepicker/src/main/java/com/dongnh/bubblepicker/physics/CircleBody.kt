@@ -9,10 +9,10 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 class CircleBody(
-    val world: World,
+    private val world: World,
     var position: Vec2,
     var radius: Float,
-    var increasedRadius: Float,
+    private var increasedRadius: Float,
     var density: Float,
     private val margin: Float = 0.001f
 ) {
@@ -20,8 +20,9 @@ class CircleBody(
     private val decreasedRadius: Float = radius
     private var isIncreasing = false
     private var isDecreasing = false
-    var toBeIncreased: Boolean = false
+    var toBeIncreased = false
     private var toBeDecreased = false
+
     val finished: Boolean
         get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
     val isBusy: Boolean
@@ -66,7 +67,7 @@ class CircleBody(
         if (increased) decrease(step) else increase(step)
     }
 
-    fun decrease(step: Float) {
+    private fun decrease(step: Float) {
         isDecreasing = true
         radius -= step
         reset()
@@ -77,7 +78,7 @@ class CircleBody(
         }
     }
 
-    fun increase(step: Float) {
+    private fun increase(step: Float) {
         isIncreasing = true
         radius += step
         reset()

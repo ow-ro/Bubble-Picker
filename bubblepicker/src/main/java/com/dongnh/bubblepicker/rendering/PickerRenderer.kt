@@ -5,7 +5,7 @@ import android.opengl.GLSurfaceView
 import android.view.View
 import com.dongnh.bubblepicker.*
 import com.dongnh.bubblepicker.model.Color
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.BubblePickerItem
 import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.rendering.BubbleShader.A_POSITION
 import com.dongnh.bubblepicker.rendering.BubbleShader.A_UV
@@ -34,7 +34,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
     var listener: BubblePickerListener? = null
 
-    var pickerList: List<PickerItem> = ArrayList()
+    var pickerList: List<BubblePickerItem> = ArrayList()
 
     var centerImmediately = false
         set(value) {
@@ -125,7 +125,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
         pickerList.forEach {
             if (circles.isNotEmpty() && it.isSelected) {
-                Engine.resize(circles.first { circle -> circle.pickerItem == it })
+                Engine.resize(circles.first { circle -> circle.bubblePickerItem == it })
             }
         }
 
@@ -214,8 +214,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
         if (Engine.resize(this)) {
             listener?.let {
-                if (circleBody.increased) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(
-                    pickerItem
+                if (circleBody.increased) it.onBubbleDeselected(bubblePickerItem) else it.onBubbleSelected(
+                    bubblePickerItem
                 )
             }
         }

@@ -1,14 +1,14 @@
 package com.dongnh.bubblepicker
 
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.BubblePickerItem
 
 /**
  * Created by irinagalata on 3/6/17.
  */
 interface BubblePickerListener {
 
-    fun onBubbleSelected(item: PickerItem)
+    fun onBubbleSelected(item: BubblePickerItem)
 
-    fun onBubbleDeselected(item: PickerItem)
+    fun onBubbleDeselected(item: BubblePickerItem)
 
 }

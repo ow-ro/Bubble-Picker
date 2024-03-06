@@ -1,6 +1,6 @@
 package com.dongnh.bubblepicker.physics
 
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.model.BubblePickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
@@ -49,8 +49,8 @@ object Engine {
     private var stepsCount = 0
     var margin = 0.001f
 
-    fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
-        pickerItems.forEach {
+    fun build(bubblePickerItems: List<BubblePickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
+        bubblePickerItems.forEach {
             val density = getDensity(it)
             val bubbleRadius = getRadius(it)
             val x = if (Random().nextBoolean()) -startX else startX
@@ -137,7 +137,7 @@ object Engine {
         return true
     }
 
-    private fun getRadius(item: PickerItem): Float {
+    private fun getRadius(item: BubblePickerItem): Float {
         return if (item.radius != 0f) {
             interpolate(0.1f, 0.25f, item.radius / 100f)
         } else {
@@ -145,7 +145,7 @@ object Engine {
         }
     }
 
-    private fun getDensity(item: PickerItem): Float {
+    private fun getDensity(item: BubblePickerItem): Float {
         return if (item.radius != 0f) {
             interpolate(0.8f, 0.2f, item.radius / 100f)
         } else {

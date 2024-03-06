@@ -12,7 +12,6 @@ import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
-import com.dongnh.bubblepicker.model.PickerItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
