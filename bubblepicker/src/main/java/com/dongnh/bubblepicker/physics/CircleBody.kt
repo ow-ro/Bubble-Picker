@@ -9,48 +9,37 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 class CircleBody(
-    val world: World, var position: Vec2,
+    val world: World,
+    var position: Vec2,
     var radius: Float,
     var increasedRadius: Float,
     var density: Float,
     private val margin: Float = 0.001f
 ) {
 
-    val decreasedRadius: Float = radius
-
-    var isIncreasing = false
-
-    var isDecreasing = false
-
-    var toBeIncreased = false
-
-    var toBeDecreased = false
-
+    private val decreasedRadius: Float = radius
+    private var isIncreasing = false
+    private var isDecreasing = false
+    var toBeIncreased: Boolean = false
+    private var toBeDecreased = false
     val finished: Boolean
         get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
-
     val isBusy: Boolean
         get() = isIncreasing || isDecreasing
-
     lateinit var physicalBody: Body
-
     var increased = false
-
     var isVisible = true
-
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
             m_radius = radius + margin
             m_p.setZero()
         }
-
     private val fixture: FixtureDef
         get() = FixtureDef().apply {
             this.shape = this@CircleBody.shape
             this.density = this@CircleBody.density
         }
-
     private val bodyDef: BodyDef
         get() = BodyDef().apply {
             type = BodyType.DYNAMIC
