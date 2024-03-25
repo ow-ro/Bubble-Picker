@@ -33,8 +33,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         }
 
     var listener: BubblePickerListener? = null
-
-    var pickerList: List<PickerItem> = ArrayList()
+    // Which list to show: main or secondary
+    var allPickerItemsList: ArrayList<PickerItem> = ArrayList()
 
     var centerImmediately = false
         set(value) {
@@ -104,26 +104,27 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     }
 
     private fun initialize() {
-        if (pickerList.isEmpty()) {
+        if (allPickerItemsList.isEmpty()) {
             return
         }
         clear()
 
         Engine.centerImmediately = centerImmediately
-        Engine.build(pickerList, scaleX, scaleY)
+        Engine.build(allPickerItemsList, scaleX, scaleY)
             .forEachIndexed { index, body ->
                 circles.add(
                     Item(
                         WeakReference(glView.context),
-                        pickerList[index],
+                        allPickerItemsList[index],
                         body,
                         widthImage,
                         heightImage
                     )
                 )
             }
+        Engine.allItems = circles
 
-        pickerList.forEach {
+        allPickerItemsList.forEach {
             if (circles.isNotEmpty() && it.isSelected) {
                 Engine.resize(circles.first { circle -> circle.pickerItem == it })
             }
@@ -185,13 +186,13 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         glUseProgram(programId)
     }
 
-    fun createProgram(vertexShader: Int, fragmentShader: Int) = glCreateProgram().apply {
+    private fun createProgram(vertexShader: Int, fragmentShader: Int) = glCreateProgram().apply {
         glAttachShader(this, vertexShader)
         glAttachShader(this, fragmentShader)
         glLinkProgram(this)
     }
 
-    fun createShader(type: Int, shader: String) = glCreateShader(type).apply {
+    private fun createShader(type: Int, shader: String) = glCreateShader(type).apply {
         glShaderSource(this, shader)
         glCompileShader(this)
     }

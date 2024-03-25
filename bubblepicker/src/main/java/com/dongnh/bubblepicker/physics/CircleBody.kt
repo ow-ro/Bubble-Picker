@@ -11,28 +11,21 @@ import kotlin.math.abs
 class CircleBody(
     val world: World,
     var position: Vec2,
-    var radius: Float,
+    var defaultRadius: Float,
     var increasedRadius: Float,
     var density: Float,
+    var shouldShow: Boolean = true,
     private val margin: Float = 0.001f
 ) {
-
-    private val decreasedRadius: Float = radius
+    lateinit var physicalBody: Body
+    private var decreasedRadius: Float = defaultRadius
     private var isIncreasing = false
     private var isDecreasing = false
-    var toBeIncreased: Boolean = false
     private var toBeDecreased = false
-    val finished: Boolean
-        get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
-    val isBusy: Boolean
-        get() = isIncreasing || isDecreasing
-    lateinit var physicalBody: Body
-    var increased = false
-    var isVisible = true
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
-            m_radius = radius + margin
+            m_radius = actualRadius
             m_p.setZero()
         }
     private val fixture: FixtureDef
@@ -45,6 +38,18 @@ class CircleBody(
             type = BodyType.DYNAMIC
             this.position = this@CircleBody.position
         }
+    var isVisible: Boolean = true
+    var toBeIncreased: Boolean = false
+    var actualRadius: Float = if (shouldShow) {
+        defaultRadius + margin
+    } else {
+        0f
+    }
+    val finished: Boolean
+        get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
+    val isBusy: Boolean
+        get() = isIncreasing || isDecreasing
+    var increased = false
 
     init {
         while (true) {
@@ -63,33 +68,71 @@ class CircleBody(
     }
 
     fun resize(step: Float) {
-        if (increased) decrease(step) else increase(step)
+        when {
+            actualRadius < defaultRadius && shouldShow -> inflate(step)
+            actualRadius > 0f && !shouldShow -> deflate(step)
+            shouldShow -> if (increased) {
+                decrease(step)
+            } else {
+                increase(step)
+            }
+        }
     }
 
-    fun decrease(step: Float) {
+    private fun decrease(step: Float) {
         isDecreasing = true
-        radius -= step
+        actualRadius -= step
         reset()
 
-        if (abs(radius - decreasedRadius) < step) {
+        if (abs(actualRadius - decreasedRadius) < step) {
             increased = false
             clear()
         }
     }
 
-    fun increase(step: Float) {
+    private fun increase(step: Float) {
         isIncreasing = true
-        radius += step
+        actualRadius += step
         reset()
 
-        if (abs(radius - increasedRadius) < step) {
+        if (abs(actualRadius - increasedRadius) < step) {
             increased = true
             clear()
         }
     }
 
+    private fun inflate(step: Float) {
+        isVisible = true
+        isIncreasing = true
+        actualRadius = if (actualRadius + step < defaultRadius) {
+            actualRadius + step
+        } else {
+            defaultRadius
+        }
+        reset()
+
+        if (actualRadius == defaultRadius) {
+            clear()
+        }
+    }
+
+    private fun deflate(step: Float) {
+        isDecreasing = true
+        actualRadius = if (actualRadius - step > 0) {
+            actualRadius - step
+        } else {
+            0f
+        }
+        reset()
+
+        if (actualRadius == 0f) {
+            isVisible = false
+            clear()
+        }
+    }
+
     private fun reset() {
-        physicalBody.fixtureList?.shape?.m_radius = radius + margin
+        physicalBody.fixtureList?.shape?.m_radius = actualRadius + margin
     }
 
     fun defineState() {

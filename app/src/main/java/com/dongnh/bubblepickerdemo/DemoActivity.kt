@@ -35,17 +35,18 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demo)
 
-        val titles = resources.getStringArray(R.array.countries)
+        val titles = resources.getStringArray(R.array.main_countries)
         colors = resources.obtainTypedArray(R.array.colors)
-        images = resources.obtainTypedArray(R.array.images)
+        images = resources.obtainTypedArray(R.array.main_images)
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this, null)
             picker.adapter = object : BubblePickerAdapter {
 
                 override val totalCount = titles.size
+                override val mainCount = titles.size
 
-                override fun getItem(position: Int): PickerItem {
+                override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         title = titles[position]
                         gradient = BubbleGradient(

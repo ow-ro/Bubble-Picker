@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string-array name="countries">
+    <string-array name="main_countries">
         <item>Argentina</item>
         <item>Bolivia</item>
         <item>Brazil</item>
@@ -10,6 +10,9 @@
         <item>Dominican Republic</item>
         <item>Mexico</item>
         <item>Nicaragua</item>
+    </string-array>
+
+    <string-array name="secondary_countries">
         <item>Peru</item>
         <item>Venezuela</item>
         <item>Cuba</item>
@@ -20,7 +23,7 @@
         <item>Paraguay</item>
     </string-array>
 
-    <integer-array name="images">
+    <integer-array name="main_images">
         <item>@drawable/argentina</item>
         <item>@drawable/bolivia</item>
         <item>@drawable/brazil</item>
@@ -29,6 +32,9 @@
         <item>@drawable/dominican_republic</item>
         <item>@drawable/mexico</item>
         <item>@drawable/nicaragua</item>
+    </integer-array>
+
+    <integer-array name="secondary_images">
         <item>@drawable/peru</item>
         <item>@drawable/venezuela</item>
         <item>@drawable/cuba</item>

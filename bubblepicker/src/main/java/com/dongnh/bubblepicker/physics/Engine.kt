@@ -1,11 +1,13 @@
 package com.dongnh.bubblepicker.physics
 
+import android.util.Log
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
 import java.util.*
+import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
@@ -13,22 +15,13 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 object Engine {
-//    val selectedBodies: List<CircleBody>
-//        get() = bodies.filter { it.increased || it.toBeIncreased || it.isIncreasing }
+    enum class Mode {
+        MAIN, SECONDARY
+    }
 
-    var selectedItem: Item? = null
-
-    var radius = 50
-        set(value) {
-            bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
-            speedToCenter = interpolate(20f, 80f, value / 100f)
-            standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
-            field = value
-        }
-    var centerImmediately = false
+    private var selectedItem: Item? = null
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var bubbleRadius = 0.17f
-
     private var world = World(Vec2(0f, 0f), false)
     private val step = 0.0009f
     private val bodies: ArrayList<CircleBody> = ArrayList()
@@ -37,17 +30,41 @@ object Engine {
     private var scaleX = 0f
     private var scaleY = 0f
     private var touch = false
-    var speedToCenter = 16f
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
-    var horizontalSwipeOnly = false
-    private val currentGravity: Float
-        get() = if (touch) increasedGravity else speedToCenter
-    private val toBeResized = mutableSetOf<Item>()
-    private val startX
-        get() = if (centerImmediately) 0.5f else 2.2f
     private var stepsCount = 0
+    private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
+    private val toBeResized = synchronizedSet<Item>(mutableSetOf())
+    private val startX get() = if (centerImmediately) 0.5f else 2.2f
+    var mode: Mode = Mode.MAIN
+        set(value) {
+            // Don't do anything if the mode is the same
+            if (value != field) {
+                field = value
+                selectedItem = null
+                allItems.forEach {
+                    it.circleBody.apply {
+                        increased = false
+                        shouldShow = shouldShowPickerItem(it.pickerItem)
+                    }
+                }
+                toBeResized.addAll(allItems)
+            }
+        }
+    var mainPickerItems: HashSet<PickerItem> = HashSet()
+    var secondaryPickerItems: HashSet<PickerItem> = HashSet()
+    var radius = 50
+        set(value) {
+            bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
+            speedToCenter = interpolate(20f, 80f, value / 100f)
+            standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
+            field = value
+        }
+    var centerImmediately = false
+    var speedToCenter = 16f
+    var horizontalSwipeOnly = false
     var margin = 0.001f
+    lateinit var allItems: List<Item>
 
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         pickerItems.forEach {
@@ -62,6 +79,7 @@ object Engine {
                     bubbleRadius * if (scaleY > scaleX) scaleY else scaleX,
                     (bubbleRadius * if (scaleY > scaleX) scaleY else scaleX) * 1.2f,
                     density = density,
+                    shouldShow = shouldShowPickerItem(it),
                     margin = margin
                 )
             )
@@ -74,13 +92,15 @@ object Engine {
     }
 
     fun move() {
-        toBeResized.forEach { it.circleBody.resize(resizeStep) }
-        world.step(step, 11, 11)
-        bodies.forEach { move(it) }
-        toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
-        stepsCount++
-        if (stepsCount >= 10) {
-            centerImmediately = false
+        synchronized(toBeResized) {
+            toBeResized.forEach { it.circleBody.resize(resizeStep) }
+            world.step(step, 11, 11)
+            bodies.forEach { move(it) }
+            toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
+            stepsCount++
+            if (stepsCount >= 10) {
+                centerImmediately = false
+            }
         }
     }
 
@@ -137,6 +157,14 @@ object Engine {
         return true
     }
 
+    private fun shouldShowPickerItem(item: PickerItem): Boolean {
+        return when {
+            mode == Mode.MAIN && mainPickerItems.contains(item) -> true
+            mode == Mode.SECONDARY && secondaryPickerItems.contains(item) -> true
+            else -> false
+        }
+    }
+
     private fun getRadius(item: PickerItem): Float {
         return if (item.radius != 0f) {
             interpolate(0.1f, 0.25f, item.radius / 100f)
@@ -158,8 +186,6 @@ object Engine {
         borders = arrayListOf(
             Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
             Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
-//            Border(world, Vec2(-0.5f / scaleX, 0f), Border.VERTICAL),
-//            Border(world, Vec2(0.5f / scaleX, 0f), Border.VERTICAL)
         )
     }
 
@@ -179,5 +205,4 @@ object Engine {
     }
 
     private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
-
 }

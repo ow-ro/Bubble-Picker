@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
  * Created by irinagalata on 1/19/17.
  */
 data class PickerItem @JvmOverloads constructor(
+    var id: Int? = null,
     var title: String? = null,
     var icon: Drawable? = null,
     var iconOnTop: Boolean = true,

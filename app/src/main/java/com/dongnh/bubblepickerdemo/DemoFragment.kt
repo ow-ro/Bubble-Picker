@@ -27,7 +27,8 @@ class DemoFragment : Fragment() {
 
     private lateinit var binding: FragmentDemoBinding
 
-    lateinit var images: TypedArray
+    lateinit var mainImages: TypedArray
+    lateinit var secondaryImages: TypedArray
     private lateinit var colors: TypedArray
     private lateinit var picker: BubblePicker
 
@@ -58,29 +59,52 @@ class DemoFragment : Fragment() {
     }
 
     private fun configView() {
-        val titles = resources.getStringArray(R.array.countries)
+        val mainTitles = resources.getStringArray(R.array.main_countries)
+        val secondaryTitles = resources.getStringArray(R.array.secondary_countries)
         colors = resources.obtainTypedArray(R.array.colors)
-        images = resources.obtainTypedArray(R.array.images)
+        mainImages = resources.obtainTypedArray(R.array.main_images)
+        secondaryImages = resources.obtainTypedArray(R.array.secondary_images)
+        binding.showMainItems.setOnClickListener {
+            picker.showMainItems()
+        }
+        binding.showSecondaryItems.setOnClickListener {
+            picker.showSecondaryItems()
+        }
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = 50
+                override val totalCount = mainTitles.size + secondaryTitles.size
+                override val mainCount = mainTitles.size
+                override val secondaryCount = secondaryTitles.size
 
-                override fun getItem(position: Int): PickerItem {
+                override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         radius = 30f + (position % 16 * 5)
-                        title = titles[position % titles.size]
+                        title = mainTitles[position % mainTitles.size]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            images.getResourceId(position % 16, 0)
+                            mainImages.getResourceId(position % 16, 0)
                         )
+                        id = position
+                    }
+                }
+
+                override fun getSecondaryItem(position: Int): PickerItem {
+                    return PickerItem().apply {
+                        radius = 30f + (position % 16 * 5)
+                        title = secondaryTitles[position % secondaryTitles.size]
+                        imgDrawable = ContextCompat.getDrawable(
+                            this@DemoFragment.requireContext(),
+                            secondaryImages.getResourceId(position % 16, 0)
+                        )
+                        id = mainTitles.size + position
                     }
                 }
             }
 
-            binding.root.addView(picker)
+            binding.pickerContainer.addView(picker)
             picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
@@ -88,8 +112,7 @@ class DemoFragment : Fragment() {
             picker.configListenerForBubble(object : BubblePickerListener {
                 override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 
-                override fun onBubbleDeselected(item: PickerItem) =
-                    toast("${item.title} deselected")
+                override fun onBubbleDeselected(item: PickerItem) = toast("${item.title} deselected")
             })
             picker.configHorizontalSwipeOnly(true)
         }, 300)
@@ -112,7 +135,7 @@ class DemoFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         colors.resources
-        images.resources
+        mainImages.resources
     }
 
 

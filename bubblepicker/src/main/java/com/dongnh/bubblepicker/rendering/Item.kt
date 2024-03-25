@@ -34,7 +34,7 @@ data class Item(
         get() = circleBody.physicalBody.position.y
 
     val radius: Float
-        get() = circleBody.radius
+        get() = circleBody.actualRadius
 
     val initialPosition: Vec2
         get() = circleBody.position
@@ -49,9 +49,6 @@ data class Item(
     private var imageTexture: Int = 0
 
     private val currentTexture: Int get () = imageTexture
-
-//        get() = if (circleBody.increased || circleBody.isIncreasing) imageTexture else texture
-
 
     private val gradient: LinearGradient?
         get() {

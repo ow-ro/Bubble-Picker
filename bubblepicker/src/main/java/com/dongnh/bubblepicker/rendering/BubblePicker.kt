@@ -12,7 +12,9 @@ import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
-import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.physics.Engine
+import com.dongnh.bubblepicker.physics.Engine.mainPickerItems
+import com.dongnh.bubblepicker.physics.Engine.secondaryPickerItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -39,8 +41,15 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                renderer.pickerList = ArrayList((0 until value.totalCount)
-                    .map { value.getItem(it) }.toList())
+                renderer.apply {
+                    mainPickerItems.addAll((0 until value.mainCount).map { value.getMainItem(it) })
+
+                    value.secondaryCount?.let { secondaryCount ->
+                        secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
+                    }
+
+                    allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems)
+                }
             }
             super.onResume()
         }
@@ -131,10 +140,19 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         array.recycle()
     }
 
+    fun showMainItems() {
+        Engine.mode = Engine.Mode.MAIN
+    }
+
+    fun showSecondaryItems() {
+        Engine.mode = Engine.Mode.SECONDARY
+    }
+
     fun configHorizontalSwipeOnly(horizOnly: Boolean) {
         // Default false
         renderer.horizontalSwipeOnly = horizOnly
     }
+
     // Config listener
     fun configListenerForBubble(listener: BubblePickerListener) {
         renderer.listener = listener
@@ -171,13 +189,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     }
 
     override fun onResume() {
-        if (renderer.pickerList.isNotEmpty()) {
+        if (renderer.allPickerItemsList.isNotEmpty()) {
             super.onResume()
         }
     }
 
     override fun onPause() {
-        if (renderer.pickerList.isNotEmpty()) {
+        if (renderer.allPickerItemsList.isNotEmpty()) {
             super.onPause()
             renderer.clear()
         }
