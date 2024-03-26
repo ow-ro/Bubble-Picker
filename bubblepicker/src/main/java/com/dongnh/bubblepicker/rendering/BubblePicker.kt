@@ -27,7 +27,7 @@ import kotlin.math.abs
  */
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default)
+    private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
     private lateinit var renderer: PickerRenderer
 
     @ColorInt
@@ -69,7 +69,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     private fun init() {
         renderer = PickerRenderer(this)
-
         setZOrderOnTop(true)
         setEGLContextClientVersion(2)
         setEGLConfigChooser(8, 8, 8, 8, 16, 0)

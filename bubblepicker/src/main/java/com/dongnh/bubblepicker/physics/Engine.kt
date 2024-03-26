@@ -189,7 +189,6 @@ object Engine {
     private fun move(body: CircleBody) {
         body.physicalBody?.apply {
             body.position = position
-            body.isVisible = centerImmediately.not()
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
