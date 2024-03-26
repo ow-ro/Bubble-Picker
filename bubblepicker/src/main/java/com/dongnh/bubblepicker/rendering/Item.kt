@@ -27,11 +27,14 @@ data class Item(
     val heightImage: Float,
 ) {
 
-    val x: Float
-        get() = circleBody.physicalBody.position.x
+    val isBodyDestroyed: Boolean
+        get() = circleBody.isDestroyed
 
-    val y: Float
-        get() = circleBody.physicalBody.position.y
+    val x: Float?
+        get() = circleBody.physicalBody?.position?.x
+
+    val y: Float?
+        get() = circleBody.physicalBody?.position?.y
 
     val radius: Float
         get() = circleBody.actualRadius
@@ -39,8 +42,8 @@ data class Item(
     val initialPosition: Vec2
         get() = circleBody.position
 
-    private val currentPosition: Vec2
-        get() = circleBody.physicalBody.position
+    private val currentPosition: Vec2?
+        get() = circleBody.physicalBody?.position
 
     private val isVisible
         get() = circleBody.isVisible
@@ -221,8 +224,8 @@ data class Item(
 
     private fun calculateMatrix(scaleX: Float, scaleY: Float) = FloatArray(16).apply {
         Matrix.setIdentityM(this, 0)
-        Matrix.translateM(this, 0, currentPosition.x * scaleX - initialPosition.x,
-            currentPosition.y * scaleY - initialPosition.y, 0f)
+        Matrix.translateM(this, 0, currentPosition!!.x * scaleX - initialPosition.x,
+            currentPosition!!.y * scaleY - initialPosition.y, 0f)
     }
 
 }

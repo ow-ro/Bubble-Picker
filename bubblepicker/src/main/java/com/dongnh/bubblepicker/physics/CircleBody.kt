@@ -17,8 +17,7 @@ class CircleBody(
     var shouldShow: Boolean = true,
     private val margin: Float = 0.001f
 ) {
-    lateinit var physicalBody: Body
-    private var decreasedRadius: Float = defaultRadius
+    var physicalBody: Body? = null
     private var isIncreasing = false
     private var isDecreasing = false
     private var toBeDecreased = false
@@ -39,6 +38,7 @@ class CircleBody(
             this.position = this@CircleBody.position
         }
     var isVisible: Boolean = true
+    var isDestroyed = true
     var toBeIncreased: Boolean = false
     var actualRadius: Float = if (shouldShow) {
         defaultRadius + margin
@@ -52,9 +52,10 @@ class CircleBody(
     var increased = false
 
     init {
-        while (true) {
+        while (shouldShow) {
             if (world.isLocked.not()) {
                 initializeBody()
+                isDestroyed = false
                 break
             }
         }
@@ -84,7 +85,7 @@ class CircleBody(
         actualRadius -= step
         reset()
 
-        if (abs(actualRadius - decreasedRadius) < step) {
+        if (abs(actualRadius - defaultRadius) < step) {
             increased = false
             clear()
         }
@@ -102,6 +103,11 @@ class CircleBody(
     }
 
     private fun inflate(step: Float) {
+        if (isDestroyed) {
+            initializeBody()
+            isDestroyed = false
+        }
+
         isVisible = true
         isIncreasing = true
         actualRadius = if (actualRadius + step < defaultRadius) {
@@ -127,12 +133,14 @@ class CircleBody(
 
         if (actualRadius == 0f) {
             isVisible = false
+            world.destroyBody(physicalBody)
+            isDestroyed = true
             clear()
         }
     }
 
     private fun reset() {
-        physicalBody.fixtureList?.shape?.m_radius = actualRadius + margin
+        physicalBody?.fixtureList?.shape?.m_radius = actualRadius + margin
     }
 
     fun defineState() {

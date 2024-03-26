@@ -1,6 +1,5 @@
 package com.dongnh.bubblepicker.physics
 
-import android.util.Log
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
@@ -24,8 +23,8 @@ object Engine {
     private var bubbleRadius = 0.17f
     private var world = World(Vec2(0f, 0f), false)
     private val step = 0.0009f
-    private val bodies: ArrayList<CircleBody> = ArrayList()
-    private var borders: ArrayList<Border> = ArrayList()
+    private val circleBodies: ArrayList<CircleBody> = ArrayList()
+    private var worldBorders: ArrayList<Border> = ArrayList()
     private val resizeStep = 0.009f
     private var scaleX = 0f
     private var scaleY = 0f
@@ -72,7 +71,7 @@ object Engine {
             val bubbleRadius = getRadius(it)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
-            bodies.add(
+            circleBodies.add(
                 CircleBody(
                     world,
                     Vec2(x, y),
@@ -88,14 +87,14 @@ object Engine {
         Engine.scaleY = scaleY
         createBorders()
 
-        return bodies
+        return circleBodies
     }
 
     fun move() {
         synchronized(toBeResized) {
             toBeResized.forEach { it.circleBody.resize(resizeStep) }
             world.step(step, 11, 11)
-            bodies.forEach { move(it) }
+            circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
             stepsCount++
             if (stepsCount >= 10) {
@@ -127,11 +126,13 @@ object Engine {
     }
 
     fun clear() {
-        borders.forEach { world.destroyBody(it.itemBody) }
-        bodies.forEach { world.destroyBody(it.physicalBody) }
+        worldBorders.forEach { world.destroyBody(it.itemBody) }
+        circleBodies.forEach {
+            it.physicalBody?.let { body -> world.destroyBody(body) }
+        }
         world = World(Vec2(0f, 0f), false)
-        borders.clear()
-        bodies.clear()
+        worldBorders.clear()
+        circleBodies.clear()
     }
 
     fun resize(item: Item): Boolean {
@@ -183,14 +184,14 @@ object Engine {
 
 
     private fun createBorders() {
-        borders = arrayListOf(
+        worldBorders = arrayListOf(
             Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
             Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
         )
     }
 
     private fun move(body: CircleBody) {
-        body.physicalBody.apply {
+        body.physicalBody?.apply {
             body.isVisible = centerImmediately.not()
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
@@ -199,7 +200,7 @@ object Engine {
                 applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody) {
-                applyForce(direction.mul(6f * increasedGravity), this.worldCenter)
+                applyForce(direction.mul(6f * increasedGravity), worldCenter)
             }
         }
     }

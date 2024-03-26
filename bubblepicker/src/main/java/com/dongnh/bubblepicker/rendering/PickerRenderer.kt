@@ -171,7 +171,11 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         glUniform4f(glGetUniformLocation(programId, U_BACKGROUND), 1f, 1f, 1f, 0f)
         verticesBuffer?.passToShader(programId, A_POSITION)
         uvBuffer?.passToShader(programId, A_UV)
-        circles.forEachIndexed { i, circle -> circle.drawItself(programId, i, scaleX, scaleY) }
+        circles.forEachIndexed { i, circle ->
+            if (!circle.isBodyDestroyed) {
+                circle.drawItself(programId, i, scaleX, scaleY)
+            }
+        }
     }
 
     private fun enableTransparency() {
@@ -209,15 +213,17 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     private fun getItem(position: Vec2) = position.let { vec2 ->
         val x = vec2.x.convertPoint(glView.width, scaleX)
         val y = vec2.y.convertPoint(glView.height, scaleY)
-        circles.find { sqrt(((x - it.x).sqr() + (y - it.y).sqr()).toDouble()) <= it.radius }
+        circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
     }
 
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
         if (Engine.resize(this)) {
             listener?.let {
-                if (circleBody.increased) it.onBubbleDeselected(pickerItem) else it.onBubbleSelected(
-                    pickerItem
-                )
+                if (circleBody.increased) {
+                    it.onBubbleDeselected(pickerItem)
+                } else {
+                    it.onBubbleSelected(pickerItem)
+                }
             }
         }
     }
