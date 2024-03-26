@@ -31,6 +31,7 @@ object Engine {
     private var touch = false
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
+    private val gravityCenterFixed = Vec2(0f, 0f)
     private var stepsCount = 0
     private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
@@ -121,8 +122,6 @@ object Engine {
 
     fun releaseWithReset() {
         gravityCenter.setZero()
-        touch = false
-        increasedGravity = standardIncreasedGravity
     }
 
     fun clear() {
@@ -144,11 +143,8 @@ object Engine {
         }
 
         if (item.circleBody.isBusy) return false
-
         item.circleBody.defineState()
-
         toBeResized.add(item)
-
         selectedItem = if (item.circleBody.toBeIncreased) {
             item
         } else {
@@ -201,7 +197,8 @@ object Engine {
                 applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody) {
-                applyForce(direction.mul(6f * increasedGravity), worldCenter)
+                val centerDirection = gravityCenterFixed.sub(position)
+                applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
             }
         }
     }
