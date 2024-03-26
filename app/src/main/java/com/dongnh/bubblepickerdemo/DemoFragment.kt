@@ -61,7 +61,6 @@ class DemoFragment : Fragment() {
     private fun configView() {
         val mainTitles = resources.getStringArray(R.array.main_countries)
         val secondaryTitles = resources.getStringArray(R.array.secondary_countries)
-        colors = resources.obtainTypedArray(R.array.colors)
         mainImages = resources.obtainTypedArray(R.array.main_images)
         secondaryImages = resources.obtainTypedArray(R.array.secondary_images)
         binding.showMainItems.setOnClickListener {
@@ -114,7 +113,7 @@ class DemoFragment : Fragment() {
 
                 override fun onBubbleDeselected(item: PickerItem) = toast("${item.title} deselected")
             })
-            picker.configHorizontalSwipeOnly(true)
+//            picker.configHorizontalSwipeOnly(true)
         }, 300)
     }
 
