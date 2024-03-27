@@ -9,10 +9,10 @@ import kotlin.math.abs
  * Created by irinagalata on 1/26/17.
  */
 class CircleBody(
-    val world: World,
+    private val world: World,
     var position: Vec2,
-    var defaultRadius: Float,
-    var increasedRadius: Float,
+    private var defaultRadius: Float,
+    private var increasedRadius: Float,
     var density: Float,
     var shouldShow: Boolean = true,
     private val margin: Float = 0.001f
@@ -37,6 +37,10 @@ class CircleBody(
             type = BodyType.DYNAMIC
             this.position = this@CircleBody.position
         }
+    val finished: Boolean
+        get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
+    val isBusy: Boolean
+        get() = isIncreasing || isDecreasing
     var isVisible: Boolean = true
     var isDestroyed = true
     var toBeIncreased: Boolean = false
@@ -45,17 +49,12 @@ class CircleBody(
     } else {
         0f
     }
-    val finished: Boolean
-        get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
-    val isBusy: Boolean
-        get() = isIncreasing || isDecreasing
     var increased = false
 
     init {
         while (shouldShow) {
             if (world.isLocked.not()) {
                 initializeBody()
-                isDestroyed = false
                 break
             }
         }
@@ -66,6 +65,7 @@ class CircleBody(
             createFixture(fixture)
             linearDamping = damping
         }
+        isDestroyed = false
     }
 
     fun resize(step: Float) {
@@ -105,7 +105,6 @@ class CircleBody(
     private fun inflate(step: Float) {
         if (isDestroyed) {
             initializeBody()
-            isDestroyed = false
         }
 
         isVisible = true

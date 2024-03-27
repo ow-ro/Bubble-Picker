@@ -18,24 +18,26 @@ object Engine {
         MAIN, SECONDARY
     }
 
+    private val step = 0.0009f
+    private val circleBodies: ArrayList<CircleBody> = ArrayList()
+    private val resizeStep = 0.009f
+    private val gravityCenterFixed = Vec2(0f, 0f)
+    private val toBeResized = synchronizedSet<Item>(mutableSetOf())
+    private val startX get() = if (centerImmediately) 0.5f else 2.2f
+    private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
     private var selectedItem: Item? = null
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var bubbleRadius = 0.17f
     private var world = World(Vec2(0f, 0f), false)
-    private val step = 0.0009f
-    private val circleBodies: ArrayList<CircleBody> = ArrayList()
     private var worldBorders: ArrayList<Border> = ArrayList()
-    private val resizeStep = 0.009f
     private var scaleX = 0f
     private var scaleY = 0f
     private var touch = false
     private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
-    private val gravityCenterFixed = Vec2(0f, 0f)
     private var stepsCount = 0
-    private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
-    private val toBeResized = synchronizedSet<Item>(mutableSetOf())
-    private val startX get() = if (centerImmediately) 0.5f else 2.2f
+    private var didModeChange = false
+    lateinit var allItems: List<Item>
     var mode: Mode = Mode.MAIN
         set(value) {
             // Don't do anything if the mode is the same
@@ -49,6 +51,7 @@ object Engine {
                     }
                 }
                 toBeResized.addAll(allItems)
+                didModeChange = true
             }
         }
     var mainPickerItems: HashSet<PickerItem> = HashSet()
@@ -64,7 +67,6 @@ object Engine {
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
-    lateinit var allItems: List<Item>
 
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         pickerItems.forEach {
@@ -189,15 +191,17 @@ object Engine {
     private fun move(body: CircleBody) {
         body.physicalBody?.apply {
             body.position = position
+            val centerDirection = gravityCenterFixed.sub(position)
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
             if (distance > step * 200 && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+                val scaledGravity = if (didModeChange) gravity * 15 else gravity * 5
+                applyForce(direction.mul(scaledGravity / distance.sqr()), position)
             }
-            if (body == selectedItem?.circleBody) {
-                val centerDirection = gravityCenterFixed.sub(position)
-                applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
+            if (body == selectedItem?.circleBody && centerDirection.length() > step * 100) {
+                val scaledGravity = if (didModeChange) 30f * increasedGravity else 6f * increasedGravity
+                applyForce(centerDirection.mul(scaledGravity), gravityCenterFixed)
             }
         }
     }
