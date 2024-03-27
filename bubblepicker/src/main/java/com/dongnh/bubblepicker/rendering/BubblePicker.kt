@@ -28,12 +28,12 @@ import kotlin.math.abs
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
+    private lateinit var renderer: PickerRenderer
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
     private var debounceRelease: Job? = null
-    private lateinit var renderer: PickerRenderer
     @ColorInt
     var background: Int = 0
         set(value) {
