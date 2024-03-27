@@ -11,7 +11,7 @@ import kotlin.math.abs
 class CircleBody(
     private val world: World,
     var position: Vec2,
-    private var defaultRadius: Float,
+    var defaultRadius: Float,
     private var increasedRadius: Float,
     var density: Float,
     var shouldShow: Boolean = true,
@@ -24,7 +24,7 @@ class CircleBody(
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
-            m_radius = defaultRadius + margin
+            m_radius = defaultRadius
             m_p.setZero()
         }
     private val fixture: FixtureDef
@@ -72,10 +72,12 @@ class CircleBody(
         when {
             actualRadius < defaultRadius && shouldShow -> inflate(step)
             actualRadius > 0f && !shouldShow -> deflate(step)
-            shouldShow -> if (increased) {
-                decrease(step)
-            } else {
-                increase(step)
+            shouldShow -> {
+                if (increased || actualRadius > defaultRadius) {
+                    decrease(step)
+                } else {
+                    increase(step)
+                }
             }
         }
     }

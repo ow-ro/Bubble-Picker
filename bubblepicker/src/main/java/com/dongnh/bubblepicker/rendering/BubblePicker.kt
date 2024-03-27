@@ -49,9 +49,19 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
                     value.secondaryCount?.let { secondaryCount ->
                         secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
-                    }
 
-                    allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems)
+                        // Add secondaryRadius if item exists in both lists
+                        mainPickerItems.forEach { mainItem ->
+                            secondaryPickerItems.firstOrNull { it.title == mainItem.title }?.let { duplicate ->
+                                mainItem.secondaryRadius = duplicate.radius
+                            }
+                        }
+
+                        // Combine mainPickerItems and secondaryPickerItems, excluding duplicates based on title
+                        allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
+                            mainPickerItems.any { it.title == secondaryItem.title }
+                        })
+                    }
                 }
             }
             super.onResume()

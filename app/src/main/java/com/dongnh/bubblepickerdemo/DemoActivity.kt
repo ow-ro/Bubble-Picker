@@ -35,9 +35,9 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_demo)
 
-        val titles = resources.getStringArray(R.array.main_countries)
+        val titles = resources.getStringArray(R.array.countries)
         colors = resources.obtainTypedArray(R.array.colors)
-        images = resources.obtainTypedArray(R.array.main_images)
+        images = resources.obtainTypedArray(R.array.images)
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this, null)

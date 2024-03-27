@@ -15,6 +15,7 @@ data class PickerItem @JvmOverloads constructor(
     @ColorInt var color: Int? = null,
     var gradient: BubbleGradient? = null,
     var radius: Float = 0f,
+    var secondaryRadius: Float = 0f,
     var overlayAlpha: Float = 0f,
     var typeface: Typeface = Typeface.DEFAULT,
     @ColorInt var textColor: Int? = null,

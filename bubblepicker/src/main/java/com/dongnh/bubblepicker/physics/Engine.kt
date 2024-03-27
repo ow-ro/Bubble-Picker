@@ -48,6 +48,11 @@ object Engine {
                     it.circleBody.apply {
                         increased = false
                         shouldShow = shouldShowPickerItem(it.pickerItem)
+                        if (it.pickerItem.secondaryRadius != 0f && value == Mode.MAIN) {
+                            it.circleBody.defaultRadius = getRadius(it.pickerItem.radius)
+                        } else {
+                            it.circleBody.defaultRadius = getRadius(it.pickerItem.secondaryRadius)
+                        }
                     }
                 }
                 toBeResized.addAll(allItems)
@@ -69,9 +74,9 @@ object Engine {
         }
     }
 
-    private fun getRadius(item: PickerItem): Float {
-        return if (item.radius != 0f) {
-            interpolate(0.1f, 0.25f, item.radius / 100f)
+    private fun getRadius(radius: Float): Float {
+        return if (radius != 0f) {
+            interpolate(0.1f, 0.25f, radius / 100f)
         } else {
             bubbleRadius
         }
@@ -114,7 +119,7 @@ object Engine {
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         pickerItems.forEach {
             val density = getDensity(it)
-            val bubbleRadius = getRadius(it)
+            val bubbleRadius = getRadius(it.radius)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
             circleBodies.add(

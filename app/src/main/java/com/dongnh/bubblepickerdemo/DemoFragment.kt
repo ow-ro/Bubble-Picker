@@ -27,8 +27,8 @@ class DemoFragment : Fragment() {
 
     private lateinit var binding: FragmentDemoBinding
 
-    lateinit var mainImages: TypedArray
-    lateinit var secondaryImages: TypedArray
+    lateinit var titles: Array<String>
+    lateinit var images: TypedArray
     private lateinit var colors: TypedArray
     private lateinit var picker: BubblePicker
 
@@ -59,10 +59,9 @@ class DemoFragment : Fragment() {
     }
 
     private fun configView() {
-        val mainTitles = resources.getStringArray(R.array.main_countries)
-        val secondaryTitles = resources.getStringArray(R.array.secondary_countries)
-        mainImages = resources.obtainTypedArray(R.array.main_images)
-        secondaryImages = resources.obtainTypedArray(R.array.secondary_images)
+        titles = resources.getStringArray(R.array.countries)
+        images = resources.obtainTypedArray(R.array.images)
+        val halfSize = titles.size / 2
         binding.showMainItems.setOnClickListener {
             picker.showMainItems()
         }
@@ -74,31 +73,32 @@ class DemoFragment : Fragment() {
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = mainTitles.size + secondaryTitles.size
-                override val mainCount = mainTitles.size
-                override val secondaryCount = secondaryTitles.size
+                override val totalCount = titles.size
+                override val mainCount = halfSize
+                override val secondaryCount = halfSize
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        radius = 30f + (position % 16 * 5)
-                        title = mainTitles[position % mainTitles.size]
+                        radius = 30f + ((position % halfSize) * 5)
+                        title = titles[position % halfSize]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            mainImages.getResourceId(position % 16, 0)
+                            images.getResourceId(position % halfSize, 0)
                         )
                         id = position
                     }
                 }
 
                 override fun getSecondaryItem(position: Int): PickerItem {
+                    val actualPos = position + halfSize
                     return PickerItem().apply {
-                        radius = 30f + (position % 16 * 5)
-                        title = secondaryTitles[position % secondaryTitles.size]
+                        radius = 30f + ((actualPos % titles.size) * 10)
+                        title = titles[position % halfSize + 4]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            secondaryImages.getResourceId(position % 16, 0)
+                            images.getResourceId(position % halfSize + 4, 0)
                         )
-                        id = mainTitles.size + position
+                        id = halfSize + position
                     }
                 }
             }
@@ -134,7 +134,7 @@ class DemoFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         colors.resources
-        mainImages.resources
+        images.resources
     }
 
 
