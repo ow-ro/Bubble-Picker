@@ -24,7 +24,7 @@ class CircleBody(
     private val damping = 25f
     private val shape: CircleShape
         get() = CircleShape().apply {
-            m_radius = actualRadius
+            m_radius = defaultRadius + margin
             m_p.setZero()
         }
     private val fixture: FixtureDef
