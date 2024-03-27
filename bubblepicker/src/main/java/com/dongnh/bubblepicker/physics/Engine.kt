@@ -56,17 +56,60 @@ object Engine {
         }
     var mainPickerItems: HashSet<PickerItem> = HashSet()
     var secondaryPickerItems: HashSet<PickerItem> = HashSet()
-    var radius = 50
-        set(value) {
-            bubbleRadius = interpolate(0.1f, 0.25f, value / 100f)
-            speedToCenter = interpolate(20f, 80f, value / 100f)
-            standardIncreasedGravity = interpolate(500f, 800f, value / 100f)
-            field = value
-        }
     var centerImmediately = false
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
+
+    private fun shouldShowPickerItem(item: PickerItem): Boolean {
+        return when {
+            mode == Mode.MAIN && mainPickerItems.any { it.title == item.title } -> true
+            mode == Mode.SECONDARY && secondaryPickerItems.any { it.title == item.title } -> true
+            else -> false
+        }
+    }
+
+    private fun getRadius(item: PickerItem): Float {
+        return if (item.radius != 0f) {
+            interpolate(0.1f, 0.25f, item.radius / 100f)
+        } else {
+            bubbleRadius
+        }
+    }
+
+    private fun getDensity(item: PickerItem): Float {
+        return if (item.radius != 0f) {
+            interpolate(0.8f, 0.2f, item.radius / 100f)
+        } else {
+            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
+        }
+    }
+
+
+    private fun createBorders() {
+        worldBorders = arrayListOf(
+            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
+            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
+        )
+    }
+
+    private fun move(body: CircleBody) {
+        body.physicalBody?.apply {
+            body.position = position
+            val centerDirection = gravityCenterFixed.sub(position)
+            val direction = gravityCenter.sub(position)
+            val distance = direction.length()
+            val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
+            if (distance > step * 200 && body != selectedItem?.circleBody) {
+                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+            }
+            if (body == selectedItem?.circleBody && centerDirection.length() > step * 100) {
+                applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
+            }
+        }
+    }
+
+    private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
 
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         pickerItems.forEach {
@@ -155,54 +198,4 @@ object Engine {
 
         return true
     }
-
-    private fun shouldShowPickerItem(item: PickerItem): Boolean {
-        return when {
-            mode == Mode.MAIN && mainPickerItems.contains(item) -> true
-            mode == Mode.SECONDARY && secondaryPickerItems.contains(item) -> true
-            else -> false
-        }
-    }
-
-    private fun getRadius(item: PickerItem): Float {
-        return if (item.radius != 0f) {
-            interpolate(0.1f, 0.25f, item.radius / 100f)
-        } else {
-            bubbleRadius
-        }
-    }
-
-    private fun getDensity(item: PickerItem): Float {
-        return if (item.radius != 0f) {
-            interpolate(0.8f, 0.2f, item.radius / 100f)
-        } else {
-            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
-        }
-    }
-
-
-    private fun createBorders() {
-        worldBorders = arrayListOf(
-            Border(world, Vec2(0f, 0.5f / scaleY), Border.HORIZONTAL),
-            Border(world, Vec2(0f, -0.5f / scaleY), Border.HORIZONTAL),
-        )
-    }
-
-    private fun move(body: CircleBody) {
-        body.physicalBody?.apply {
-            body.position = position
-            val centerDirection = gravityCenterFixed.sub(position)
-            val direction = gravityCenter.sub(position)
-            val distance = direction.length()
-            val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > step * 200 && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
-            }
-            if (body == selectedItem?.circleBody && centerDirection.length() > step * 100) {
-                applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
-            }
-        }
-    }
-
-    private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
 }

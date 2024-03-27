@@ -24,61 +24,46 @@ import kotlin.math.sqrt
  */
 class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
-    var backgroundColor: Color? = null
-
-    var bubbleSize = 10
-        set(value) {
-            field = value
-            Engine.radius = value
-        }
-
-    var listener: BubblePickerListener? = null
-    // Which list to show: main or secondary
-    var allPickerItemsList: ArrayList<PickerItem> = ArrayList()
-
-    var centerImmediately = false
-        set(value) {
-            field = value
-            Engine.centerImmediately = value
-        }
-
-    // Image size
-    var widthImage = 256f
-    var heightImage = 256f
-
+    private val scaleX: Float get() = if (glView.width < glView.height) {
+        1f
+    } else {
+        glView.height.toFloat() / glView.width.toFloat()
+    }
+    private val scaleY: Float get() = if (glView.width < glView.height) {
+        glView.width.toFloat() / glView.height.toFloat()
+    } else {
+        1f
+    }
+    private val circles = ArrayList<Item>()
     private var programId = 0
     private var verticesBuffer: FloatBuffer? = null
     private var uvBuffer: FloatBuffer? = null
     private var vertices: FloatArray? = null
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
+    var backgroundColor: Color? = null
+    var listener: BubblePickerListener? = null
+    var allPickerItemsList: ArrayList<PickerItem> = ArrayList()
+    var centerImmediately = false
+        set(value) {
+            field = value
+            Engine.centerImmediately = value
+        }
+    // Image size
+    var widthImage = 256f
+    var heightImage = 256f
     var horizontalSwipeOnly: Boolean = false
         set(value) {
             Engine.horizontalSwipeOnly = value
             field = value
         }
-
-    private val scaleX: Float get() = if (glView.width < glView.height) {
-            1f
-        } else {
-            glView.height.toFloat() / glView.width.toFloat()
-        }
-    private val scaleY: Float get() = if (glView.width < glView.height) {
-            glView.width.toFloat() / glView.height.toFloat()
-        } else {
-            1f
-        }
-    private val circles = ArrayList<Item>()
-
-    // Speed item back or come to center view
+    // Gravity
     var speedBackToCenter = 50f
         set(value) {
             field = value
             Engine.speedToCenter = value
         }
-
-    // Margin item
-    var marginBetweenItem = 0.001f
+    var marginBetweenItems = 0.001f
         set(value) {
             field = value
             Engine.margin = value
@@ -206,10 +191,6 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         y.convertValue(glView.height, scaleY)
     )
 
-    fun release() = Engine.release()
-
-    fun releaseWithReset() = Engine.releaseWithReset()
-
     private fun getItem(position: Vec2) = position.let { vec2 ->
         val x = vec2.x.convertPoint(glView.width, scaleX)
         val y = vec2.y.convertPoint(glView.height, scaleY)
@@ -227,6 +208,10 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
             }
         }
     }
+
+    fun release() = Engine.release()
+
+    fun releaseWithReset() = Engine.releaseWithReset()
 
     fun clear() {
         circles.clear()

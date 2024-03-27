@@ -28,15 +28,18 @@ import kotlin.math.abs
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
+    private var startX = 0f
+    private var startY = 0f
+    private var previousX = 0f
+    private var previousY = 0f
+    private var debounceRelease: Job? = null
     private lateinit var renderer: PickerRenderer
-
     @ColorInt
     var background: Int = 0
         set(value) {
             field = value
             renderer.backgroundColor = Color(value)
         }
-
     var adapter: BubblePickerAdapter? = null
         set(value) {
             field = value
@@ -53,14 +56,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             }
             super.onResume()
         }
-
     var swipeMoveSpeed = 1.5f
-
-    private var startX = 0f
-    private var startY = 0f
-    private var previousX = 0f
-    private var previousY = 0f
-    private var debounceRelease: Job? = null
 
     init {
         init()
@@ -75,6 +71,19 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         holder.setFormat(PixelFormat.RGBA_8888)
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
+    }
+
+    override fun onResume() {
+        if (renderer.allPickerItemsList.isNotEmpty()) {
+            super.onResume()
+        }
+    }
+
+    override fun onPause() {
+        if (renderer.allPickerItemsList.isNotEmpty()) {
+            super.onPause()
+            renderer.clear()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -159,7 +168,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     // Margin of item
     fun configMargin(marginItem: Float) {
-        renderer.marginBetweenItem = marginItem
+        renderer.marginBetweenItems = marginItem
     }
 
     // Config speed draw and move iem
@@ -172,31 +181,9 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         renderer.centerImmediately = center
     }
 
-    // Config size of bubble
-    fun configBubbleSize(bubbleSize: Int) {
-        if (bubbleSize in 1..100) {
-            renderer.bubbleSize = bubbleSize
-        } else {
-            renderer.bubbleSize = 50
-        }
-    }
-
     // Config size of image
     fun configSizeOfImage(width: Float, height: Float) {
         renderer.widthImage = width
         renderer.heightImage = height
-    }
-
-    override fun onResume() {
-        if (renderer.allPickerItemsList.isNotEmpty()) {
-            super.onResume()
-        }
-    }
-
-    override fun onPause() {
-        if (renderer.allPickerItemsList.isNotEmpty()) {
-            super.onPause()
-            renderer.clear()
-        }
     }
 }
