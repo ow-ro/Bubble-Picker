@@ -44,25 +44,23 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                renderer.apply {
-                    mainPickerItems.addAll((0 until value.mainItemCount).map { value.getMainItem(it) })
+                mainPickerItems.addAll((0 until value.mainItemCount).map { value.getMainItem(it) })
 
-                    value.secondaryItemCount?.let { secondaryCount ->
-                        secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
+                value.secondaryItemCount?.let { secondaryCount ->
+                    secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
 
-                        // Add secondaryRadius if item exists in both lists
-                        mainPickerItems.forEach { mainItem ->
-                            secondaryPickerItems.firstOrNull { it.title == mainItem.title }?.let { duplicate ->
-                                mainItem.secondaryRadius = duplicate.radius
-                            }
+                    // Add secondaryRadius if item exists in both lists
+                    mainPickerItems.forEach { mainItem ->
+                        secondaryPickerItems.firstOrNull { it.title == mainItem.title }?.let { duplicate ->
+                            mainItem.secondaryRadius = duplicate.radius
                         }
-
-                        // Combine mainPickerItems and secondaryPickerItems, excluding duplicates based on title
-                        allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
-                            mainPickerItems.any { it.title == secondaryItem.title }
-                        })
                     }
                 }
+
+                // Combine mainPickerItems and secondaryPickerItems, excluding duplicates based on title
+                renderer.allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
+                    mainPickerItems.any { it.title == secondaryItem.title }
+                })
             }
             super.onResume()
         }

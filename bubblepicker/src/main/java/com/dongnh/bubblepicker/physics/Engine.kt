@@ -38,6 +38,8 @@ object Engine {
     private var stepsCount = 0
     private var didModeChange = false
     lateinit var allItems: List<Item>
+    var mainPickerItems: HashSet<PickerItem> = HashSet()
+    var secondaryPickerItems: HashSet<PickerItem> = HashSet()
     var mode: Mode = Mode.MAIN
         set(value) {
             // Don't do anything if the mode is the same
@@ -69,12 +71,12 @@ object Engine {
                 didModeChange = true
             }
         }
-    var mainPickerItems: HashSet<PickerItem> = HashSet()
-    var secondaryPickerItems: HashSet<PickerItem> = HashSet()
     var centerImmediately = false
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
+    var mainMaxScale: Float = 0f
+    var secondaryMaxScale: Float = 0f
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
@@ -118,7 +120,7 @@ object Engine {
             if (distance > step * 200 && body != selectedItem?.circleBody) {
                 applyForce(direction.mul(gravity * 5 * distance.sqr()), position)
             }
-            if (body == selectedItem?.circleBody && centerDirection.length() > step * 100) {
+            if (body == selectedItem?.circleBody && centerDirection.length() > step * 50) {
                 applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
             }
         }
