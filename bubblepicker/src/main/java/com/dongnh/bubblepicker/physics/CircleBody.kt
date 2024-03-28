@@ -12,7 +12,7 @@ class CircleBody(
     private val world: World,
     var position: Vec2,
     var defaultRadius: Float,
-    private var increasedRadius: Float,
+    var increasedRadius: Float,
     var density: Float,
     var shouldShow: Boolean = true,
     private val margin: Float = 0.001f
@@ -73,7 +73,7 @@ class CircleBody(
             actualRadius < defaultRadius && shouldShow -> inflate(step)
             actualRadius > 0f && !shouldShow -> deflate(step)
             shouldShow -> {
-                if (increased || actualRadius > defaultRadius) {
+                if (increased || (actualRadius > defaultRadius && !toBeIncreased)) {
                     decrease(step)
                 } else {
                     increase(step)

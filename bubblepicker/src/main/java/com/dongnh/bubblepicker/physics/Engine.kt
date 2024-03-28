@@ -49,9 +49,13 @@ object Engine {
                         increased = false
                         shouldShow = shouldShowPickerItem(it.pickerItem)
                         if (it.pickerItem.secondaryRadius != 0f && value == Mode.MAIN) {
-                            it.circleBody.defaultRadius = getRadius(it.pickerItem.radius)
+                            val mainRadius = getRadius(it.pickerItem.radius)
+                            defaultRadius = getRadius(it.pickerItem.radius)
+                            increasedRadius = mainRadius * getScale() * 1.2f
                         } else {
-                            it.circleBody.defaultRadius = getRadius(it.pickerItem.secondaryRadius)
+                            val secondaryRadius = getRadius(it.pickerItem.secondaryRadius)
+                            defaultRadius = secondaryRadius * getScale()
+                            increasedRadius = secondaryRadius * getScale() * 1.2f
                         }
                     }
                 }
@@ -116,7 +120,17 @@ object Engine {
 
     private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
 
+    private fun getScale(): Float {
+        return if (scaleY > scaleX) {
+            scaleY
+        } else {
+            scaleX
+        }
+    }
+
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
+        this.scaleX = scaleX
+        this.scaleY = scaleY
         pickerItems.forEach {
             val density = getDensity(it)
             val bubbleRadius = getRadius(it.radius)
@@ -126,16 +140,15 @@ object Engine {
                 CircleBody(
                     world,
                     Vec2(x, y),
-                    bubbleRadius * if (scaleY > scaleX) scaleY else scaleX,
-                    (bubbleRadius * if (scaleY > scaleX) scaleY else scaleX) * 1.2f,
+                    bubbleRadius * getScale(),
+                    bubbleRadius * getScale() * 1.2f,
                     density = density,
                     shouldShow = shouldShowPickerItem(it),
                     margin = margin
                 )
             )
         }
-        Engine.scaleX = scaleX
-        Engine.scaleY = scaleY
+
         createBorders()
 
         return circleBodies
