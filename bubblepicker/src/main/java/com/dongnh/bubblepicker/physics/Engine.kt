@@ -48,14 +48,20 @@ object Engine {
                     it.circleBody.apply {
                         increased = false
                         shouldShow = shouldShowPickerItem(it.pickerItem)
-                        if (it.pickerItem.secondaryRadius != 0f && value == Mode.MAIN) {
-                            val mainRadius = getRadius(it.pickerItem.radius)
-                            defaultRadius = getRadius(it.pickerItem.radius)
-                            increasedRadius = mainRadius * getScale() * 1.2f
-                        } else {
-                            val secondaryRadius = getRadius(it.pickerItem.secondaryRadius)
-                            defaultRadius = secondaryRadius * getScale()
-                            increasedRadius = secondaryRadius * getScale() * 1.2f
+
+                        // Only need to do this for duplicate items
+                        if (it.pickerItem.secondaryRadius != 0f) {
+                            if (value == Mode.MAIN) {
+                                val mainRadius = getRadius(it.pickerItem.radius)
+                                density = getDensity(it.pickerItem.radius)
+                                defaultRadius = mainRadius * getScale()
+                                increasedRadius = mainRadius * getScale() * 1.2f
+                            } else {
+                                val secondaryRadius = getRadius(it.pickerItem.secondaryRadius)
+                                density = getDensity(it.pickerItem.secondaryRadius)
+                                defaultRadius = secondaryRadius * getScale()
+                                increasedRadius = secondaryRadius * getScale() * 1.2f
+                            }
                         }
                     }
                 }
@@ -86,11 +92,11 @@ object Engine {
         }
     }
 
-    private fun getDensity(item: PickerItem): Float {
-        return if (item.radius != 0f) {
-            interpolate(0.8f, 0.2f, item.radius / 100f)
+    private fun getDensity(radius: Float): Float {
+        return if (radius != 0f) {
+            interpolate(0.2f, 0.8f, radius / 100f)
         } else {
-            interpolate(0.8f, 0.2f, bubbleRadius / 100f)
+            interpolate(0.2f, 0.8f, bubbleRadius / 100f)
         }
     }
 
@@ -132,7 +138,7 @@ object Engine {
         this.scaleX = scaleX
         this.scaleY = scaleY
         pickerItems.forEach {
-            val density = getDensity(it)
+            val density = getDensity(it.radius)
             val bubbleRadius = getRadius(it.radius)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
