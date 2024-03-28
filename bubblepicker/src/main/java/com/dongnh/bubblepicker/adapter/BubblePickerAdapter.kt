@@ -7,9 +7,9 @@ import com.dongnh.bubblepicker.model.PickerItem
  */
 interface BubblePickerAdapter {
 
-    val totalCount: Int
-    val mainCount: Int
-    val secondaryCount: Int?
+    val totalItemCount: Int
+    val mainItemCount: Int
+    val secondaryItemCount: Int?
         get() = null
 
     fun getMainItem(position: Int): PickerItem

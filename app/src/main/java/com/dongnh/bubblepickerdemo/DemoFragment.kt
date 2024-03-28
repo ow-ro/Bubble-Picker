@@ -49,7 +49,6 @@ class DemoFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentDemoBinding.inflate(inflater, container, false)
-        //configView()
         return binding.root
     }
 
@@ -73,9 +72,9 @@ class DemoFragment : Fragment() {
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = titles.size
-                override val mainCount = halfSize
-                override val secondaryCount = halfSize
+                override val totalItemCount = titles.size
+                override val mainItemCount = halfSize
+                override val secondaryItemCount = halfSize
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {

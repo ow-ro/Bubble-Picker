@@ -28,7 +28,7 @@ import kotlin.math.abs
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
-    private lateinit var renderer: PickerRenderer
+    private var renderer: PickerRenderer = PickerRenderer(this)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
@@ -45,9 +45,9 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
             if (value != null) {
                 renderer.apply {
-                    mainPickerItems.addAll((0 until value.mainCount).map { value.getMainItem(it) })
+                    mainPickerItems.addAll((0 until value.mainItemCount).map { value.getMainItem(it) })
 
-                    value.secondaryCount?.let { secondaryCount ->
+                    value.secondaryItemCount?.let { secondaryCount ->
                         secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
 
                         // Add secondaryRadius if item exists in both lists
@@ -69,18 +69,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     var swipeMoveSpeed = 1.5f
 
     init {
-        init()
-        attrs?.let { retrieveAttributes(attrs) }
-    }
-
-    private fun init() {
-        renderer = PickerRenderer(this)
         setZOrderOnTop(true)
         setEGLContextClientVersion(2)
         setEGLConfigChooser(8, 8, 8, 8, 16, 0)
         holder.setFormat(PixelFormat.RGBA_8888)
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
+        attrs?.let { retrieveAttributes(attrs) }
     }
 
     override fun onResume() {

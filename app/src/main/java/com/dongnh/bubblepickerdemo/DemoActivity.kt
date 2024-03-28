@@ -43,8 +43,8 @@ class DemoActivity : AppCompatActivity() {
             picker = BubblePicker(this, null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalCount = titles.size
-                override val mainCount = titles.size
+                override val totalItemCount = titles.size
+                override val mainItemCount = titles.size
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
