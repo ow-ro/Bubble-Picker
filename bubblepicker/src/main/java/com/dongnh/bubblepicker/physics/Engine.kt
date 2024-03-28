@@ -116,7 +116,7 @@ object Engine {
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
             if (distance > step * 200 && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+                applyForce(direction.mul(gravity * 5 * distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody && centerDirection.length() > step * 100) {
                 applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
