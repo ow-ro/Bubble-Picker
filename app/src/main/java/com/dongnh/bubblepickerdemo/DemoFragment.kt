@@ -78,7 +78,11 @@ class DemoFragment : Fragment() {
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        radius = 30f + ((position % halfSize) * 5)
+                        value = if (position % halfSize == 0) {
+                            20f + ((position % halfSize) * 5f)
+                        } else {
+                            5f + (position % halfSize)
+                        }
                         title = titles[position % halfSize]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
@@ -91,7 +95,11 @@ class DemoFragment : Fragment() {
                 override fun getSecondaryItem(position: Int): PickerItem {
                     val actualPos = position + halfSize
                     return PickerItem().apply {
-                        radius = 30f + ((actualPos % titles.size) * 10)
+                        value = if (actualPos % halfSize == 0) {
+                            20f + ((actualPos % halfSize) * 5f)
+                        } else {
+                            5f + actualPos % halfSize
+                        }
                         title = titles[position % halfSize + 4]
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
@@ -112,7 +120,7 @@ class DemoFragment : Fragment() {
 
                 override fun onBubbleDeselected(item: PickerItem) = toast("${item.title} deselected")
             })
-            picker.configHorizontalSwipeOnly(true)
+            picker.configHorizontalSwipeOnly(false)
         }, 300)
     }
 

@@ -13,7 +13,9 @@ import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
 import com.dongnh.bubblepicker.physics.Engine
+import com.dongnh.bubblepicker.physics.Engine.mainMaxScale
 import com.dongnh.bubblepicker.physics.Engine.mainPickerItems
+import com.dongnh.bubblepicker.physics.Engine.secondaryMaxScale
 import com.dongnh.bubblepicker.physics.Engine.secondaryPickerItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,14 +47,16 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
             if (value != null) {
                 mainPickerItems.addAll((0 until value.mainItemCount).map { value.getMainItem(it) })
+                mainMaxScale = mainPickerItems.maxBy { it.value }.value
 
                 value.secondaryItemCount?.let { secondaryCount ->
                     secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
+                    secondaryMaxScale = secondaryPickerItems.maxBy { it.value }.value
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
                         secondaryPickerItems.firstOrNull { it.title == mainItem.title }?.let { duplicate ->
-                            mainItem.secondaryRadius = duplicate.radius
+                            mainItem.secondaryValue = duplicate.value
                         }
                     }
                 }

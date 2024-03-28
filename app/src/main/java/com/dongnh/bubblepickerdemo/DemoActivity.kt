@@ -53,7 +53,7 @@ class DemoActivity : AppCompatActivity() {
                             colors.getColor((position * 2) % 8, 0),
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
                         )
-                        radius = 50f + (position * 10)
+                        value = 50f + (position * 10)
                         typeface = mediumTypeface
                         textColor = ContextCompat.getColor(this@DemoActivity, android.R.color.white)
                         // If you want to use image url, you need using glide load it and pass to this param

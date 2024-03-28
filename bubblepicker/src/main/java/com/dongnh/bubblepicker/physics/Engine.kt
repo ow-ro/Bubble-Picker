@@ -18,16 +18,15 @@ object Engine {
         MAIN, SECONDARY
     }
 
-    private val step = 0.0009f
+    private const val STEP = 0.0009f
+    private const val RESIZE_STEP = 0.009f
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
-    private val resizeStep = 0.009f
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
     private val startX get() = if (centerImmediately) 0.5f else 2.2f
     private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
     private var selectedItem: Item? = null
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
-    private var bubbleRadius = 0.17f
     private var world = World(Vec2(0f, 0f), false)
     private var worldBorders: ArrayList<Border> = ArrayList()
     private var scaleX = 0f
@@ -52,15 +51,16 @@ object Engine {
                         shouldShow = shouldShowPickerItem(it.pickerItem)
 
                         // Only need to do this for duplicate items
-                        if (it.pickerItem.secondaryRadius != 0f) {
+                        if (it.pickerItem.secondaryValue != 0f) {
+                            val isSecondary = it.pickerItem.value > mainMaxScale
                             if (value == Mode.MAIN) {
-                                val mainRadius = getRadius(it.pickerItem.radius)
-                                density = getDensity(it.pickerItem.radius)
+                                val mainRadius = getRadius(it.pickerItem.value, isSecondary)
+                                density = getDensity(it.pickerItem.value, isSecondary)
                                 defaultRadius = mainRadius * getScale()
                                 increasedRadius = mainRadius * getScale() * 1.2f
                             } else {
-                                val secondaryRadius = getRadius(it.pickerItem.secondaryRadius)
-                                density = getDensity(it.pickerItem.secondaryRadius)
+                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue, isSecondary)
+                                density = getDensity(it.pickerItem.secondaryValue, isSecondary)
                                 defaultRadius = secondaryRadius * getScale()
                                 increasedRadius = secondaryRadius * getScale() * 1.2f
                             }
@@ -86,19 +86,19 @@ object Engine {
         }
     }
 
-    private fun getRadius(radius: Float): Float {
-        return if (radius != 0f) {
-            interpolate(0.1f, 0.25f, radius / 100f)
+    private fun getRadius(value: Float, isSecondary: Boolean): Float {
+        return if (!isSecondary) {
+            interpolate(0.1f, 0.4f, value / mainMaxScale)
         } else {
-            bubbleRadius
+            interpolate(0.1f, 0.4f, value / secondaryMaxScale)
         }
     }
 
-    private fun getDensity(radius: Float): Float {
-        return if (radius != 0f) {
-            interpolate(0.2f, 0.8f, radius / 100f)
+    private fun getDensity(value: Float, isSecondary: Boolean): Float {
+        return if (!isSecondary) {
+            interpolate(0.2f, 0.4f, value / mainMaxScale)
         } else {
-            interpolate(0.2f, 0.8f, bubbleRadius / 100f)
+            interpolate(0.2f, 0.4f, value / secondaryMaxScale)
         }
     }
 
@@ -117,10 +117,10 @@ object Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > step * 200 && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 5 * distance.sqr()), position)
+            if (distance > STEP * 200 && body != selectedItem?.circleBody) {
+                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
-            if (body == selectedItem?.circleBody && centerDirection.length() > step * 50) {
+            if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
                 applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
             }
         }
@@ -140,8 +140,9 @@ object Engine {
         this.scaleX = scaleX
         this.scaleY = scaleY
         pickerItems.forEach {
-            val density = getDensity(it.radius)
-            val bubbleRadius = getRadius(it.radius)
+            val isSecondary = it.value > mainMaxScale
+            val density = getDensity(it.value, isSecondary)
+            val bubbleRadius = getRadius(it.value, isSecondary)
             val x = if (Random().nextBoolean()) -startX else startX
             val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
             circleBodies.add(
@@ -164,8 +165,8 @@ object Engine {
 
     fun move() {
         synchronized(toBeResized) {
-            toBeResized.forEach { it.circleBody.resize(resizeStep) }
-            world.step(step, 11, 11)
+            toBeResized.forEach { it.circleBody.resize(RESIZE_STEP) }
+            world.step(STEP, 11, 11)
             circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
             stepsCount++
