@@ -122,12 +122,11 @@ class DemoActivity : AppCompatActivity() {
             picker = BubblePicker(this, null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalItemCount = titles.size
-                override val mainItemCount = titles.size
+                override val totalItemCount = frameInfos.size
+                override val mainItemCount = frameInfos.size
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        title = titles[position]
                         gradient = BubbleGradient(
                             colors.getColor((position * 2) % 8, 0),
                             colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
