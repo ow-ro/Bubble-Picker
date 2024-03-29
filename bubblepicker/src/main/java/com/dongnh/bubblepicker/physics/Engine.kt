@@ -77,6 +77,9 @@ object Engine {
     var margin = 0.001f
     var mainMaxScale: Float = 0f
     var secondaryMaxScale: Float = 0f
+    var maxBubbleSize = 0.4f
+    var minBubbleSize = 0.1f
+
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
@@ -88,9 +91,9 @@ object Engine {
 
     private fun getRadius(value: Float, isSecondary: Boolean): Float {
         return if (!isSecondary) {
-            interpolate(0.1f, 0.4f, value / mainMaxScale)
+            interpolate(minBubbleSize, maxBubbleSize, value / mainMaxScale)
         } else {
-            interpolate(0.1f, 0.4f, value / secondaryMaxScale)
+            interpolate(minBubbleSize, maxBubbleSize, value / secondaryMaxScale)
         }
     }
 

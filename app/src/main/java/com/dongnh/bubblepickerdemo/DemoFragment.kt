@@ -120,6 +120,8 @@ class DemoFragment : Fragment() {
 
                 override fun onBubbleDeselected(item: PickerItem) = toast("${item.title} deselected")
             })
+            picker.setMaxBubbleSize(0.4f)
+            picker.setMinBubbleSize(0.1f)
             picker.configHorizontalSwipeOnly(false)
         }, 300)
     }

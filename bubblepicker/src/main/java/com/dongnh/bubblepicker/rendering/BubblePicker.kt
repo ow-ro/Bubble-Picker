@@ -163,6 +163,26 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         Engine.mode = Engine.Mode.SECONDARY
     }
 
+    /**
+     * This function sets the max size of the bubble as a percentage
+     * of the lesser dimension of the view the BubblePicker is displayed in.
+     *
+     * @param size The maximum size of the bubble, default is 0.4f (40% of smaller dimension).
+     */
+    fun setMaxBubbleSize(size: Float) {
+        Engine.maxBubbleSize = size
+    }
+
+    /**
+     * This function sets the min size of the bubble as a percentage
+     * of the lesser dimension of the view the BubblePicker is displayed in.
+     *
+     * @param size The minimum size of the bubble, default is 0.1f (10% of smaller dimension).
+     */
+    fun setMinBubbleSize(size: Float) {
+        Engine.minBubbleSize = size
+    }
+
     fun configHorizontalSwipeOnly(horizOnly: Boolean) {
         // Default false
         renderer.horizontalSwipeOnly = horizOnly
