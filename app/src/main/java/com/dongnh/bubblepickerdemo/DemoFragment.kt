@@ -2,7 +2,6 @@ package com.dongnh.bubblepickerdemo
 
 import android.annotation.SuppressLint
 import android.content.res.TypedArray
-import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -30,7 +29,7 @@ class DemoFragment : Fragment() {
 
     data class Item(
         val title: String,
-        val imgDrawable: Int,
+        val imgResId: Int,
         val value: Float
     )
 
@@ -91,8 +90,9 @@ class DemoFragment : Fragment() {
                         title = mainItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            mainItem.imgDrawable
+                            mainItem.imgResId
                         )
+                        id = mainItem.imgResId
                     }
                 }
 
@@ -103,8 +103,9 @@ class DemoFragment : Fragment() {
                         title = secondaryItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            secondaryItem.imgDrawable
+                            secondaryItem.imgResId
                         )
+                        id = secondaryItem.imgResId
                     }
                 }
             }
