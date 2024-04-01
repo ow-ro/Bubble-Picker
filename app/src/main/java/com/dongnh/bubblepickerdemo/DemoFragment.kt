@@ -2,6 +2,8 @@ package com.dongnh.bubblepickerdemo
 
 import android.annotation.SuppressLint
 import android.content.res.TypedArray
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,10 +13,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.BubblePicker
+import com.dongnh.bubblepickerdemo.databinding.DemoBubbleCellBinding
+import com.dongnh.bubblepickerdemo.databinding.DemoEmptyCellBinding
 import com.dongnh.bubblepickerdemo.databinding.FragmentDemoBinding
 
 /**
@@ -49,11 +55,12 @@ class DemoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        configView()
+        binding.recyclerView.layoutManager = LinearLayoutManager(this.requireContext(), RecyclerView.VERTICAL, false)
+        binding.recyclerView.adapter = SimpleAdapter()
     }
 
     @SuppressLint("Recycle")
-    private fun configView() {
+    private fun configView(container: ViewGroup) {
         val primaryTitles = resources.getStringArray(R.array.countries_primary)
         val primaryImages = resources.obtainTypedArray(R.array.images_primary)
         primaryItems = mutableListOf()
@@ -110,7 +117,7 @@ class DemoFragment : Fragment() {
                 }
             }
 
-            binding.pickerContainer.addView(picker)
+            container.addView(picker)
             picker.configCenterImmediately(true)
             picker.swipeMoveSpeed = 1f
             picker.configSpeedMoveOfItem(20f)
@@ -145,6 +152,34 @@ class DemoFragment : Fragment() {
         colors.resources
     }
 
+    inner class SimpleAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+        inner class SimpleViewHolder(val binding: DemoEmptyCellBinding) : RecyclerView.ViewHolder(binding.root)
+        inner class PickerViewHolder(val binding: DemoBubbleCellBinding) : RecyclerView.ViewHolder(binding.root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            return if (viewType == 0) {
+                val binding = DemoBubbleCellBinding.inflate(LayoutInflater.from(parent.context))
+                PickerViewHolder(binding)
+            } else {
+                val binding = DemoEmptyCellBinding.inflate(LayoutInflater.from(parent.context))
+                SimpleViewHolder(binding)
+            }
+        }
+
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+            if (position == 0) {
+                val container = (holder as? PickerViewHolder)?.binding?.pickerContainer ?: return
+                configView(container)
+            } else {
+                val image = (holder as? SimpleViewHolder)?.binding?.img ?: return
+                image.setImageResource((primaryItems + secondaryItems).random().imgResId)
+            }
+        }
+
+        override fun getItemCount() = 8
+        override fun getItemViewType(position: Int) = if (position == 0) 0 else 1
+    }
 
     private fun toast(text: String) =
         Toast.makeText(this.requireContext(), text, Toast.LENGTH_SHORT).show()
