@@ -135,6 +135,7 @@ class CircleBody(
         if (actualRadius == 0f) {
             isVisible = false
             world.destroyBody(physicalBody)
+            physicalBody = null
             isDestroyed = true
             clear()
         }

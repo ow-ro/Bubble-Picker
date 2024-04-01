@@ -52,15 +52,16 @@ object Engine {
 
                         // Only need to do this for duplicate items
                         if (it.pickerItem.secondaryValue != 0f) {
-                            val isSecondary = secondaryPickerItems.contains(it.pickerItem)
                             if (value == Mode.MAIN) {
-                                val mainRadius = getRadius(it.pickerItem.value, isSecondary)
-                                density = getDensity(it.pickerItem.value, isSecondary)
+                                // Main mode, we want the main sizings/densities
+                                val mainRadius = getRadius(it.pickerItem.value, false)
+                                density = getDensity(it.pickerItem.value, false)
                                 defaultRadius = mainRadius * getScale()
                                 increasedRadius = mainRadius * getScale() * 1.2f
                             } else {
-                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue, isSecondary)
-                                density = getDensity(it.pickerItem.secondaryValue, isSecondary)
+                                // Secondary mode, we want the secondary sizings/densities
+                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue, true)
+                                density = getDensity(it.pickerItem.secondaryValue, true)
                                 defaultRadius = secondaryRadius * getScale()
                                 increasedRadius = secondaryRadius * getScale() * 1.2f
                             }
@@ -202,7 +203,9 @@ object Engine {
     fun clear() {
         worldBorders.forEach { world.destroyBody(it.itemBody) }
         circleBodies.forEach {
-            it.physicalBody?.let { body -> world.destroyBody(body) }
+            it.physicalBody?.let { body ->
+                world.destroyBody(body)
+            }
         }
         world = World(Vec2(0f, 0f), false)
         worldBorders.clear()
