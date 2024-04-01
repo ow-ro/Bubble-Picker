@@ -1,12 +1,7 @@
 package com.dongnh.bubblepickerdemo
 
 import android.annotation.SuppressLint
-import android.content.res.TypedArray
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,7 +36,6 @@ class DemoFragment : Fragment() {
 
     lateinit var primaryItems: MutableList<Item>
     lateinit var secondaryItems: MutableList<Item>
-    private lateinit var colors: TypedArray
     private lateinit var picker: BubblePicker
 
     override fun onCreateView(
@@ -82,55 +76,63 @@ class DemoFragment : Fragment() {
             picker.showSecondaryItems()
         }
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            picker = BubblePicker(this.requireContext(), null)
-            picker.adapter = object : BubblePickerAdapter {
+        // If picker is already initialized, remove it from its parent and add it to the new container
+        if (::picker.isInitialized) {
+            picker.parent?.let {
+                (it as ViewGroup).removeView(picker)
+            }
+            container.addView(picker)
+            return
+        }
 
-                override val totalItemCount = primaryItems.size + secondaryItems.size
-                override val mainItemCount = primaryItems.size
-                override val secondaryItemCount = secondaryItems.size
+        picker = BubblePicker(this.requireContext(), null)
+        picker.adapter = object : BubblePickerAdapter {
 
-                override fun getMainItem(position: Int): PickerItem {
-                    return PickerItem().apply {
-                        val mainItem = primaryItems[position]
-                        value = mainItem.value
-                        title = mainItem.title
-                        imgDrawable = ContextCompat.getDrawable(
-                            this@DemoFragment.requireContext(),
-                            mainItem.imgResId
-                        )
-                        id = mainItem.imgResId
-                    }
-                }
+            override val totalItemCount = primaryItems.size + secondaryItems.size
+            override val mainItemCount = primaryItems.size
+            override val secondaryItemCount = secondaryItems.size
 
-                override fun getSecondaryItem(position: Int): PickerItem {
-                    return PickerItem().apply {
-                        val secondaryItem = secondaryItems[position]
-                        value = secondaryItem.value
-                        title = secondaryItem.title
-                        imgDrawable = ContextCompat.getDrawable(
-                            this@DemoFragment.requireContext(),
-                            secondaryItem.imgResId
-                        )
-                        id = secondaryItem.imgResId
-                    }
+            override fun getMainItem(position: Int): PickerItem {
+                return PickerItem().apply {
+                    val mainItem = primaryItems[position]
+                    value = mainItem.value
+                    title = mainItem.title
+                    imgDrawable = ContextCompat.getDrawable(
+                        this@DemoFragment.requireContext(),
+                        mainItem.imgResId
+                    )
+                    id = mainItem.imgResId
                 }
             }
 
-            container.addView(picker)
-            picker.configCenterImmediately(true)
-            picker.swipeMoveSpeed = 1f
-            picker.configSpeedMoveOfItem(20f)
-            picker.configMargin(0.001f)
-            picker.configListenerForBubble(object : BubblePickerListener {
-                override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
+            override fun getSecondaryItem(position: Int): PickerItem {
+                return PickerItem().apply {
+                    val secondaryItem = secondaryItems[position]
+                    value = secondaryItem.value
+                    title = secondaryItem.title
+                    imgDrawable = ContextCompat.getDrawable(
+                        this@DemoFragment.requireContext(),
+                        secondaryItem.imgResId
+                    )
+                    id = secondaryItem.imgResId
+                }
+            }
+        }
 
-                override fun onBubbleDeselected(item: PickerItem) = toast("${item.title} deselected")
-            })
-            picker.setMaxBubbleSize(0.4f)
-            picker.setMinBubbleSize(0.1f)
-            picker.configHorizontalSwipeOnly(false)
-        }, 300)
+        container.addView(picker)
+        picker.configCenterImmediately(true)
+        picker.swipeMoveSpeed = 1f
+        picker.configSpeedMoveOfItem(20f)
+        picker.configMargin(0.001f)
+        picker.configListenerForBubble(object : BubblePickerListener {
+            override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
+
+            override fun onBubbleDeselected(item: PickerItem) =
+                toast("${item.title} deselected")
+        })
+        picker.setMaxBubbleSize(0.4f)
+        picker.setMinBubbleSize(0.1f)
+        picker.configHorizontalSwipeOnly(false)
     }
 
     override fun onResume() {
@@ -149,7 +151,7 @@ class DemoFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        colors.resources
+        picker.cleanup()
     }
 
     inner class SimpleAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -169,7 +171,8 @@ class DemoFragment : Fragment() {
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             if (position == 0) {
-                val container = (holder as? PickerViewHolder)?.binding?.pickerContainer ?: return
+                val pickerHolder = holder as? PickerViewHolder ?: return
+                val container = pickerHolder.binding.pickerContainer
                 configView(container)
             } else {
                 val image = (holder as? SimpleViewHolder)?.binding?.img ?: return
