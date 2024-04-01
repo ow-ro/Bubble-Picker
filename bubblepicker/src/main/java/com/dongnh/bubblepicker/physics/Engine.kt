@@ -52,7 +52,7 @@ object Engine {
 
                         // Only need to do this for duplicate items
                         if (it.pickerItem.secondaryValue != 0f) {
-                            val isSecondary = it.pickerItem.value > mainMaxScale
+                            val isSecondary = secondaryPickerItems.contains(it.pickerItem)
                             if (value == Mode.MAIN) {
                                 val mainRadius = getRadius(it.pickerItem.value, isSecondary)
                                 density = getDensity(it.pickerItem.value, isSecondary)
@@ -99,9 +99,9 @@ object Engine {
 
     private fun getDensity(value: Float, isSecondary: Boolean): Float {
         return if (!isSecondary) {
-            interpolate(0.2f, 0.4f, value / mainMaxScale)
+            interpolate(0.4f, 0.5f, value / mainMaxScale)
         } else {
-            interpolate(0.2f, 0.4f, value / secondaryMaxScale)
+            interpolate(0.4f, 0.5f, value / secondaryMaxScale)
         }
     }
 
@@ -143,7 +143,7 @@ object Engine {
         this.scaleX = scaleX
         this.scaleY = scaleY
         pickerItems.forEach {
-            val isSecondary = it.value > mainMaxScale
+            val isSecondary = secondaryPickerItems.contains(it)
             val density = getDensity(it.value, isSecondary)
             val bubbleRadius = getRadius(it.value, isSecondary)
             val x = if (Random().nextBoolean()) -startX else startX

@@ -46,16 +46,16 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                mainPickerItems.addAll((0 until value.mainItemCount).map { value.getMainItem(it) })
+                mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
                 mainMaxScale = mainPickerItems.maxBy { it.value }.value
 
                 value.secondaryItemCount?.let { secondaryCount ->
-                    secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
+                    secondaryPickerItems = HashSet((0 until secondaryCount).map { value.getSecondaryItem(it) })
                     secondaryMaxScale = secondaryPickerItems.maxBy { it.value }.value
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
-                        secondaryPickerItems.firstOrNull { it.title == mainItem.title }?.let { duplicate ->
+                        secondaryPickerItems.firstOrNull { it.id == mainItem.id }?.let { duplicate ->
                             mainItem.secondaryValue = duplicate.value
                         }
                     }
@@ -63,7 +63,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
                 // Combine mainPickerItems and secondaryPickerItems, excluding duplicates based on title
                 renderer.allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
-                    mainPickerItems.any { it.title == secondaryItem.title }
+                    mainPickerItems.any { it.id == secondaryItem.id }
                 })
             }
             super.onResume()
@@ -212,5 +212,11 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     fun configSizeOfImage(width: Float, height: Float) {
         renderer.widthImage = width
         renderer.heightImage = height
+    }
+
+    fun cleanup() {
+        renderer.clear()
+        mainPickerItems.clear()
+        secondaryPickerItems.clear()
     }
 }
