@@ -93,26 +93,28 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         if (allPickerItemsList.isEmpty()) {
             return
         }
-        clear()
 
-        Engine.centerImmediately = centerImmediately
-        Engine.build(allPickerItemsList, scaleX, scaleY)
-            .forEachIndexed { index, body ->
-                circles.add(
-                    Item(
-                        WeakReference(glView.context),
-                        allPickerItemsList[index],
-                        body,
-                        widthImage,
-                        heightImage
+        // If items aren't already generated, create them
+        if (circles.size == 0) {
+            Engine.centerImmediately = centerImmediately
+            Engine.build(allPickerItemsList, scaleX, scaleY)
+                .forEachIndexed { index, body ->
+                    circles.add(
+                        Item(
+                            WeakReference(glView.context),
+                            allPickerItemsList[index],
+                            body,
+                            widthImage,
+                            heightImage
+                        )
                     )
-                )
-            }
-        Engine.allItems = circles
+                }
+            Engine.allItems = circles
 
-        allPickerItemsList.forEach {
-            if (circles.isNotEmpty() && it.isSelected) {
-                Engine.resize(circles.first { circle -> circle.pickerItem == it })
+            allPickerItemsList.forEach {
+                if (circles.isNotEmpty() && it.isSelected) {
+                    Engine.resize(circles.first { circle -> circle.pickerItem == it })
+                }
             }
         }
 
