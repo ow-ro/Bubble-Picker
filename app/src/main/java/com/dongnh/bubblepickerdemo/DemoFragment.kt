@@ -1,5 +1,6 @@
 package com.dongnh.bubblepickerdemo
 
+import android.annotation.SuppressLint
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.os.Bundle
@@ -27,21 +28,16 @@ class DemoFragment : Fragment() {
 
     private lateinit var binding: FragmentDemoBinding
 
-    lateinit var titles: Array<String>
-    lateinit var images: TypedArray
+    data class Item(
+        val title: String,
+        val imgDrawable: Int,
+        val value: Float
+    )
+
+    lateinit var primaryItems: MutableList<Item>
+    lateinit var secondaryItems: MutableList<Item>
     private lateinit var colors: TypedArray
     private lateinit var picker: BubblePicker
-
-    private val mediumTypeface by lazy {
-        Typeface.createFromAsset(
-            requireActivity().assets,
-            ROBOTO_MEDIUM
-        )
-    }
-
-    companion object {
-        private const val ROBOTO_MEDIUM = "roboto_medium.ttf"
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,10 +53,22 @@ class DemoFragment : Fragment() {
         configView()
     }
 
+    @SuppressLint("Recycle")
     private fun configView() {
-        titles = resources.getStringArray(R.array.countries)
-        images = resources.obtainTypedArray(R.array.images)
-        val halfSize = titles.size / 2
+        val primaryTitles = resources.getStringArray(R.array.countries_primary)
+        val primaryImages = resources.obtainTypedArray(R.array.images_primary)
+        primaryItems = mutableListOf()
+        primaryTitles.forEachIndexed { index, title ->
+            primaryItems.add(Item(title, primaryImages.getResourceId(index, 0), IntRange(50, 150).random().toFloat()))
+        }
+
+        val secondaryTitles = resources.getStringArray(R.array.countries_secondary)
+        val secondaryImages = resources.obtainTypedArray(R.array.images_secondary)
+        secondaryItems = mutableListOf()
+        secondaryTitles.forEachIndexed { index, title ->
+            secondaryItems.add(Item(title, secondaryImages.getResourceId(index, 0), IntRange(1, 25).random().toFloat()))
+        }
+
         binding.showMainItems.setOnClickListener {
             picker.showMainItems()
         }
@@ -72,40 +80,31 @@ class DemoFragment : Fragment() {
             picker = BubblePicker(this.requireContext(), null)
             picker.adapter = object : BubblePickerAdapter {
 
-                override val totalItemCount = titles.size
-                override val mainItemCount = halfSize
-                override val secondaryItemCount = halfSize
+                override val totalItemCount = primaryItems.size + secondaryItems.size
+                override val mainItemCount = primaryItems.size
+                override val secondaryItemCount = secondaryItems.size
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        value = if (position % halfSize == 0) {
-                            20f + ((position % halfSize) * 5f)
-                        } else {
-                            5f + (position % halfSize)
-                        }
-                        title = titles[position % halfSize]
+                        val mainItem = primaryItems[position]
+                        value = mainItem.value
+                        title = mainItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            images.getResourceId(position % halfSize, 0)
+                            mainItem.imgDrawable
                         )
-                        id = position
                     }
                 }
 
                 override fun getSecondaryItem(position: Int): PickerItem {
-                    val actualPos = position + halfSize
                     return PickerItem().apply {
-                        value = if (actualPos % halfSize == 0) {
-                            20f + ((actualPos % halfSize) * 5f)
-                        } else {
-                            5f + actualPos % halfSize
-                        }
-                        title = titles[position % halfSize + 4]
+                        val secondaryItem = secondaryItems[position]
+                        value = secondaryItem.value
+                        title = secondaryItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoFragment.requireContext(),
-                            images.getResourceId(position % halfSize + 4, 0)
+                            secondaryItem.imgDrawable
                         )
-                        id = halfSize + position
                     }
                 }
             }
@@ -143,7 +142,6 @@ class DemoFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         colors.resources
-        images.resources
     }
 
 
