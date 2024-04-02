@@ -98,9 +98,9 @@ object Engine {
 
     private fun getDensity(value: Float, isSecondary: Boolean): Float {
         return if (!isSecondary) {
-            interpolate(0.4f, 0.5f, value / mainMaxScale)
+            interpolate(0.8f, 0.2f, value / mainMaxScale)
         } else {
-            interpolate(0.4f, 0.5f, value / secondaryMaxScale)
+            interpolate(0.8f, 0.2f, value / secondaryMaxScale)
         }
     }
 
@@ -119,11 +119,11 @@ object Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > STEP * 200 && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+            if (distance > STEP * 100 && body != selectedItem?.circleBody) {
+                applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
-                applyForce(centerDirection.mul(10f * increasedGravity), gravityCenterFixed)
+                applyForce(centerDirection.mul(7f * increasedGravity), gravityCenterFixed)
             }
         }
     }
