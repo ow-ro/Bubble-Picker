@@ -36,9 +36,7 @@ object Engine {
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
-    lateinit var allItems: List<Item>
-    var mainPickerItems: HashSet<PickerItem> = HashSet()
-    var secondaryPickerItems: HashSet<PickerItem> = HashSet()
+    var allItems: ArrayList<Item> = arrayListOf()
     var mode: Mode = Mode.MAIN
         set(value) {
             // Don't do anything if the mode is the same
@@ -84,8 +82,8 @@ object Engine {
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
-            mode == Mode.MAIN && mainPickerItems.any { it.title == item.title } -> true
-            mode == Mode.SECONDARY && secondaryPickerItems.any { it.title == item.title } -> true
+            mode == Mode.MAIN && !item.isSecondary -> true
+            mode == Mode.SECONDARY && (item.isSecondary || item.secondaryValue != 0f) -> true
             else -> false
         }
     }
@@ -125,7 +123,7 @@ object Engine {
                 applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
-                applyForce(centerDirection.mul(6f * increasedGravity), gravityCenterFixed)
+                applyForce(centerDirection.mul(10f * increasedGravity), gravityCenterFixed)
             }
         }
     }
@@ -144,7 +142,7 @@ object Engine {
         this.scaleX = scaleX
         this.scaleY = scaleY
         pickerItems.forEach {
-            val isSecondary = secondaryPickerItems.contains(it)
+            val isSecondary = it.isSecondary
             val density = getDensity(it.value, isSecondary)
             val bubbleRadius = getRadius(it.value, isSecondary)
             val x = if (Random().nextBoolean()) -startX else startX
@@ -210,6 +208,8 @@ object Engine {
         world = World(Vec2(0f, 0f), false)
         worldBorders.clear()
         circleBodies.clear()
+        toBeResized.clear()
+        allItems.clear()
     }
 
     fun resize(item: Item): Boolean {

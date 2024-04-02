@@ -12,11 +12,10 @@ import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
+import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.physics.Engine.mainMaxScale
-import com.dongnh.bubblepicker.physics.Engine.mainPickerItems
 import com.dongnh.bubblepicker.physics.Engine.secondaryMaxScale
-import com.dongnh.bubblepicker.physics.Engine.secondaryPickerItems
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,11 +45,12 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
+                val mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
                 mainMaxScale = mainPickerItems.maxBy { it.value }.value
 
+                val secondaryPickerItems = hashSetOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
-                    secondaryPickerItems = HashSet((0 until secondaryCount).map { value.getSecondaryItem(it) })
+                    secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
                     secondaryMaxScale = secondaryPickerItems.maxBy { it.value }.value
 
                     // Add secondaryRadius if item exists in both lists
@@ -216,7 +216,5 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
 
     fun cleanup() {
         renderer.clear()
-        mainPickerItems.clear()
-        secondaryPickerItems.clear()
     }
 }

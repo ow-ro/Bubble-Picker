@@ -115,6 +115,7 @@ class DemoFragment : Fragment() {
                         secondaryItem.imgResId
                     )
                     id = secondaryItem.imgResId
+                    isSecondary = true
                 }
             }
         }
@@ -150,8 +151,8 @@ class DemoFragment : Fragment() {
     }
 
     override fun onDestroy() {
+        picker?.cleanup()
         super.onDestroy()
-        picker.cleanup()
     }
 
     inner class SimpleAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
