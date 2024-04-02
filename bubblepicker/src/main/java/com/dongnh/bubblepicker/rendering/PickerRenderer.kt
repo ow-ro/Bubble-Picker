@@ -116,6 +116,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
                     Engine.resize(circles.first { circle -> circle.pickerItem == it })
                 }
             }
+            Engine.mode = Engine.Mode.MAIN
         }
 
         if (textureIds == null) {

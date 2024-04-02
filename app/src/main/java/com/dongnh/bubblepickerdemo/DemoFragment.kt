@@ -36,7 +36,7 @@ class DemoFragment : Fragment() {
 
     lateinit var primaryItems: MutableList<Item>
     lateinit var secondaryItems: MutableList<Item>
-    private lateinit var picker: BubblePicker
+    private var picker: BubblePicker? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,23 +70,21 @@ class DemoFragment : Fragment() {
         }
 
         binding.showMainItems.setOnClickListener {
-            picker.showMainItems()
+            picker?.showMainItems()
         }
         binding.showSecondaryItems.setOnClickListener {
-            picker.showSecondaryItems()
+            picker?.showSecondaryItems()
         }
 
         // If picker is already initialized, remove it from its parent and add it to the new container
-        if (::picker.isInitialized) {
-            picker.parent?.let {
-                (it as ViewGroup).removeView(picker)
-            }
+        picker?.parent?.let {
+            (it as ViewGroup).removeView(picker)
             container.addView(picker)
             return
         }
 
         picker = BubblePicker(this.requireContext(), null)
-        picker.adapter = object : BubblePickerAdapter {
+        picker!!.adapter = object : BubblePickerAdapter {
 
             override val totalItemCount = primaryItems.size + secondaryItems.size
             override val mainItemCount = primaryItems.size
@@ -121,38 +119,29 @@ class DemoFragment : Fragment() {
         }
 
         container.addView(picker)
-        picker.configCenterImmediately(true)
-        picker.swipeMoveSpeed = 1f
-        picker.configSpeedMoveOfItem(20f)
-        picker.configMargin(0.001f)
-        picker.configListenerForBubble(object : BubblePickerListener {
+        picker!!.configCenterImmediately(true)
+        picker!!.swipeMoveSpeed = 1f
+        picker!!.configSpeedMoveOfItem(20f)
+        picker!!.configMargin(0.001f)
+        picker!!.configListenerForBubble(object : BubblePickerListener {
             override fun onBubbleSelected(item: PickerItem) = toast("${item.title} selected")
 
             override fun onBubbleDeselected(item: PickerItem) =
                 toast("${item.title} deselected")
         })
-        picker.setMaxBubbleSize(0.4f)
-        picker.setMinBubbleSize(0.1f)
-        picker.configHorizontalSwipeOnly(false)
+        picker!!.setMaxBubbleSize(0.4f)
+        picker!!.setMinBubbleSize(0.1f)
+        picker!!.configHorizontalSwipeOnly(false)
     }
 
     override fun onResume() {
         super.onResume()
-        if (::picker.isInitialized) {
-            picker.onResume()
-        }
+        picker?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        if (::picker.isInitialized) {
-            picker.onPause()
-        }
-    }
-
-    override fun onDestroy() {
-        picker?.cleanup()
-        super.onDestroy()
+        picker?.onPause()
     }
 
     inner class SimpleAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
