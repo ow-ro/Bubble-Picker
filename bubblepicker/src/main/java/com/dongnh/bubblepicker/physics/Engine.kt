@@ -9,6 +9,8 @@ import java.util.*
 import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Created by irinagalata on 1/26/17.
@@ -36,6 +38,8 @@ object Engine {
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
+    private var maxArea = 0f
+    private var minArea = 0f
     var allItems: ArrayList<Item> = arrayListOf()
     var mode: Mode = Mode.MAIN
         set(value) {
@@ -77,7 +81,15 @@ object Engine {
     var mainMaxScale: Float = 0f
     var secondaryMaxScale: Float = 0f
     var maxBubbleSize = 0.4f
+        set(value) {
+            field = value
+            maxArea = getArea(value)
+        }
     var minBubbleSize = 0.1f
+        set(value) {
+            field = value
+            minArea = getArea(value)
+        }
 
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
@@ -89,11 +101,13 @@ object Engine {
     }
 
     private fun getRadius(value: Float, isSecondary: Boolean): Float {
-        return if (!isSecondary) {
-            interpolate(minBubbleSize, maxBubbleSize, value / mainMaxScale)
+        // Get interpolated area, return radius from it
+        val scaledArea = if (!isSecondary) {
+            interpolate(minArea, maxArea, value / mainMaxScale)
         } else {
-            interpolate(minBubbleSize, maxBubbleSize, value / secondaryMaxScale)
+            interpolate(minArea, maxArea, value / secondaryMaxScale)
         }
+        return sqrt(scaledArea / Math.PI).toFloat()
     }
 
     private fun getDensity(value: Float, isSecondary: Boolean): Float {
@@ -104,6 +118,9 @@ object Engine {
         }
     }
 
+    private fun getArea(radius: Float): Float {
+        return (Math.PI * radius.pow(2)).toFloat()
+    }
 
     private fun createBorders() {
         worldBorders = arrayListOf(
