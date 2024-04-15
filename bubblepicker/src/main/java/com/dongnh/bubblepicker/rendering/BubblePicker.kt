@@ -14,8 +14,6 @@ import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.Engine
-import com.dongnh.bubblepicker.physics.Engine.mainMaxScale
-import com.dongnh.bubblepicker.physics.Engine.secondaryMaxScale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,7 +27,8 @@ import kotlin.math.abs
 class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
-    private var renderer: PickerRenderer = PickerRenderer(this)
+    private val engine: Engine = Engine()
+    private val renderer: PickerRenderer = PickerRenderer(this, engine)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
@@ -46,12 +45,12 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             field = value
             if (value != null) {
                 val mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
-                mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                engine.mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
 
                 val secondaryPickerItems = hashSetOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
                     secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
-                    secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                    engine.secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
@@ -156,11 +155,11 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     }
 
     fun showMainItems() {
-        Engine.mode = Engine.Mode.MAIN
+        engine.mode = Engine.Mode.MAIN
     }
 
     fun showSecondaryItems() {
-        Engine.mode = Engine.Mode.SECONDARY
+        engine.mode = Engine.Mode.SECONDARY
     }
 
     /**
@@ -170,7 +169,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
      * @param size The maximum size of the bubble, default is 0.4f (40% of smaller dimension).
      */
     fun setMaxBubbleSize(size: Float) {
-        Engine.maxBubbleSize = size
+        engine.maxBubbleSize = size
     }
 
     /**
@@ -180,7 +179,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
      * @param size The minimum size of the bubble, default is 0.1f (10% of smaller dimension).
      */
     fun setMinBubbleSize(size: Float) {
-        Engine.minBubbleSize = size
+        engine.minBubbleSize = size
     }
 
     fun configHorizontalSwipeOnly(horizOnly: Boolean) {

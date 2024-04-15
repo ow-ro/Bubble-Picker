@@ -2,7 +2,6 @@ package com.dongnh.bubblepicker.rendering
 
 import android.opengl.GLES20.*
 import android.opengl.GLSurfaceView
-import android.util.Log
 import android.view.View
 import com.dongnh.bubblepicker.*
 import com.dongnh.bubblepicker.model.Color
@@ -23,7 +22,7 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
+class PickerRenderer(private val glView: View, private val engine: Engine) : GLSurfaceView.Renderer {
 
     private val scaleX: Float get() = if (glView.width < glView.height) {
         1f
@@ -48,26 +47,26 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     var centerImmediately = false
         set(value) {
             field = value
-            Engine.centerImmediately = value
+            engine.centerImmediately = value
         }
     // Image size
     var widthImage = 256f
     var heightImage = 256f
     var horizontalSwipeOnly: Boolean = false
         set(value) {
-            Engine.horizontalSwipeOnly = value
+            engine.horizontalSwipeOnly = value
             field = value
         }
     // Gravity
     var speedBackToCenter = 50f
         set(value) {
             field = value
-            Engine.speedToCenter = value
+            engine.speedToCenter = value
         }
     var marginBetweenItems = 0.001f
         set(value) {
             field = value
-            Engine.margin = value
+            engine.margin = value
         }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -85,7 +84,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
     override fun onDrawFrame(gl: GL10?) {
         calculateVertices()
-        Engine.move()
+        engine.move()
         drawFrame()
     }
 
@@ -96,8 +95,8 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
 
         // If items aren't already generated, create them
         if (circles.size == 0) {
-            Engine.centerImmediately = centerImmediately
-            Engine.build(allPickerItemsList, scaleX, scaleY)
+            engine.centerImmediately = centerImmediately
+            engine.build(allPickerItemsList, scaleX, scaleY)
                 .forEachIndexed { index, body ->
                     circles.add(
                         Item(
@@ -109,14 +108,14 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
                         )
                     )
                 }
-            Engine.allItems = circles
+            engine.allItems = circles
 
             allPickerItemsList.forEach {
                 if (circles.isNotEmpty() && it.isSelected) {
-                    Engine.resize(circles.first { circle -> circle.pickerItem == it })
+                    engine.resize(circles.first { circle -> circle.pickerItem == it })
                 }
             }
-            Engine.mode = Engine.Mode.MAIN
+            engine.mode = Engine.Mode.MAIN
         }
 
         if (textureIds == null) {
@@ -190,7 +189,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         glCompileShader(this)
     }
 
-    fun swipe(x: Float, y: Float) = Engine.swipe(
+    fun swipe(x: Float, y: Float) = engine.swipe(
         x.convertValue(glView.width, scaleX),
         y.convertValue(glView.height, scaleY)
     )
@@ -202,7 +201,7 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
     }
 
     fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
-        if (Engine.resize(this)) {
+        if (engine.resize(this)) {
             listener?.let {
                 if (circleBody.increased) {
                     it.onBubbleDeselected(pickerItem)
@@ -213,12 +212,12 @@ class PickerRenderer(private val glView: View) : GLSurfaceView.Renderer {
         }
     }
 
-    fun release() = Engine.release()
+    fun release() = engine.release()
 
-    fun releaseWithReset() = Engine.releaseWithReset()
+    fun releaseWithReset() = engine.releaseWithReset()
 
     fun clear() {
         circles.clear()
-        Engine.clear()
+        engine.clear()
     }
 }

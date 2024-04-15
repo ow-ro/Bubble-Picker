@@ -15,13 +15,13 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/26/17.
  */
-object Engine {
+class Engine {
     enum class Mode {
         MAIN, SECONDARY
     }
 
-    private const val STEP = 0.0009f
-    private const val RESIZE_STEP = 0.009f
+    private val STEP = 0.0009f
+    private val RESIZE_STEP = 0.009f
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
@@ -90,7 +90,6 @@ object Engine {
             field = value
             minArea = getArea(value)
         }
-
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
