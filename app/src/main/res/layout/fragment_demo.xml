@@ -9,8 +9,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="0dp"
         android:layout_marginTop="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/show_main_items"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,8 +23,8 @@
         android:layout_marginStart="30dp"
         android:text="Show Main Items"
         android:textAllCaps="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/show_secondary_items"
@@ -32,6 +33,6 @@
         android:layout_marginRight="30dp"
         android:text="Show Secondary Items"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
