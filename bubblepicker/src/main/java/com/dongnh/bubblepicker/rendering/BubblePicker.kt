@@ -88,7 +88,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     override fun onPause() {
         if (renderer.allPickerItemsList.isNotEmpty()) {
             super.onPause()
-            renderer.clear()
         }
     }
 
@@ -211,9 +210,5 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     fun configSizeOfImage(width: Float, height: Float) {
         renderer.widthImage = width
         renderer.heightImage = height
-    }
-
-    fun cleanup() {
-        renderer.clear()
     }
 }

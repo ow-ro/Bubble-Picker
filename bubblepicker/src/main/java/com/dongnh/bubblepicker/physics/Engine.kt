@@ -214,20 +214,6 @@ class Engine {
         gravityCenter.setZero()
     }
 
-    fun clear() {
-        worldBorders.forEach { world.destroyBody(it.itemBody) }
-        circleBodies.forEach {
-            it.physicalBody?.let { body ->
-                world.destroyBody(body)
-            }
-        }
-        world = World(Vec2(0f, 0f), false)
-        worldBorders.clear()
-        circleBodies.clear()
-        toBeResized.clear()
-        allItems.clear()
-    }
-
     fun resize(item: Item): Boolean {
         if (item != selectedItem && selectedItem?.circleBody?.isBusy == false) {
             selectedItem?.also {

@@ -215,9 +215,4 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
     fun release() = engine.release()
 
     fun releaseWithReset() = engine.releaseWithReset()
-
-    fun clear() {
-        circles.clear()
-        engine.clear()
-    }
 }
