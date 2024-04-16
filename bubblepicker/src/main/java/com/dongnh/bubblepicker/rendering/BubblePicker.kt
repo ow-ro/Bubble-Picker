@@ -46,11 +46,17 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
             if (value != null) {
                 val mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
                 engine.mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                // Prevent 0/0 division when there is an all time friend with 0 minutes
+                val mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                engine.mainMaxScale = if (mainMaxScale == 0f) 1f else mainMaxScale
 
                 val secondaryPickerItems = hashSetOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
                     secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
                     engine.secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                    // Prevent 0/0 division when there is an all time friend with 0 minutes
+                    val secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
+                    engine.secondaryMaxScale = if (secondaryMaxScale == 0f) 1f else secondaryMaxScale
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
