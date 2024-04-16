@@ -5,7 +5,6 @@ import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
 import org.jbox2d.dynamics.World
-import java.util.*
 import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
@@ -53,17 +52,17 @@ class Engine {
                         shouldShow = shouldShowPickerItem(it.pickerItem)
 
                         // Only need to do this for duplicate items
-                        if (it.pickerItem.secondaryValue != 0f) {
+                        if (it.pickerItem.secondaryValue != null) {
                             if (value == Mode.MAIN) {
                                 // Main mode, we want the main sizings/densities
-                                val mainRadius = getRadius(it.pickerItem.value, false)
-                                density = getDensity(it.pickerItem.value, false)
+                                val mainRadius = getRadius(it.pickerItem.value)
+                                density = getDensity(it.pickerItem.value)
                                 defaultRadius = mainRadius * getScale()
                                 increasedRadius = mainRadius * getScale() * 1.2f
                             } else {
                                 // Secondary mode, we want the secondary sizings/densities
-                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue, true)
-                                density = getDensity(it.pickerItem.secondaryValue, true)
+                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue!!)
+                                density = getDensity(it.pickerItem.secondaryValue!!)
                                 defaultRadius = secondaryRadius * getScale()
                                 increasedRadius = secondaryRadius * getScale() * 1.2f
                             }
@@ -78,8 +77,6 @@ class Engine {
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
-    var mainMaxScale: Float = 0f
-    var secondaryMaxScale: Float = 0f
     var maxBubbleSize = 0.4f
         set(value) {
             field = value
@@ -94,27 +91,20 @@ class Engine {
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
             mode == Mode.MAIN && !item.isSecondary -> true
-            mode == Mode.SECONDARY && (item.isSecondary || item.secondaryValue != 0f) -> true
+            mode == Mode.SECONDARY && (item.isSecondary || item.secondaryValue != null) -> true
             else -> false
         }
     }
 
-    private fun getRadius(value: Float, isSecondary: Boolean): Float {
+    private fun getRadius(value: Float): Float {
         // Get interpolated area, return radius from it
-        val scaledArea = if (!isSecondary) {
-            interpolate(minArea, maxArea, value / mainMaxScale)
-        } else {
-            interpolate(minArea, maxArea, value / secondaryMaxScale)
-        }
+        val scaledArea = interpolate(minArea, maxArea, value)
+
         return sqrt(scaledArea / Math.PI).toFloat()
     }
 
-    private fun getDensity(value: Float, isSecondary: Boolean): Float {
-        return if (!isSecondary) {
-            interpolate(0.8f, 0.2f, value / mainMaxScale)
-        } else {
-            interpolate(0.8f, 0.2f, value / secondaryMaxScale)
-        }
+    private fun getDensity(value: Float): Float {
+        return interpolate(0.8f, 0.4f, value)
     }
 
     private fun getArea(radius: Float): Float {
@@ -135,8 +125,10 @@ class Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > STEP * 100 && body != selectedItem?.circleBody) {
+            if (distance > 1f && body != selectedItem?.circleBody) {
                 applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
+            } else if (distance > 0.5f && body != selectedItem?.circleBody) {
+                applyForce(direction.mul(gravity * 3 / distance.sqr()), position)
             }
             if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
                 applyForce(centerDirection.mul(7f * increasedGravity), gravityCenterFixed)
@@ -154,15 +146,59 @@ class Engine {
         }
     }
 
+    /**
+     * Generates a list of coordinates for the bubbles to be placed at in a rectangular
+     * alternating pattern, this helps with putting larger items in the center which are
+     * at the start of the list in the build function.
+     * For example: 8 4 0 2 6
+     *              9 5 1 3 7
+     * @param numPoints The number of bubbles to generate coordinates for
+     * @return A list of coordinates for the bubbles
+     */
+    private fun generateCoordinates(numPoints: Int): List<Pair<Float, Float>> {
+        val coordinates = mutableListOf<Pair<Float, Float>>()
+        var x = 0f
+        var y = 0.5f
+        for (i in 0 until numPoints) {
+            // Subtract 2 because the first 2 coordinates are (0, 0.5) and (0, -0.5)
+            if ((i - 2) % 2 == 0) {
+                x *= -1
+            }
+            if ((i - 2) % 4 == 0) {
+                x += 0.5f
+            }
+            y *= -1
+            coordinates.add(Pair(x, y))
+        }
+        return coordinates
+    }
+
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         this.scaleX = scaleX
         this.scaleY = scaleY
-        pickerItems.forEach {
-            val isSecondary = it.isSecondary
-            val density = getDensity(it.value, isSecondary)
-            val bubbleRadius = getRadius(it.value, isSecondary)
-            val x = if (Random().nextBoolean()) -startX else startX
-            val y = if (Random().nextBoolean()) -0.5f / scaleY else 0.5f / scaleY
+        val coords = generateCoordinates(pickerItems.size)
+        pickerItems.filter { !it.isSecondary }.forEachIndexed { i, it ->
+            val density = getDensity(it.value)
+            val bubbleRadius = getRadius(it.value)
+            val x = coords[i].first
+            val y = coords[i].second
+            circleBodies.add(
+                CircleBody(
+                    world,
+                    Vec2(x, y),
+                    bubbleRadius * getScale(),
+                    bubbleRadius * getScale() * 1.2f,
+                    density = density,
+                    shouldShow = shouldShowPickerItem(it),
+                    margin = margin
+                )
+            )
+        }
+        pickerItems.filter { it.isSecondary }.forEachIndexed { i, it ->
+            val density = getDensity(it.value)
+            val bubbleRadius = getRadius(it.value)
+            val x = coords[i].first
+            val y = coords[i].second
             circleBodies.add(
                 CircleBody(
                     world,

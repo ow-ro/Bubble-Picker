@@ -44,19 +44,22 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         set(value) {
             field = value
             if (value != null) {
-                val mainPickerItems = HashSet((0 until value.mainItemCount).map { value.getMainItem(it) })
-                engine.mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
-                // Prevent 0/0 division when there is an all time friend with 0 minutes
-                val mainMaxScale = mainPickerItems.maxByOrNull { it.value }?.value ?: 0f
-                engine.mainMaxScale = if (mainMaxScale == 0f) 1f else mainMaxScale
+                val mainPickerItems = (0 until value.mainItemCount)
+                    .map { value.getMainItem(it) }
+                    .sortedByDescending { it.value }
 
-                val secondaryPickerItems = hashSetOf<PickerItem>()
+                // Makes min values equal to 0% and max values equal to 100%, everything in between is scaled accordingly
+                setNormalizedValues(mainPickerItems)
+
+                val secondaryPickerItems = mutableListOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
-                    secondaryPickerItems.addAll((0 until secondaryCount).map { value.getSecondaryItem(it) })
-                    engine.secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
-                    // Prevent 0/0 division when there is an all time friend with 0 minutes
-                    val secondaryMaxScale = secondaryPickerItems.maxByOrNull { it.value }?.value ?: 0f
-                    engine.secondaryMaxScale = if (secondaryMaxScale == 0f) 1f else secondaryMaxScale
+                    secondaryPickerItems.addAll((0 until secondaryCount)
+                        .map { value.getSecondaryItem(it) }
+                        .sortedByDescending { it.value }
+                    )
+
+                    // Makes min values equal to 0% and max values equal to 100%, everything in between is scaled accordingly
+                    setNormalizedValues(secondaryPickerItems)
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
@@ -157,6 +160,14 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         }
 
         array.recycle()
+    }
+
+    private fun setNormalizedValues(items: List<PickerItem>) {
+        val minVal = items.minOfOrNull { it.value } ?: 0f
+        val maxVal = items.maxOfOrNull { it.value } ?: 1f
+        items.forEach {
+            it.value = (it.value - minVal) / (maxVal - minVal)
+        }
     }
 
     fun showMainItems() {
