@@ -218,11 +218,6 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         renderer.speedBackToCenter = speed
     }
 
-    // Config Center Immediately
-    fun configCenterImmediately(center: Boolean) {
-        renderer.centerImmediately = center
-    }
-
     // Config size of image
     fun configSizeOfImage(width: Float, height: Float) {
         renderer.widthImage = width

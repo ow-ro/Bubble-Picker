@@ -44,11 +44,6 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
     var allPickerItemsList: ArrayList<PickerItem> = ArrayList()
-    var centerImmediately = false
-        set(value) {
-            field = value
-            engine.centerImmediately = value
-        }
     // Image size
     var widthImage = 256f
     var heightImage = 256f
@@ -95,7 +90,6 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
 
         // If items aren't already generated, create them
         if (circles.size == 0) {
-            engine.centerImmediately = centerImmediately
             engine.build(allPickerItemsList, scaleX, scaleY)
                 .forEachIndexed { index, body ->
                     circles.add(

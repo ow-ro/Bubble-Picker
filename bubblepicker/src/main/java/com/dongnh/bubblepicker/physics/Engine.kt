@@ -24,7 +24,6 @@ class Engine {
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
-    private val startX get() = if (centerImmediately) 0.5f else 2.2f
     private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
     private var selectedItem: Item? = null
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
@@ -73,7 +72,6 @@ class Engine {
                 didModeChange = true
             }
         }
-    var centerImmediately = false
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
@@ -224,9 +222,6 @@ class Engine {
             circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
             stepsCount++
-            if (stepsCount >= 10) {
-                centerImmediately = false
-            }
         }
     }
 

@@ -128,7 +128,6 @@ class DemoFragment : Fragment() {
             }
 
             container.addView(this)
-            configCenterImmediately(true)
             swipeMoveSpeed = 1f
             configSpeedMoveOfItem(20f)
             configMargin(0.001f)
@@ -189,7 +188,6 @@ class DemoFragment : Fragment() {
             }
 
             container.addView(this)
-            configCenterImmediately(true)
             swipeMoveSpeed = 1f
             configSpeedMoveOfItem(20f)
             configMargin(0.001f)
