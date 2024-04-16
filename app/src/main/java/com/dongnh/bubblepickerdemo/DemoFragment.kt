@@ -1,6 +1,10 @@
 package com.dongnh.bubblepickerdemo
 
 import android.annotation.SuppressLint
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -47,6 +51,7 @@ class DemoFragment : Fragment() {
         binding.recyclerView.layoutManager =
             LinearLayoutManager(this.requireContext(), RecyclerView.VERTICAL, false)
         binding.recyclerView.adapter = SimpleAdapter()
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(1, Color.BLACK))
     }
 
     @SuppressLint("Recycle")
@@ -213,6 +218,36 @@ class DemoFragment : Fragment() {
         super.onPause()
         firstPicker?.onPause()
         secondPicker?.onPause()
+    }
+
+    inner class DividerItemDecoration(private val dividerHeight: Int, private val dividerColor: Int) : RecyclerView.ItemDecoration() {
+
+        private val paint = Paint()
+
+        init {
+            paint.color = dividerColor
+        }
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+            super.getItemOffsets(outRect, view, parent, state)
+            outRect.bottom = dividerHeight
+        }
+
+        override fun onDraw(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+            val left = parent.paddingLeft
+            val right = parent.width - parent.paddingRight
+
+            val childCount = parent.childCount
+            for (i in 0 until childCount) {
+                val child = parent.getChildAt(i)
+                val params = child.layoutParams as RecyclerView.LayoutParams
+
+                val top = child.bottom + params.bottomMargin
+                val bottom = top + dividerHeight
+
+                c.drawRect(left.toFloat(), top.toFloat(), right.toFloat(), bottom.toFloat(), paint)
+            }
+        }
     }
 
     inner class SimpleAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
