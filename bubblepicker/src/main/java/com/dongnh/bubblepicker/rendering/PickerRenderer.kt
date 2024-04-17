@@ -43,7 +43,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
     private var textureIds: IntArray? = null
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
-    var allPickerItemsList: ArrayList<PickerItem> = ArrayList()
+    var allPickerItems: List<PickerItem> = ArrayList()
     // Image size
     var widthImage = 256f
     var heightImage = 256f
@@ -84,18 +84,18 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
     }
 
     private fun initialize() {
-        if (allPickerItemsList.isEmpty()) {
+        if (allPickerItems.isEmpty()) {
             return
         }
 
         // If items aren't already generated, create them
         if (circles.size == 0) {
-            engine.build(allPickerItemsList, scaleX, scaleY)
+            engine.build(allPickerItems, scaleX, scaleY)
                 .forEachIndexed { index, body ->
                     circles.add(
                         Item(
                             WeakReference(glView.context),
-                            allPickerItemsList[index],
+                            allPickerItems[index],
                             body,
                             widthImage,
                             heightImage
@@ -104,7 +104,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
                 }
             engine.allItems = circles
 
-            allPickerItemsList.forEach {
+            allPickerItems.forEach {
                 if (circles.isNotEmpty() && it.isSelected) {
                     engine.resize(circles.first { circle -> circle.pickerItem == it })
                 }

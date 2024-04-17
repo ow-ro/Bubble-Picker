@@ -70,7 +70,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                 }
 
                 // Combine mainPickerItems and secondaryPickerItems, excluding duplicates based on title
-                renderer.allPickerItemsList = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
+                renderer.allPickerItems = ArrayList(mainPickerItems + secondaryPickerItems.filterNot { secondaryItem ->
                     mainPickerItems.any { it.id == secondaryItem.id }
                 })
             }
@@ -89,13 +89,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     }
 
     override fun onResume() {
-        if (renderer.allPickerItemsList.isNotEmpty()) {
+        if (renderer.allPickerItems.isNotEmpty()) {
             super.onResume()
         }
     }
 
     override fun onPause() {
-        if (renderer.allPickerItemsList.isNotEmpty()) {
+        if (renderer.allPickerItems.isNotEmpty()) {
             super.onPause()
         }
     }
