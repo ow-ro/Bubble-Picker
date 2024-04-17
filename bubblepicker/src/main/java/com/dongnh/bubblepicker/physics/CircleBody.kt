@@ -90,6 +90,7 @@ class CircleBody(
 
         if (abs(actualRadius - defaultRadius) < step) {
             increased = false
+            physicalBody?.resetMassData()
             clear()
         }
     }
@@ -101,6 +102,7 @@ class CircleBody(
 
         if (abs(actualRadius - increasedRadius) < step) {
             increased = true
+            physicalBody?.resetMassData()
             clear()
         }
     }
@@ -121,6 +123,7 @@ class CircleBody(
 
         if (actualRadius == defaultRadius) {
             clear()
+            physicalBody?.resetMassData()
         }
     }
 
@@ -144,7 +147,6 @@ class CircleBody(
 
     private fun reset() {
         physicalBody?.fixtureList?.shape?.m_radius = actualRadius + margin
-        physicalBody?.resetMassData()
     }
 
     fun defineState() {
