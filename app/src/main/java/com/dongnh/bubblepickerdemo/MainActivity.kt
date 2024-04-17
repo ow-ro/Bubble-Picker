@@ -38,6 +38,15 @@ class MainActivity : AppCompatActivity() {
                 .addToBackStack("fragmentDemo")
                 .commit()
         }
+
+        binding.openSingleFragment.setOnClickListener {
+            val fragmentDemo = DemoSingleFragment()
+            supportFragmentManager.beginTransaction()
+                .add(R.id.main_add_view, fragmentDemo, "fragmentDemo")
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .addToBackStack("fragmentDemo")
+                .commit()
+        }
     }
 
     override fun onBackPressed() {
