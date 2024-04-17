@@ -144,6 +144,7 @@ class CircleBody(
 
     private fun reset() {
         physicalBody?.fixtureList?.shape?.m_radius = actualRadius + margin
+        physicalBody?.resetMassData()
     }
 
     fun defineState() {
