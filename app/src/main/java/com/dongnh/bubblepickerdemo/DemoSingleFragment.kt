@@ -49,7 +49,7 @@ class DemoSingleFragment : Fragment() {
                 Item(
                     title,
                     primaryImages.getResourceId(index, 0),
-                    if (index == 6 || index == 7) 1f else 0f
+                    IntRange(50, 150).random().toFloat()
                 )
             )
         }
@@ -62,7 +62,7 @@ class DemoSingleFragment : Fragment() {
                 Item(
                     title,
                     secondaryImages.getResourceId(index, 0),
-                    if (index == 6 || index == 7) 1f else 0f
+                    IntRange(1, 25).random().toFloat()
                 )
             )
         }
