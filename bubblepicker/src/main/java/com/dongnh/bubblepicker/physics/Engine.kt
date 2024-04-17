@@ -40,10 +40,10 @@ class Engine {
     private var minArea = 0f
     var allItems: ArrayList<Item> = arrayListOf()
     var mode: Mode = Mode.MAIN
-        set(value) {
+        set(newMode) {
             // Don't do anything if the mode is the same
-            if (value != field) {
-                field = value
+            if (newMode != field) {
+                field = newMode
                 selectedItem = null
                 allItems.forEach {
                     it.circleBody.apply {
@@ -52,18 +52,20 @@ class Engine {
 
                         // Only need to do this for duplicate items
                         if (it.pickerItem.secondaryValue != null) {
-                            if (value == Mode.MAIN) {
+                            if (newMode == Mode.MAIN) {
                                 // Main mode, we want the main sizings/densities
                                 val mainRadius = getRadius(it.pickerItem.value)
                                 density = getDensity(it.pickerItem.value)
                                 defaultRadius = mainRadius * getScale()
                                 increasedRadius = mainRadius * getScale() * 1.2f
+                                value = it.pickerItem.value
                             } else {
                                 // Secondary mode, we want the secondary sizings/densities
                                 val secondaryRadius = getRadius(it.pickerItem.secondaryValue!!)
                                 density = getDensity(it.pickerItem.secondaryValue!!)
                                 defaultRadius = secondaryRadius * getScale()
                                 increasedRadius = secondaryRadius * getScale() * 1.2f
+                                value = it.pickerItem.secondaryValue!!
                             }
                         }
                     }
@@ -123,10 +125,22 @@ class Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
-            if (distance > 1f && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
-            } else if (distance > 0.5f && body != selectedItem?.circleBody) {
-                applyForce(direction.mul(gravity * 3 / distance.sqr()), position)
+            if (distance > STEP * 300 && body != selectedItem?.circleBody) {
+                // apply more force to top 30% of bubbles
+                if (body.value >= 0.7f) {
+                    // pull in bubbles that are far away
+                    if (distance > 0.5f) {
+                        applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
+                    } else {
+                        applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
+                    }
+                } else {
+                    if (distance > 0.5f) {
+                        applyForce(direction.mul(gravity * distance.sqr()), position)
+                    } else {
+                        applyForce(direction.mul(gravity / distance.sqr()), position)
+                    }
+                }
             }
             if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
                 applyForce(centerDirection.mul(7f * increasedGravity), gravityCenterFixed)
@@ -146,19 +160,23 @@ class Engine {
 
     /**
      * Generates a list of coordinates for the bubbles to be placed at in a rectangular
-     * alternating pattern, this helps with putting larger items in the center which are
-     * at the start of the list in the build function.
-     * For example: 8 4 0 2 6
-     *              9 5 1 3 7
+     * alternating pattern.
+     * For example:
+     * ```
+     * 8 4 0 2 6
+     * 9 5 1 3 7
+     * ```
+     * Where each number is the index of the item in the list
      * @param numPoints The number of bubbles to generate coordinates for
      * @return A list of coordinates for the bubbles
      */
-    private fun generateCoordinates(numPoints: Int): List<Pair<Float, Float>> {
+    private fun getCoordinates(numPoints: Int): List<Pair<Float, Float>> {
         val coordinates = mutableListOf<Pair<Float, Float>>()
         var x = 0f
-        var y = 0.5f
+        var y = 0f
         for (i in 0 until numPoints) {
-            // Subtract 2 because the first 2 coordinates are (0, 0.5) and (0, -0.5)
+            if (i == 2) y = 0.15f
+            // Subtract 2 because the first 2 coordinates are (0, 0.15) and (0, -0.15)
             if ((i - 2) % 2 == 0) {
                 x *= -1
             }
@@ -174,12 +192,25 @@ class Engine {
     fun build(pickerItems: List<PickerItem>, scaleX: Float, scaleY: Float): List<CircleBody> {
         this.scaleX = scaleX
         this.scaleY = scaleY
-        val coords = generateCoordinates(pickerItems.size)
-        pickerItems.filter { !it.isSecondary }.forEachIndexed { i, it ->
+        val coords = getCoordinates(pickerItems.size)
+        var secondaryIndex = 0
+        pickerItems.forEachIndexed { i, it ->
             val density = getDensity(it.value)
             val bubbleRadius = getRadius(it.value)
-            val x = coords[i].first
-            val y = coords[i].second
+
+            val x = if (it.isSecondary) {
+                coords[secondaryIndex].first
+            } else {
+                coords[i].first
+            }
+            val y = if (it.isSecondary) {
+                val index = secondaryIndex
+                secondaryIndex++
+                coords[index].second
+            } else {
+                coords[i].second
+            }
+
             circleBodies.add(
                 CircleBody(
                     world,
@@ -188,23 +219,7 @@ class Engine {
                     bubbleRadius * getScale() * 1.2f,
                     density = density,
                     shouldShow = shouldShowPickerItem(it),
-                    margin = margin
-                )
-            )
-        }
-        pickerItems.filter { it.isSecondary }.forEachIndexed { i, it ->
-            val density = getDensity(it.value)
-            val bubbleRadius = getRadius(it.value)
-            val x = coords[i].first
-            val y = coords[i].second
-            circleBodies.add(
-                CircleBody(
-                    world,
-                    Vec2(x, y),
-                    bubbleRadius * getScale(),
-                    bubbleRadius * getScale() * 1.2f,
-                    density = density,
-                    shouldShow = shouldShowPickerItem(it),
+                    value = it.value,
                     margin = margin
                 )
             )

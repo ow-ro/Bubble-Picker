@@ -15,6 +15,7 @@ class CircleBody(
     var increasedRadius: Float,
     var density: Float,
     var shouldShow: Boolean = true,
+    var value: Float,
     private val margin: Float = 0.001f
 ) {
     var physicalBody: Body? = null
