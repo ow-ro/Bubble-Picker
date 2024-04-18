@@ -53,10 +53,9 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                 val mainPickerItems = (0 until value.mainItemCount)
                     .map { value.getMainItem(it) }
                     .sortedByDescending { it.value }
-                val totalMainValue = mainPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
                 // Transition values into radii
-                setRadii(mainPickerItems, if (totalMainValue != 0f) totalMainValue else 1f)
+                setRadii(mainPickerItems)
 
                 val secondaryPickerItems = mutableListOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
@@ -64,10 +63,9 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                         .map { value.getSecondaryItem(it) }
                         .sortedByDescending { it.value }
                     )
-                    val totalSecondaryValue = secondaryPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
                     // Transition values into radii
-                    setRadii(secondaryPickerItems, if (totalSecondaryValue != 0f) totalSecondaryValue else 1f)
+                    setRadii(secondaryPickerItems)
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
@@ -170,9 +168,13 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         array.recycle()
     }
 
-    private fun setRadii(items: List<PickerItem>, totalValue: Float) {
+    private fun setRadii(items: List<PickerItem>) {
+        val sum = items.sumOf { it.value.toDouble() }.toFloat()
+        // Prevent division by zero
+        val totalValue = if (sum != 0f) sum else 1f
         val lesserDimension = min(adapter?.width!!, adapter?.height!!)
-        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 0.8f
+        // Increasing the area allows the bubbles to grow closer to the bubble picker view height
+        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 1.5f
         val maxArea = (Math.PI * (maxBubbleSize * lesserDimension).pow(2)).toFloat()
         val minArea = (Math.PI * (minBubbleSize * lesserDimension).pow(2)).toFloat()
         // Make each radius based on area
