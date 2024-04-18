@@ -56,7 +56,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                 val totalMainValue = mainPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
                 // Transition values into radii
-                setRadii(mainPickerItems, totalMainValue)
+                setRadii(mainPickerItems, if (totalMainValue != 0f) totalMainValue else 1f)
 
                 val secondaryPickerItems = mutableListOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
@@ -67,7 +67,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                     val totalSecondaryValue = secondaryPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
                     // Transition values into radii
-                    setRadii(secondaryPickerItems, totalSecondaryValue)
+                    setRadii(secondaryPickerItems, if (totalSecondaryValue != 0f) totalSecondaryValue else 1f)
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
