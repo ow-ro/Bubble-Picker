@@ -12,6 +12,9 @@ interface BubblePickerAdapter {
     val secondaryItemCount: Int?
         get() = null
 
+    val width: Int
+    val height: Int
+
     fun getMainItem(position: Int): PickerItem
     fun getSecondaryItem(position: Int): PickerItem { return PickerItem() }
 }

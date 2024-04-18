@@ -20,6 +20,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 /**
  * Created by irinagalata on 1/19/17.
@@ -34,6 +38,8 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
     private var previousX = 0f
     private var previousY = 0f
     private var debounceRelease: Job? = null
+    private var minBubbleSize: Float = 0.1f
+    private var maxBubbleSize: Float = 0.8f
     @ColorInt
     var background: Int = 0
         set(value) {
@@ -47,9 +53,10 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                 val mainPickerItems = (0 until value.mainItemCount)
                     .map { value.getMainItem(it) }
                     .sortedByDescending { it.value }
+                val totalMainValue = mainPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
-                // Makes min values equal to 0% and max values equal to 100%, everything in between is scaled accordingly
-                setNormalizedValues(mainPickerItems)
+                // Transition values into radii
+                setRadii(mainPickerItems, totalMainValue)
 
                 val secondaryPickerItems = mutableListOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
@@ -57,9 +64,10 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
                         .map { value.getSecondaryItem(it) }
                         .sortedByDescending { it.value }
                     )
+                    val totalSecondaryValue = secondaryPickerItems.sumOf { it.value.toDouble() }.toFloat()
 
-                    // Makes min values equal to 0% and max values equal to 100%, everything in between is scaled accordingly
-                    setNormalizedValues(secondaryPickerItems)
+                    // Transition values into radii
+                    setRadii(secondaryPickerItems, totalSecondaryValue)
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
@@ -162,11 +170,18 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
         array.recycle()
     }
 
-    private fun setNormalizedValues(items: List<PickerItem>) {
-        val minVal = items.minOfOrNull { it.value } ?: 0f
-        val maxVal = items.maxOfOrNull { it.value } ?: 1f
+    private fun setRadii(items: List<PickerItem>, totalValue: Float) {
+        val lesserDimension = min(adapter?.width!!, adapter?.height!!)
+        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 0.8f
+        val maxArea = (Math.PI * (maxBubbleSize * lesserDimension).pow(2)).toFloat()
+        val minArea = (Math.PI * (minBubbleSize * lesserDimension).pow(2)).toFloat()
+        // Make each radius based on area
         items.forEach {
-            it.value = (it.value - minVal) / (maxVal - minVal)
+            val ratio = it.value / totalValue
+            val area = totalArea * ratio
+            val finalArea = max(minArea, min(maxArea, area))
+            val radius = sqrt(finalArea / Math.PI).toFloat()
+            it.value = radius / lesserDimension
         }
     }
 
@@ -185,7 +200,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
      * @param size The maximum size of the bubble, default is 0.4f (40% of smaller dimension).
      */
     fun setMaxBubbleSize(size: Float) {
-        engine.maxBubbleSize = size
+        maxBubbleSize = size
     }
 
     /**
@@ -195,7 +210,7 @@ class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(cont
      * @param size The minimum size of the bubble, default is 0.1f (10% of smaller dimension).
      */
     fun setMinBubbleSize(size: Float) {
-        engine.minBubbleSize = size
+        minBubbleSize = size
     }
 
     fun configHorizontalSwipeOnly(horizOnly: Boolean) {

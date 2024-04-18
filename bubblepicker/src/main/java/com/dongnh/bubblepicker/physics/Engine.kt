@@ -8,8 +8,6 @@ import org.jbox2d.dynamics.World
 import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * Created by irinagalata on 1/26/17.
@@ -36,8 +34,6 @@ class Engine {
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
-    private var maxArea = 0f
-    private var minArea = 0f
     var allItems: ArrayList<Item> = arrayListOf()
     var mode: Mode = Mode.MAIN
         set(newMode) {
@@ -54,17 +50,15 @@ class Engine {
                         if (it.pickerItem.secondaryValue != null) {
                             if (newMode == Mode.MAIN) {
                                 // Main mode, we want the main sizings/densities
-                                val mainRadius = getRadius(it.pickerItem.value)
                                 density = getDensity(it.pickerItem.value)
-                                defaultRadius = mainRadius * getScale()
-                                increasedRadius = mainRadius * getScale() * 1.2f
+                                defaultRadius = it.pickerItem.value * getScale()
+                                increasedRadius = it.pickerItem.value * getScale() * 1.2f
                                 value = it.pickerItem.value
                             } else {
                                 // Secondary mode, we want the secondary sizings/densities
-                                val secondaryRadius = getRadius(it.pickerItem.secondaryValue!!)
                                 density = getDensity(it.pickerItem.secondaryValue!!)
-                                defaultRadius = secondaryRadius * getScale()
-                                increasedRadius = secondaryRadius * getScale() * 1.2f
+                                defaultRadius = it.pickerItem.secondaryValue!! * getScale()
+                                increasedRadius = it.pickerItem.secondaryValue!! * getScale() * 1.2f
                                 value = it.pickerItem.secondaryValue!!
                             }
                         }
@@ -77,16 +71,6 @@ class Engine {
     var speedToCenter = 16f
     var horizontalSwipeOnly = false
     var margin = 0.001f
-    var maxBubbleSize = 0.4f
-        set(value) {
-            field = value
-            maxArea = getArea(value)
-        }
-    var minBubbleSize = 0.1f
-        set(value) {
-            field = value
-            minArea = getArea(value)
-        }
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
@@ -96,19 +80,8 @@ class Engine {
         }
     }
 
-    private fun getRadius(value: Float): Float {
-        // Get interpolated area, return radius from it
-        val scaledArea = interpolate(minArea, maxArea, value)
-
-        return sqrt(scaledArea / Math.PI).toFloat()
-    }
-
     private fun getDensity(value: Float): Float {
         return interpolate(0.8f, 0.4f, value)
-    }
-
-    private fun getArea(radius: Float): Float {
-        return (Math.PI * radius.pow(2)).toFloat()
     }
 
     private fun createBorders() {
@@ -129,13 +102,13 @@ class Engine {
                 // apply more force to top 30% of bubbles
                 if (body.value >= 0.7f) {
                     // pull in bubbles that are far away
-                    if (distance > 0.5f) {
+                    if (distance > 1.5f) {
                         applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
                     } else {
                         applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
                     }
                 } else {
-                    if (distance > 0.5f) {
+                    if (distance > 1.5f) {
                         applyForce(direction.mul(gravity * distance.sqr()), position)
                     } else {
                         applyForce(direction.mul(gravity / distance.sqr()), position)
@@ -196,7 +169,7 @@ class Engine {
         var secondaryIndex = 0
         pickerItems.forEachIndexed { i, it ->
             val density = getDensity(it.value)
-            val bubbleRadius = getRadius(it.value)
+            val bubbleRadius = it.value
 
             val x = if (it.isSecondary) {
                 coords[secondaryIndex].first

@@ -35,8 +35,12 @@ class DemoSingleFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = inflate(inflater, container, false)
-        configView(binding.pickerContainer)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.post { configView(binding.pickerContainer) }
     }
 
     @SuppressLint("Recycle")
@@ -83,11 +87,17 @@ class DemoSingleFragment : Fragment() {
 
         firstPicker = BubblePicker(this.requireContext(), null)
         firstPicker!!.apply {
+            // This must be set before setting the adapter
+            setMaxBubbleSize(0.8f)
+            setMinBubbleSize(0.1f)
             adapter = object : BubblePickerAdapter {
 
                 override val totalItemCount = primaryItems.size + secondaryItems.size
                 override val mainItemCount = primaryItems.size
                 override val secondaryItemCount = secondaryItems.size
+
+                override val width = container.width
+                override val height = container.height
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
@@ -127,8 +137,6 @@ class DemoSingleFragment : Fragment() {
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
             })
-            setMaxBubbleSize(0.4f)
-            setMinBubbleSize(0.1f)
             configHorizontalSwipeOnly(false)
         }
     }

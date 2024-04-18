@@ -125,6 +125,10 @@ class DemoActivity : AppCompatActivity() {
                 override val totalItemCount = frameInfos.size
                 override val mainItemCount = frameInfos.size
 
+                // nonsense values
+                override val width = 300
+                override val height = 300
+
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         gradient = BubbleGradient(
