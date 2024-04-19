@@ -36,6 +36,11 @@ class DemoFragment : Fragment() {
     lateinit var secondaryItems: MutableList<Item>
     private var firstPicker: BubblePicker? = null
     private var secondPicker: BubblePicker? = null
+    private val deviceWidth: Int by lazy { resources.displayMetrics.widthPixels }
+    private val pickerHeight: Int by lazy {
+        val density = resources.displayMetrics.density
+        (275 * density).toInt()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -107,8 +112,8 @@ class DemoFragment : Fragment() {
                 override val mainItemCount = primaryItems.size
                 override val secondaryItemCount = secondaryItems.size
 
-                override val width = container.width
-                override val height = container.height
+                override val width = deviceWidth
+                override val height = pickerHeight
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
@@ -184,8 +189,8 @@ class DemoFragment : Fragment() {
                 override val totalItemCount = primaryItems.size
                 override val mainItemCount = primaryItems.size
 
-                override val width = container.width
-                override val height = container.height
+                override val width = deviceWidth
+                override val height = pickerHeight
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
