@@ -28,11 +28,13 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class BubblePicker(context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+class BubblePicker(val startMode: Engine.Mode, context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+
+    constructor(context: Context?, attrs: AttributeSet?) : this(Engine.Mode.MAIN, context, attrs)
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
     private val engine: Engine = Engine()
-    private val renderer: PickerRenderer = PickerRenderer(this, engine)
+    private val renderer: PickerRenderer = PickerRenderer(this, engine, startMode)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f

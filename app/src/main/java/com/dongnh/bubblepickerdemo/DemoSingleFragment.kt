@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.rendering.BubblePicker
 import com.dongnh.bubblepickerdemo.databinding.FragmentSingleDemoBinding
 import com.dongnh.bubblepickerdemo.databinding.FragmentSingleDemoBinding.*
@@ -85,7 +86,7 @@ class DemoSingleFragment : Fragment() {
             return
         }
 
-        firstPicker = BubblePicker(this.requireContext(), null)
+        firstPicker = BubblePicker(Engine.Mode.MAIN, this.requireContext(), null)
         firstPicker!!.apply {
             // This must be set before setting the adapter
             setMaxBubbleSize(0.8f)

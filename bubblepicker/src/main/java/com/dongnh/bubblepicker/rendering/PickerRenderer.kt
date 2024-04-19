@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class PickerRenderer(private val glView: View, private val engine: Engine) : GLSurfaceView.Renderer {
+class PickerRenderer(private val glView: View, private val engine: Engine, private val startMode: Engine.Mode) : GLSurfaceView.Renderer {
 
     private val scaleX: Float get() = if (glView.width < glView.height) {
         1f
@@ -109,7 +109,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine) : GLS
                     engine.resize(circles.first { circle -> circle.pickerItem == it })
                 }
             }
-            engine.mode = Engine.Mode.MAIN
+            engine.mode = startMode
         }
 
         if (textureIds == null) {
