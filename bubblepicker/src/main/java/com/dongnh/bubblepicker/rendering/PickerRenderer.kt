@@ -41,12 +41,12 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     private var vertices: FloatArray? = null
     private var textureVertices: FloatArray? = null
     private var textureIds: IntArray? = null
+    private var widthImage = 256f
+    private var heightImage = 256f
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
     var allPickerItems: List<PickerItem> = ArrayList()
     // Image size
-    var widthImage = 256f
-    var heightImage = 256f
     var horizontalSwipeOnly: Boolean = false
         set(value) {
             engine.horizontalSwipeOnly = value
@@ -106,7 +106,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
 
             allPickerItems.forEach {
                 if (circles.isNotEmpty() && it.isSelected) {
-                    engine.resize(circles.first { circle -> circle.pickerItem == it })
+                    engine.resize(circles.first { circle -> circle.pickerItem == it }, true)
                 }
             }
             engine.mode = startMode
@@ -194,8 +194,8 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
     }
 
-    fun resize(x: Float, y: Float) = getItem(Vec2(x, glView.height - y))?.apply {
-        if (engine.resize(this)) {
+    fun resize(x: Float, y: Float, resizeOnDeselect: Boolean) = getItem(Vec2(x, glView.height - y))?.apply {
+        if (engine.resize(this, resizeOnDeselect)) {
             listener?.let {
                 if (circleBody.increased) {
                     it.onBubbleDeselected(pickerItem)
@@ -203,6 +203,8 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
                     it.onBubbleSelected(pickerItem)
                 }
             }
+        } else if (this == engine.selectedItem && !resizeOnDeselect) {
+            listener?.onBubbleDeselected(pickerItem)
         }
     }
 

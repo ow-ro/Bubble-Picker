@@ -28,9 +28,9 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class BubblePicker(val startMode: Engine.Mode, context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean, context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
 
-    constructor(context: Context?, attrs: AttributeSet?) : this(Engine.Mode.MAIN, context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?) : this(Engine.Mode.MAIN, true, context, attrs)
 
     private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
     private val engine: Engine = Engine()
@@ -121,7 +121,7 @@ class BubblePicker(val startMode: Engine.Mode, context: Context?, attrs: Attribu
             }
             MotionEvent.ACTION_UP -> {
                 Log.i("BubblePicker", "ACTION_UP")
-                if (isClick(event)) renderer.resize(event.x, event.y)
+                if (isClick(event)) renderer.resize(event.x, event.y, resizeOnDeselect)
                 renderer.release()
                 releaseWithReset()
             }
@@ -235,11 +235,5 @@ class BubblePicker(val startMode: Engine.Mode, context: Context?, attrs: Attribu
     // Config speed draw and move iem
     fun configSpeedMoveOfItem(speed: Float) {
         renderer.speedBackToCenter = speed
-    }
-
-    // Config size of image
-    fun configSizeOfImage(width: Float, height: Float) {
-        renderer.widthImage = width
-        renderer.heightImage = height
     }
 }

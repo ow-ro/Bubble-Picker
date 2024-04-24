@@ -23,7 +23,6 @@ class Engine {
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
     private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
-    private var selectedItem: Item? = null
     private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var world = World(Vec2(0f, 0f), false)
     private var worldBorders: ArrayList<Border> = ArrayList()
@@ -34,6 +33,7 @@ class Engine {
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
+    var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
     var mode: Mode = Mode.MAIN
         set(newMode) {
@@ -233,7 +233,9 @@ class Engine {
         gravityCenter.setZero()
     }
 
-    fun resize(item: Item): Boolean {
+    fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {
+        /** If an item different than currently selected item was clicked,
+         * we queue up the currently selected item to be downsized */
         if (item != selectedItem && selectedItem?.circleBody?.isBusy == false) {
             selectedItem?.also {
                 it.circleBody.defineState()
@@ -242,8 +244,11 @@ class Engine {
         }
 
         if (item.circleBody.isBusy) return false
+        if (!resizeOnDeselect && selectedItem == item) return false
         item.circleBody.defineState()
         toBeResized.add(item)
+
+        // If a default radius item is clicked, we queue up the item to be upsized
         selectedItem = if (item.circleBody.toBeIncreased) {
             item
         } else {

@@ -86,7 +86,7 @@ class DemoSingleFragment : Fragment() {
             return
         }
 
-        firstPicker = BubblePicker(Engine.Mode.MAIN, this.requireContext(), null)
+        firstPicker = BubblePicker(Engine.Mode.MAIN, false, this.requireContext(), null)
         firstPicker!!.apply {
             // This must be set before setting the adapter
             setMaxBubbleSize(0.8f)
