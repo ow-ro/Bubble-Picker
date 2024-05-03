@@ -6,21 +6,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.opengl.GLES20.*
 import android.opengl.GLUtils
 import android.opengl.Matrix
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import android.util.Log
 import com.dongnh.bubblepicker.model.BubbleGradient
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.CircleBody
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
 import com.dongnh.bubblepicker.toTexture
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 
@@ -84,17 +77,17 @@ data class Item(
         pickerItem.animatedFrames?.let {
             if (it.size == 1) {
                 // Static image
-                val frame = it.first()
+                val bitmap = applyStrokeToFrame(it.first().bitmap)
                 glBindTexture(GL_TEXTURE_2D, currentTexture)
-                GLUtils.texImage2D(GL_TEXTURE_2D, 0, frame.bitmap, 0)
+                GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
             } else {
                 // Animated image
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastUpdateTime >= frameDelay) {
                     currentFrameIndex = (currentFrameIndex + 1) % it.size
-                    val frame = it[currentFrameIndex]
+                    val bitmap = applyStrokeToFrame(it[currentFrameIndex].bitmap)
                     glBindTexture(GL_TEXTURE_2D, currentTexture)
-                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, frame.bitmap, 0)
+                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
                     lastUpdateTime = currentTime
                 }
             }
@@ -121,6 +114,15 @@ data class Item(
         imageTexture = bindTexture(textureIds, index * 2 + 1)
     }
 
+    private fun applyStrokeToFrame(sourceImage: Bitmap): Bitmap {
+        val modifiedBitmap = Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(modifiedBitmap)
+        val bitmapDrawable = BitmapDrawable(context.get()?.resources, sourceImage)
+        drawImage(bitmapDrawable, canvas)
+        drawStrokeSelect(canvas)
+        return modifiedBitmap
+    }
+
     private fun createBitmap(): Bitmap {
         var bitmap: Bitmap =
             Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
@@ -132,7 +134,7 @@ data class Item(
         val canvas = bitmap?.let { Canvas(it) }
 
         canvas?.let {
-            drawImage(it)
+            drawImage(pickerItem.imgDrawable as? BitmapDrawable, it)
             if (pickerItem.isViewBorderSelected) drawStrokeSelect(it)
             drawBackground(it)
             drawIcon(it)
@@ -245,16 +247,15 @@ data class Item(
         }
     }
 
-    private fun drawImage(canvas: Canvas) {
-        pickerItem.imgDrawable?.let {
-            val height = (it as BitmapDrawable).bitmap.height.toFloat()
-            val width = it.bitmap.width.toFloat()
-            val ratio = height.coerceAtLeast(width) / height.coerceAtMost(width)
-            val bitmapHeight = if (height < width) widthImage else heightImage * ratio
-            val bitmapWidth = if (height < width) widthImage * ratio else heightImage
-            it.bounds = Rect(0, 0, bitmapWidth.toInt(), bitmapHeight.toInt())
-            it.draw(canvas)
-        }
+    private fun drawImage(bitmapDrawable: BitmapDrawable?, canvas: Canvas) {
+        bitmapDrawable ?: return
+        val height = bitmapDrawable.bitmap.height.toFloat()
+        val width = bitmapDrawable.bitmap.width.toFloat()
+        val ratio = height.coerceAtLeast(width) / height.coerceAtMost(width)
+        val bitmapHeight = if (height < width) widthImage else heightImage * ratio
+        val bitmapWidth = if (height < width) widthImage * ratio else heightImage
+        bitmapDrawable.bounds = Rect(0, 0, bitmapWidth.toInt(), bitmapHeight.toInt())
+        bitmapDrawable.draw(canvas)
     }
 
     private fun calculateMatrix(scaleX: Float, scaleY: Float) = FloatArray(16).apply {
