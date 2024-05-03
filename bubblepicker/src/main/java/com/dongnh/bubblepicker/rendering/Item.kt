@@ -73,11 +73,15 @@ data class Item(
             }
         }
 
-    private fun maybeUpdateAnimatedFrame() {
+    private fun maybeUpdateAnimatedFrame(isSelected: Boolean) {
         pickerItem.animatedFrames?.let {
             if (it.size == 1) {
                 // Static image
-                val bitmap = applyStrokeToFrame(it.first().bitmap)
+                val bitmap = if (isSelected) {
+                    applyStrokeToFrame(it.first().bitmap)
+                } else {
+                    it.first().bitmap
+                }
                 glBindTexture(GL_TEXTURE_2D, currentTexture)
                 GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
             } else {
@@ -85,7 +89,11 @@ data class Item(
                 val currentTime = System.currentTimeMillis()
                 if (currentTime - lastUpdateTime >= frameDelay) {
                     currentFrameIndex = (currentFrameIndex + 1) % it.size
-                    val bitmap = applyStrokeToFrame(it[currentFrameIndex].bitmap)
+                    val bitmap = if (isSelected) {
+                        applyStrokeToFrame(it[currentFrameIndex].bitmap)
+                    } else {
+                        it[currentFrameIndex].bitmap
+                    }
                     glBindTexture(GL_TEXTURE_2D, currentTexture)
                     GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
                     lastUpdateTime = currentTime
@@ -94,8 +102,8 @@ data class Item(
         }
     }
 
-    fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float) {
-        maybeUpdateAnimatedFrame()
+    fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float, isSelected: Boolean) {
+        maybeUpdateAnimatedFrame(isSelected)
         glActiveTexture(GL_TEXTURE)
         glBindTexture(GL_TEXTURE_2D, currentTexture)
         glUniform1i(glGetUniformLocation(programId, BubbleShader.U_TEXT), 0)
@@ -150,7 +158,7 @@ data class Item(
         if (pickerItem.colorBorderSelected != null) {
             strokePaint.color = pickerItem.colorBorderSelected!!
         } else {
-            strokePaint.color = Color.BLACK
+            strokePaint.color = Color.WHITE
         }
 
         strokePaint.strokeWidth = pickerItem.strokeWidthBorder

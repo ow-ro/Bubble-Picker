@@ -155,7 +155,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         uvBuffer?.passToShader(programId, A_UV)
         circles.forEachIndexed { i, circle ->
             if (!circle.isBodyDestroyed) {
-                circle.drawItself(programId, i, scaleX, scaleY)
+                circle.drawItself(programId, i, scaleX, scaleY, engine.selectedItem == circle)
             }
         }
     }
