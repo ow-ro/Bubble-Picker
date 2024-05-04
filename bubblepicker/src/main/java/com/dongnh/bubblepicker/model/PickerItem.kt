@@ -27,7 +27,7 @@ data class PickerItem @JvmOverloads constructor(
     var isSelected: Boolean = false,
     var isViewBorderSelected: Boolean = false,
     @ColorInt var colorBorderSelected: Int? = null,
-    var strokeWidthBorder: Float = 10f,
+    var strokeWidthBorder: Float = 12.5f,
     var isSecondary: Boolean = false,
     var customData: Any? = null
 )

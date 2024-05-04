@@ -153,19 +153,16 @@ data class Item(
     }
 
     private fun drawStrokeSelect(canvas: Canvas) {
-        val strokePaint = Paint()
-        strokePaint.style = Paint.Style.STROKE
-        if (pickerItem.colorBorderSelected != null) {
-            strokePaint.color = pickerItem.colorBorderSelected!!
-        } else {
-            strokePaint.color = Color.WHITE
+        val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            color = pickerItem.colorBorderSelected ?: Color.WHITE
+            strokeWidth = pickerItem.strokeWidthBorder
         }
 
-        strokePaint.strokeWidth = pickerItem.strokeWidthBorder
         canvas.drawCircle(
             widthImage / 2,
             heightImage / 2,
-            widthImage / 2 - (pickerItem.strokeWidthBorder / 2f),
+            widthImage / 2,
             strokePaint
         )
     }
