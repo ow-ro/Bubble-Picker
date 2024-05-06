@@ -176,7 +176,7 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         val totalValue = if (sum != 0f) sum else 1f
         val lesserDimension = min(adapter?.width!!, adapter?.height!!)
         // Increasing the area allows the bubbles to grow closer to the bubble picker view height
-        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 1.5f
+        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 2.5f
         val maxArea = (Math.PI * (maxBubbleSize * lesserDimension).pow(2)).toFloat()
         val minArea = (Math.PI * (minBubbleSize * lesserDimension).pow(2)).toFloat()
         // Make each radius based on area
