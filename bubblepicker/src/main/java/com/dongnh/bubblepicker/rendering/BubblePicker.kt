@@ -181,7 +181,8 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         val minArea = (Math.PI * (minBubbleSize * lesserDimension).pow(2)).toFloat()
         // Make each radius based on area
         items.forEach {
-            val ratio = it.value / totalValue
+            val value = if (it.value == 0f) 1f else it.value
+            val ratio = value / totalValue
             val area = totalArea * ratio
             val finalArea = max(minArea, min(maxArea, area))
             val radius = sqrt(finalArea / Math.PI).toFloat()
