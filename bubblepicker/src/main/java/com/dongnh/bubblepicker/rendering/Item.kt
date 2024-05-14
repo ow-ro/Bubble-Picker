@@ -49,10 +49,7 @@ data class Item(
     private val isVisible
         get() = circleBody.isVisible
 
-
-    private var imageTexture: Int = 0
-
-    private val currentTexture: Int get () = imageTexture
+    private var texture: Int = 0
 
     private var currentFrameIndex: Int = 0
     private var lastUpdateTime = System.currentTimeMillis()
@@ -82,7 +79,7 @@ data class Item(
                 } else {
                     it.first().bitmap
                 }
-                glBindTexture(GL_TEXTURE_2D, currentTexture)
+                glBindTexture(GL_TEXTURE_2D, texture)
                 GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
             } else {
                 // Animated image
@@ -94,7 +91,7 @@ data class Item(
                     } else {
                         it[currentFrameIndex].bitmap
                     }
-                    glBindTexture(GL_TEXTURE_2D, currentTexture)
+                    glBindTexture(GL_TEXTURE_2D, texture)
                     GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
                     lastUpdateTime = currentTime
                 }
@@ -105,7 +102,7 @@ data class Item(
     fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float, isSelected: Boolean) {
         maybeUpdateAnimatedFrame(isSelected)
         glActiveTexture(GL_TEXTURE)
-        glBindTexture(GL_TEXTURE_2D, currentTexture)
+        glBindTexture(GL_TEXTURE_2D, texture)
         glUniform1i(glGetUniformLocation(programId, BubbleShader.U_TEXT), 0)
         glUniform1i(glGetUniformLocation(programId, BubbleShader.U_VISIBILITY), if (isVisible) 1 else -1)
         glUniformMatrix4fv(glGetUniformLocation(programId, U_MATRIX), 1, false, calculateMatrix(scaleX, scaleY), 0)
@@ -119,7 +116,7 @@ data class Item(
     }
 
     fun bindTextures(textureIds: IntArray, index: Int) {
-        imageTexture = bindTexture(textureIds, index * 2 + 1)
+        texture = bindTexture(textureIds, index * 2 + 1)
     }
 
     private fun applyStrokeToFrame(sourceImage: Bitmap): Bitmap {
