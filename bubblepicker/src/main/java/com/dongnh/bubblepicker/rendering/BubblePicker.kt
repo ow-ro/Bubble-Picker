@@ -87,24 +87,36 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     var swipeMoveSpeed = 1.5f
 
     init {
-        setZOrderOnTop(true)
-        setEGLContextClientVersion(2)
-        setEGLConfigChooser(8, 8, 8, 8, 16, 0)
-        holder.setFormat(PixelFormat.RGBA_8888)
-        setRenderer(renderer)
-        renderMode = RENDERMODE_CONTINUOUSLY
-        attrs?.let { retrieveAttributes(attrs) }
+        try {
+            setZOrderOnTop(true)
+            setEGLContextClientVersion(2)
+            setEGLConfigChooser(8, 8, 8, 8, 16, 0)
+            holder.setFormat(PixelFormat.RGBA_8888)
+            setRenderer(renderer)
+            renderMode = RENDERMODE_CONTINUOUSLY
+            attrs?.let { retrieveAttributes(attrs) }
+        } catch (e: Exception) {
+            Log.e("BubblePicker", "Error creating BubblePicker: ${e.message}", e)
+        }
     }
 
     override fun onResume() {
-        if (renderer.allPickerItems.isNotEmpty()) {
-            super.onResume()
+        try {
+            if (renderer.allPickerItems.isNotEmpty()) {
+                super.onResume()
+            }
+        } catch (e: Exception) {
+            Log.e("BubblePicker", "Error resuming BubblePicker: ${e.message}", e)
         }
     }
 
     override fun onPause() {
-        if (renderer.allPickerItems.isNotEmpty()) {
-            super.onPause()
+        try {
+            if (renderer.allPickerItems.isNotEmpty()) {
+                super.onPause()
+            }
+        } catch (e: Exception) {
+            Log.e("BubblePicker", "Error pausing BubblePicker: ${e.message}", e)
         }
     }
 
