@@ -74,7 +74,7 @@ data class Item(
             }
         }
 
-    private fun maybeUpdateAnimatedFrame(programId: Int, isSelected: Boolean) {
+    private fun maybeUpdateAnimatedFrame(programId: Int, isSelected: Boolean): Float {
         pickerItem.animatedFrames?.let { frames ->
             val frame = frames[currentFrameIndex]
             val currentTime = System.currentTimeMillis()
@@ -85,21 +85,24 @@ data class Item(
             } else if (frames.size == 1) {
                 updateTexture(frame.bitmap)
             }
+            return frame.bitmap.width.toFloat() / frame.bitmap.height.toFloat()
         }
+        return 1f
     }
 
     private fun updateTexture(bitmap: Bitmap) {
-        val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
-        glUniform1f(aspectRatioLocation, aspectRatio)
+        //val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+        //glUniform1f(aspectRatioLocation, aspectRatio)
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
     }
 
     fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float, isSelected: Boolean) {
-        maybeUpdateAnimatedFrame(programId, isSelected)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, texture)
+        val aspectRatio = maybeUpdateAnimatedFrame(programId, isSelected)
         glUniform1i(textUniformLocation, 0)
         glUniform1i(visibilityLocation, if (isVisible) 1 else -1)
+        glUniform1f(aspectRatioLocation, aspectRatio)
         glUniformMatrix4fv(matrixLocation, 1, false, calculateMatrix(scaleX, scaleY), 0)
         glDrawArrays(GL_TRIANGLE_STRIP, index * 4, 4)
     }
