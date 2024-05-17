@@ -53,8 +53,12 @@ data class Item(
 
     private var currentFrameIndex: Int = 0
     private var lastUpdateTime = System.currentTimeMillis()
+    var programId: Int = 0
     private val frameDelay: Long get() = pickerItem.animatedFrames?.get(currentFrameIndex)?.duration ?: 40
-
+    private val aspectRatioLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_ASPECT_RATIO) }
+    private val textUniformLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_TEXT) }
+    private val visibilityLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_VISIBILITY) }
+    private val matrixLocation by lazy { glGetUniformLocation(programId, U_MATRIX) }
 
     private val gradient: LinearGradient?
         get() {
@@ -70,42 +74,33 @@ data class Item(
             }
         }
 
-    private fun maybeUpdateAnimatedFrame(isSelected: Boolean) {
-        pickerItem.animatedFrames?.let {
-            if (it.size == 1) {
-                // Static image
-                val bitmap = if (isSelected) {
-                    applyStrokeToFrame(it.first().bitmap)
-                } else {
-                    it.first().bitmap
-                }
-                glBindTexture(GL_TEXTURE_2D, texture)
-                GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
-            } else {
-                // Animated image
-                val currentTime = System.currentTimeMillis()
-                if (currentTime - lastUpdateTime >= frameDelay) {
-                    currentFrameIndex = (currentFrameIndex + 1) % it.size
-                    val bitmap = if (isSelected) {
-                        applyStrokeToFrame(it[currentFrameIndex].bitmap)
-                    } else {
-                        it[currentFrameIndex].bitmap
-                    }
-                    glBindTexture(GL_TEXTURE_2D, texture)
-                    GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
-                    lastUpdateTime = currentTime
-                }
+    private fun maybeUpdateAnimatedFrame(programId: Int, isSelected: Boolean) {
+        pickerItem.animatedFrames?.let { frames ->
+            val frame = frames[currentFrameIndex]
+            val currentTime = System.currentTimeMillis()
+            if (frames.size > 1 && currentTime - lastUpdateTime > frameDelay) {
+                currentFrameIndex = (currentFrameIndex + 1) % frames.size
+                lastUpdateTime = currentTime
+                updateTexture(frame.bitmap)
+            } else if (frames.size == 1) {
+                updateTexture(frame.bitmap)
             }
         }
     }
 
+    private fun updateTexture(bitmap: Bitmap) {
+        val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+        glUniform1f(aspectRatioLocation, aspectRatio)
+        GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
+    }
+
     fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float, isSelected: Boolean) {
-        maybeUpdateAnimatedFrame(isSelected)
-        glActiveTexture(GL_TEXTURE)
+        maybeUpdateAnimatedFrame(programId, isSelected)
+        glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, texture)
-        glUniform1i(glGetUniformLocation(programId, BubbleShader.U_TEXT), 0)
-        glUniform1i(glGetUniformLocation(programId, BubbleShader.U_VISIBILITY), if (isVisible) 1 else -1)
-        glUniformMatrix4fv(glGetUniformLocation(programId, U_MATRIX), 1, false, calculateMatrix(scaleX, scaleY), 0)
+        glUniform1i(textUniformLocation, 0)
+        glUniform1i(visibilityLocation, if (isVisible) 1 else -1)
+        glUniformMatrix4fv(matrixLocation, 1, false, calculateMatrix(scaleX, scaleY), 0)
         glDrawArrays(GL_TRIANGLE_STRIP, index * 4, 4)
     }
 

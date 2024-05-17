@@ -127,6 +127,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     }
 
     private fun initializeItem(item: Item, index: Int) {
+        item.programId = programId
         initializeVertices(item, index)
         textureVertices?.passTextureVertices(index)
         item.bindTextures(textureIds ?: IntArray(0), index)
@@ -143,8 +144,19 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         val radiusY = radius * scaleY
 
         body.initialPosition.apply {
-            vertices?.put(8 * index, floatArrayOf(x - radiusX, y + radiusY, x - radiusX, y - radiusY,
-                x + radiusX, y + radiusY, x + radiusX, y - radiusY))
+            vertices?.put(
+                8 * index,
+                floatArrayOf(
+                    x - radiusX,
+                    y + radiusY,
+                    x - radiusX,
+                    y - radiusY,
+                    x + radiusX,
+                    y + radiusY,
+                    x + radiusX,
+                    y - radiusY
+                )
+            )
         }
     }
 
@@ -167,8 +179,10 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     }
 
     private fun attachShaders() {
-        programId = createProgram(createShader(GL_VERTEX_SHADER, vertexShader),
-            createShader(GL_FRAGMENT_SHADER, fragmentShader))
+        programId = createProgram(
+            createShader(GL_VERTEX_SHADER, vertexShader),
+            createShader(GL_FRAGMENT_SHADER, fragmentShader)
+        )
         glUseProgram(programId)
     }
 

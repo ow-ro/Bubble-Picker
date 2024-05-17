@@ -53,7 +53,6 @@ class DemoActivity : AppCompatActivity() {
     }
 
     lateinit var images: TypedArray
-    lateinit var colors: TypedArray
     lateinit var picker: BubblePicker
     lateinit var glide: RequestManager
 
@@ -115,7 +114,6 @@ class DemoActivity : AppCompatActivity() {
     }
 
     private fun buildPicker(frameInfos: List<List<AvifLoader.FrameInfo>>) {
-        colors = resources.obtainTypedArray(R.array.colors)
         images = resources.obtainTypedArray(R.array.images)
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -131,10 +129,6 @@ class DemoActivity : AppCompatActivity() {
 
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        gradient = BubbleGradient(
-                            colors.getColor((position * 2) % 8, 0),
-                            colors.getColor((position * 2) % 8 + 1, 0), BubbleGradient.VERTICAL
-                        )
                         value = 50f + (position * 10)
                         typeface = mediumTypeface
                         // If you want to use image url, you need using glide load it and pass to this param
@@ -176,7 +170,6 @@ class DemoActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        colors.resources
         images.resources
     }
 
