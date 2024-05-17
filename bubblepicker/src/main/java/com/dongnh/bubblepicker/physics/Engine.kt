@@ -4,10 +4,12 @@ import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
+import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.World
+import org.jbox2d.dynamics.joints.MouseJoint
+import org.jbox2d.dynamics.joints.MouseJointDef
 import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
-import kotlin.math.abs
 
 /**
  * Created by irinagalata on 1/26/17.
@@ -22,19 +24,22 @@ class Engine {
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
-    private val currentGravity: Float get() = if (touch) increasedGravity else speedToCenter
-    private var standardIncreasedGravity = interpolate(500f, 800f, 0.5f)
     private var world = World(Vec2(0f, 0f), false)
+    private var groundBody = world.createBody(BodyDef())
     private var worldBorders: ArrayList<Border> = ArrayList()
     private var scaleX = 0f
     private var scaleY = 0f
-    private var touch = false
-    private var increasedGravity = 55f
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
+    private var mouseJoint: MouseJoint? = null
+    private var targetBody: CircleBody? = null
+    private var shouldDestroyJoint: Boolean = false
     var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
+    var speedToCenter = 16f
+    var horizontalSwipeOnly = false
+    var margin = 0.001f
     var mode: Mode = Mode.MAIN
         set(newMode) {
             // Don't do anything if the mode is the same
@@ -68,9 +73,6 @@ class Engine {
                 didModeChange = true
             }
         }
-    var speedToCenter = 16f
-    var horizontalSwipeOnly = false
-    var margin = 0.001f
 
     private fun shouldShowPickerItem(item: PickerItem): Boolean {
         return when {
@@ -97,7 +99,7 @@ class Engine {
             val centerDirection = gravityCenterFixed.sub(position)
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
-            val gravity = if (body.increased) 1.2f * currentGravity else currentGravity
+            val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
             if (distance > STEP * 300 && body != selectedItem?.circleBody) {
                 // apply more force to top 30% of bubbles
                 if (body.value >= 0.7f) {
@@ -115,9 +117,39 @@ class Engine {
                     }
                 }
             }
-            if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
-                applyForce(centerDirection.mul(7f * increasedGravity), gravityCenterFixed)
+            if (body == selectedItem?.circleBody && !body.isBeingDragged && centerDirection.length() > STEP * 50) {
+                applyForce(centerDirection.mul(1500f), position)
             }
+        }
+    }
+
+    private fun createMouseJoint(circleBody: CircleBody, target: Vec2) {
+        if (world.isLocked) return
+        if (circleBody != targetBody) {
+            destroyMouseJoint()
+            targetBody = circleBody
+        }
+        val body = circleBody.physicalBody ?: return
+        // Calculate the offset from the touch point to the body center
+        val touchOffset = body.position.sub(target)
+        val md = MouseJointDef().apply {
+            this.bodyA = groundBody
+            this.bodyB = body
+            this.target.set(target.add(touchOffset))
+            this.maxForce = 50000.0f * body.mass // Very high max force to make it "stick" to the target
+            this.frequencyHz = 100.0f // High frequency for more stiffness and less lag
+            this.dampingRatio = 0.0f // Low damping ratio to eliminate damping and make it very responsive        }
+        }
+        mouseJoint = world.createJoint(md) as MouseJoint
+        body.isAwake = true
+    }
+
+    private fun destroyMouseJoint() {
+        mouseJoint?.let {
+            if (world.isLocked) return
+            world.destroyJoint(it)
+            mouseJoint = null
+            targetBody = null
         }
     }
 
@@ -207,30 +239,30 @@ class Engine {
         synchronized(toBeResized) {
             toBeResized.forEach { it.circleBody.resize(RESIZE_STEP) }
             world.step(STEP, 11, 11)
+            if (shouldDestroyJoint) {
+                destroyMouseJoint()
+                shouldDestroyJoint = false
+            }
             circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
             stepsCount++
         }
     }
 
-    fun swipe(x: Float, y: Float) {
-        gravityCenter.x += -x
-        if (!horizontalSwipeOnly) {
-            gravityCenter.y += y
-        } else {
-            gravityCenter.y = 0f
+    fun swipe(x: Float, y: Float, item: Item?) {
+        if (item != null && !item.isBodyDestroyed) {
+            item.circleBody.isBeingDragged = true
+            if (mouseJoint == null) {
+                createMouseJoint(item.circleBody, Vec2(x, y))
+            } else {
+                mouseJoint?.target = Vec2(x, y)
+            }
         }
-        increasedGravity = standardIncreasedGravity * abs(x * 13) * abs(y * 13)
-        touch = true
     }
 
     fun release() {
-        touch = false
-        increasedGravity = standardIncreasedGravity
-    }
-
-    fun releaseWithReset() {
-        gravityCenter.setZero()
+        shouldDestroyJoint = true
+        circleBodies.forEach { it.isBeingDragged = false }
     }
 
     fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {

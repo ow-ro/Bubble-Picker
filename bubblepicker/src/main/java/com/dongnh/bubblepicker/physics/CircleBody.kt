@@ -41,6 +41,7 @@ class CircleBody(
     val finished: Boolean
         get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
     val isBusy: Boolean get() = isIncreasing || isDecreasing
+    var isBeingDragged = false
     var isVisible: Boolean = true
     var toBeIncreased: Boolean = false
     var actualRadius: Float = if (shouldShow) {

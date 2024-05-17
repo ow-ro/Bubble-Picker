@@ -200,8 +200,9 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     }
 
     fun swipe(x: Float, y: Float) = engine.swipe(
-        x.convertValue(glView.width, scaleX),
-        y.convertValue(glView.height, scaleY)
+        x.convertPoint(glView.width, scaleX),
+        (glView.height - y).convertPoint(glView.height, scaleY),
+        getItem(Vec2(x, glView.height - y))
     )
 
     private fun getItem(position: Vec2) = position.let { vec2 ->
@@ -225,6 +226,4 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     }
 
     fun release() = engine.release()
-
-    fun releaseWithReset() = engine.releaseWithReset()
 }

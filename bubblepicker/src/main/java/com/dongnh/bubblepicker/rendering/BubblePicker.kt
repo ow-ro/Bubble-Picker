@@ -134,37 +134,25 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
             MotionEvent.ACTION_UP -> {
                 Log.i("BubblePicker", "ACTION_UP")
                 if (isClick(event)) renderer.resize(event.x, event.y, resizeOnDeselect)
-                renderer.release()
-                releaseWithReset()
+                release()
             }
             MotionEvent.ACTION_MOVE -> {
                 Log.i("BubblePicker", "ACTION_MOVE")
                 if (isSwipe(event)) {
-                    renderer.swipe((previousX - event.x) * swipeMoveSpeed, (previousY - event.y) * swipeMoveSpeed)
+                    renderer.swipe(event.x, event.y)
                     previousX = event.x
                     previousY = event.y
-                } else {
-                    release()
                 }
             }
             else -> {
                 release()
-                releaseWithReset()
             }
         }
 
         return true
     }
 
-    private fun release() = post { renderer.release() }
-
-    private fun releaseWithReset() {
-        debounceRelease?.cancel()
-        debounceRelease = coroutineScope.launch {
-            delay(1000)
-            renderer.releaseWithReset()
-        }
-    }
+    private fun release() = renderer.release()
 
     private fun isClick(event: MotionEvent) =
         abs(event.x - startX) < 5 && abs(event.y - startY) < 5
