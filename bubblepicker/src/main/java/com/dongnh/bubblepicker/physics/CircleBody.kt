@@ -40,10 +40,8 @@ class CircleBody(
         }
     val finished: Boolean
         get() = !toBeIncreased && !toBeDecreased && !isIncreasing && !isDecreasing
-    val isBusy: Boolean
-        get() = isIncreasing || isDecreasing
+    val isBusy: Boolean get() = isIncreasing || isDecreasing
     var isVisible: Boolean = true
-    var isDestroyed = true
     var toBeIncreased: Boolean = false
     var actualRadius: Float = if (shouldShow) {
         defaultRadius + margin
@@ -66,7 +64,6 @@ class CircleBody(
             createFixture(fixture)
             linearDamping = damping
         }
-        isDestroyed = false
     }
 
     fun resize(step: Float) {
@@ -108,7 +105,7 @@ class CircleBody(
     }
 
     private fun inflate(step: Float) {
-        if (isDestroyed) {
+        if (physicalBody == null) {
             initializeBody()
         }
 
@@ -140,7 +137,6 @@ class CircleBody(
             isVisible = false
             world.destroyBody(physicalBody)
             physicalBody = null
-            isDestroyed = true
             clear()
         }
     }

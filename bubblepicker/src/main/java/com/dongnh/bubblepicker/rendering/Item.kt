@@ -29,7 +29,7 @@ data class Item(
 ) {
 
     val isBodyDestroyed: Boolean
-        get() = circleBody.isDestroyed
+        get() = circleBody.physicalBody == null
 
     val x: Float?
         get() = circleBody.physicalBody?.position?.x
