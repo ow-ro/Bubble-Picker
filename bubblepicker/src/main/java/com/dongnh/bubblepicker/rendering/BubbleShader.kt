@@ -10,6 +10,8 @@ object BubbleShader {
     const val U_TEXT = "u_Text"
     const val U_VISIBILITY = "u_Visibility"
     const val U_ASPECT_RATIO = "u_AspectRatio"
+    const val U_BORDER_THICKNESS = "u_BorderThickness"
+    const val U_BORDER_COLOR = "u_BorderColor"
 
     const val A_POSITION = "a_Position"
     const val A_UV = "a_UV"
@@ -34,6 +36,8 @@ object BubbleShader {
         uniform sampler2D u_Texture;
         uniform int u_Visibility;
         uniform float u_AspectRatio; // Uniform to pass aspect ratio of the image
+        uniform float u_BorderThickness; // Uniform for the border thickness
+        uniform vec4 u_BorderColor; // Uniform for the border color
         varying vec2 v_UV;
 
         void main() {
@@ -45,8 +49,14 @@ object BubbleShader {
             }
 
             float distance = distance(vec2(0.5, 0.5), v_UV);
-            gl_FragColor = u_Visibility > 0 ?
-                mix(texture2D(u_Texture, centeredUV), u_Background, smoothstep(0.49, 0.5, distance)) : vec4(0);
+            if (distance > 0.5) {
+                discard; // Discard fragments outside the circle
+            } else if (distance > (0.5 - u_BorderThickness)) {
+                gl_FragColor = u_BorderColor; // Draw border color
+            } else {
+                gl_FragColor = u_Visibility > 0 ?
+                 mix(texture2D(u_Texture, centeredUV), u_Background, smoothstep(0.49, 0.5, distance)) : vec4(0);
+            }
         }
     """
 

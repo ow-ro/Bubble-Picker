@@ -1,6 +1,7 @@
 package com.dongnh.bubblepickerdemo
 
 import android.content.res.TypedArray
+import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -118,6 +119,7 @@ class DemoActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this, null)
+            picker.background = Color.BLACK
             picker.adapter = object : BubblePickerAdapter {
 
                 override val totalItemCount = frameInfos.size
@@ -143,6 +145,8 @@ class DemoActivity : AppCompatActivity() {
 
             setContentView(picker)
             picker.swipeMoveSpeed = 1f
+            picker.setSelectedBorderColor(floatArrayOf(1f, 1f, 1f, 1f))
+            picker.setSelectedBorderWidth(0.03f)
             picker.configSpeedMoveOfItem(20f)
             picker.configMargin(0.001f)
             picker.configListenerForBubble(object : BubblePickerListener {

@@ -63,6 +63,8 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
             field = value
             engine.margin = value
         }
+    var selectedBorderColor: FloatArray = floatArrayOf(1f, 1f, 1f, 1f)
+    var selectedBorderWidth: Float = 0.01f
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         glClearColor(
@@ -167,7 +169,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         uvBuffer?.passToShader(programId, A_UV)
         circles.forEachIndexed { i, circle ->
             if (!circle.isBodyDestroyed) {
-                circle.drawItself(programId, i, scaleX, scaleY, engine.selectedItem == circle)
+                circle.drawItself(i, scaleX, scaleY, selectedBorderColor, selectedBorderWidth, engine.selectedItem == circle)
             }
         }
     }

@@ -230,6 +230,14 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         minBubbleSize = size
     }
 
+    fun setSelectedBorderColor(color: FloatArray) {
+        renderer.selectedBorderColor = color
+    }
+
+    fun setSelectedBorderWidth(width: Float) {
+        renderer.selectedBorderWidth = width
+    }
+
     fun configHorizontalSwipeOnly(horizOnly: Boolean) {
         // Default false
         renderer.horizontalSwipeOnly = horizOnly

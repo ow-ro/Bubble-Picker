@@ -49,13 +49,14 @@ data class Item(
     private val isVisible
         get() = circleBody.isVisible
 
+    var programId: Int = 0
     private var texture: Int = 0
-
     private var currentFrameIndex: Int = 0
     private var lastUpdateTime = System.currentTimeMillis()
-    var programId: Int = 0
     private val frameDelay: Long get() = pickerItem.animatedFrames?.get(currentFrameIndex)?.duration ?: 40
     private val aspectRatioLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_ASPECT_RATIO) }
+    private val borderColorLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_BORDER_COLOR) }
+    private val borderThicknessLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_BORDER_THICKNESS) }
     private val textUniformLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_TEXT) }
     private val visibilityLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_VISIBILITY) }
     private val matrixLocation by lazy { glGetUniformLocation(programId, U_MATRIX) }
@@ -74,7 +75,7 @@ data class Item(
             }
         }
 
-    private fun maybeUpdateAnimatedFrame(programId: Int, isSelected: Boolean): Float {
+    private fun maybeUpdateAnimatedFrame(): Float {
         pickerItem.animatedFrames?.let { frames ->
             val frame = frames[currentFrameIndex]
             val currentTime = System.currentTimeMillis()
@@ -91,18 +92,23 @@ data class Item(
     }
 
     private fun updateTexture(bitmap: Bitmap) {
-        //val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
-        //glUniform1f(aspectRatioLocation, aspectRatio)
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0)
     }
 
-    fun drawItself(programId: Int, index: Int, scaleX: Float, scaleY: Float, isSelected: Boolean) {
+    fun drawItself(index: Int, scaleX: Float, scaleY: Float, borderColor: FloatArray, borderThickness: Float, isSelected: Boolean) {
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, texture)
-        val aspectRatio = maybeUpdateAnimatedFrame(programId, isSelected)
+        val aspectRatio = maybeUpdateAnimatedFrame()
         glUniform1i(textUniformLocation, 0)
         glUniform1i(visibilityLocation, if (isVisible) 1 else -1)
         glUniform1f(aspectRatioLocation, aspectRatio)
+        if (isSelected) {
+            glUniform4fv(borderColorLocation, 1, borderColor, 0)
+            glUniform1f(borderThicknessLocation, borderThickness)
+        } else {
+            glUniform4f(borderColorLocation, 0f, 0f, 0f, 0f)
+            glUniform1f(borderThicknessLocation, 0f)
+        }
         glUniformMatrix4fv(matrixLocation, 1, false, calculateMatrix(scaleX, scaleY), 0)
         glDrawArrays(GL_TRIANGLE_STRIP, index * 4, 4)
     }
