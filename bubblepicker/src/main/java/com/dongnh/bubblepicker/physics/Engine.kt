@@ -25,6 +25,7 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
     private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
+    private val standardIncreasedGravity = interpolate(800f, 300f, 0.5f)
     private var world = World(Vec2(0f, 0f), false)
     private var groundBody = world.createBody(BodyDef())
     private var worldBorders: ArrayList<Border> = ArrayList()
@@ -104,9 +105,9 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
             val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
             if (!body.isBeingDragged) {
                 if (distance > STEP * 200 && body != selectedItem?.circleBody) {
-                    applyForce(direction.mul(gravity * 3 / distance.sqr()), position)
+                    applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
                 } else if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
-                    applyForce(centerDirection.mul(7f * gravity), position)
+                    applyForce(centerDirection.mul(7f * standardIncreasedGravity), position)
                 }
             }
         }
