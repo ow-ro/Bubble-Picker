@@ -1,5 +1,6 @@
 package com.dongnh.bubblepicker.physics
 
+import com.dongnh.bubblepicker.BubblePickerOnTouchListener
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
@@ -14,7 +15,7 @@ import kotlin.collections.ArrayList
 /**
  * Created by irinagalata on 1/26/17.
  */
-class Engine {
+class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     enum class Mode {
         MAIN, SECONDARY
     }
@@ -45,6 +46,7 @@ class Engine {
             // Don't do anything if the mode is the same
             if (newMode != field) {
                 field = newMode
+                shouldDestroyJoint = true
                 selectedItem = null
                 allItems.forEach {
                     it.circleBody.apply {
@@ -100,35 +102,21 @@ class Engine {
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
-            if (distance > STEP * 300 && body != selectedItem?.circleBody) {
-                // apply more force to top 30% of bubbles
-                if (body.value >= 0.7f) {
-                    // pull in bubbles that are far away
-                    if (distance > 1.5f) {
-                        applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
-                    } else {
-                        applyForce(direction.mul(gravity * 5 / distance.sqr()), position)
-                    }
-                } else {
-                    if (distance > 1.5f) {
-                        applyForce(direction.mul(gravity * distance.sqr()), position)
-                    } else {
-                        applyForce(direction.mul(gravity / distance.sqr()), position)
-                    }
+            if (!body.isBeingDragged) {
+                if (distance > STEP * 200 && body != selectedItem?.circleBody) {
+                    applyForce(direction.mul(gravity * 3 / distance.sqr()), position)
+                } else if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
+                    applyForce(centerDirection.mul(7f * gravity), position)
                 }
-            }
-            if (body == selectedItem?.circleBody && !body.isBeingDragged && centerDirection.length() > STEP * 50) {
-                applyForce(centerDirection.mul(1500f), position)
             }
         }
     }
 
     private fun createMouseJoint(circleBody: CircleBody, target: Vec2) {
         if (world.isLocked) return
-        if (circleBody != targetBody) {
-            destroyMouseJoint()
-            targetBody = circleBody
-        }
+        destroyMouseJoint()
+        targetBody = circleBody
+        touchListener?.onTouchDown()
         val body = circleBody.physicalBody ?: return
         // Calculate the offset from the touch point to the body center
         val touchOffset = body.position.sub(target)
@@ -140,6 +128,7 @@ class Engine {
             this.frequencyHz = 100.0f // High frequency for more stiffness and less lag
             this.dampingRatio = 0.0f // Low damping ratio to eliminate damping and make it very responsive        }
         }
+        if (world.isLocked) return
         mouseJoint = world.createJoint(md) as MouseJoint
         body.isAwake = true
     }
@@ -150,6 +139,7 @@ class Engine {
             world.destroyJoint(it)
             mouseJoint = null
             targetBody = null
+            shouldDestroyJoint = false
         }
     }
 
@@ -239,9 +229,8 @@ class Engine {
         synchronized(toBeResized) {
             toBeResized.forEach { it.circleBody.resize(RESIZE_STEP) }
             world.step(STEP, 11, 11)
-            if (shouldDestroyJoint) {
+            if (shouldDestroyJoint && !world.isLocked) {
                 destroyMouseJoint()
-                shouldDestroyJoint = false
             }
             circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())

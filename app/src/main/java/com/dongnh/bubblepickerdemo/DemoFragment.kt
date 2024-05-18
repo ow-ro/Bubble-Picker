@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -15,8 +16,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dongnh.bubblepicker.BubblePickerListener
+import com.dongnh.bubblepicker.BubblePickerOnTouchListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.PickerItem
+import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.rendering.BubblePicker
 import com.dongnh.bubblepickerdemo.databinding.DemoBubbleCellBinding
 import com.dongnh.bubblepickerdemo.databinding.DemoEmptyCellBinding
@@ -101,8 +104,15 @@ class DemoFragment : Fragment() {
             return
         }
 
-        firstPicker = BubblePicker(this.requireContext(), null)
-        firstPicker!!.apply {
+        firstPicker = BubblePicker(Engine.Mode.MAIN, false, context, null, object : BubblePickerOnTouchListener {
+            override fun onTouchUp(event: MotionEvent) {
+                binding.recyclerView.suppressLayout(false)
+            }
+
+            override fun onTouchDown() {
+                binding.recyclerView.suppressLayout(true)
+            }
+        }).apply {
             // This must be set before the adapter
             setMaxBubbleSize(0.8f)
             setMinBubbleSize(0.1f)

@@ -9,16 +9,12 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.ColorInt
 import com.dongnh.bubblepicker.BubblePickerListener
+import com.dongnh.bubblepicker.BubblePickerOnTouchListener
 import com.dongnh.bubblepicker.R
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.Engine
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -28,18 +24,16 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean, context: Context?, attrs: AttributeSet?) : GLSurfaceView(context, attrs) {
+class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean, context: Context?, attrs: AttributeSet?, private val touchListener: BubblePickerOnTouchListener? = null) : GLSurfaceView(context, attrs) {
 
-    constructor(context: Context?, attrs: AttributeSet?) : this(Engine.Mode.MAIN, true, context, attrs)
+    constructor(context: Context?, attrs: AttributeSet? = null) : this(Engine.Mode.MAIN, true, context, attrs)
 
-    private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default) }
-    private val engine: Engine = Engine()
+    private val engine: Engine = Engine(touchListener)
     private val renderer: PickerRenderer = PickerRenderer(this, engine, startMode)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
-    private var debounceRelease: Job? = null
     private var minBubbleSize: Float = 0.1f
     private var maxBubbleSize: Float = 0.8f
     @ColorInt
@@ -125,7 +119,6 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 Log.i("BubblePicker", "ACTION_DOWN")
-                debounceRelease?.cancel()
                 startX = event.x
                 startY = event.y
                 previousX = event.x
@@ -134,25 +127,25 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
             MotionEvent.ACTION_UP -> {
                 Log.i("BubblePicker", "ACTION_UP")
                 if (isClick(event)) renderer.resize(event.x, event.y, resizeOnDeselect)
-                release()
+                touchListener?.onTouchUp(event)
+                renderer.release()
             }
             MotionEvent.ACTION_MOVE -> {
                 Log.i("BubblePicker", "ACTION_MOVE")
                 if (isSwipe(event)) {
+                    touchListener?.onTouchMove(event)
                     renderer.swipe(event.x, event.y)
                     previousX = event.x
                     previousY = event.y
                 }
             }
             else -> {
-                release()
+                renderer.release()
             }
         }
 
         return true
     }
-
-    private fun release() = renderer.release()
 
     private fun isClick(event: MotionEvent) =
         abs(event.x - startX) < 5 && abs(event.y - startY) < 5
