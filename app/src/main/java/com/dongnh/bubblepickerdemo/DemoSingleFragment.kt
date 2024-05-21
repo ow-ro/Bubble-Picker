@@ -138,7 +138,6 @@ class DemoSingleFragment : Fragment() {
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
             })
-            configHorizontalSwipeOnly(false)
         }
     }
 

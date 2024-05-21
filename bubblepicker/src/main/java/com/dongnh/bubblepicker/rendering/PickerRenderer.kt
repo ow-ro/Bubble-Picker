@@ -46,12 +46,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
     var allPickerItems: List<PickerItem> = ArrayList()
-    // Image size
-    var horizontalSwipeOnly: Boolean = false
-        set(value) {
-            engine.horizontalSwipeOnly = value
-            field = value
-        }
+
     // Gravity
     var speedBackToCenter = 50f
         set(value) {

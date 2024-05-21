@@ -219,11 +219,6 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         renderer.selectedBorderWidth = width
     }
 
-    fun configHorizontalSwipeOnly(horizOnly: Boolean) {
-        // Default false
-        renderer.horizontalSwipeOnly = horizOnly
-    }
-
     // Config listener
     fun configListenerForBubble(listener: BubblePickerListener) {
         renderer.listener = listener
