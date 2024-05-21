@@ -116,22 +116,27 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     private fun createMouseJoint(circleBody: CircleBody, target: Vec2) {
         if (world.isLocked) return
         destroyMouseJoint()
+
         targetBody = circleBody
         touchListener?.onTouchDown()
+
         val body = circleBody.physicalBody ?: return
-        // Calculate the offset from the touch point to the body center
-        val touchOffset = body.position.sub(target)
+        val touchOffset = body.position.sub(target) // Calculate the offset from the touch point to the body center
+
         val md = MouseJointDef().apply {
             this.bodyA = groundBody
             this.bodyB = body
             this.target.set(target.add(touchOffset))
-            this.maxForce = 50000.0f * body.mass // Very high max force to make it "stick" to the target
-            this.frequencyHz = 100.0f // High frequency for more stiffness and less lag
+            this.maxForce = 50000 * body.mass // Very high max force to make it "stick" to the target
+            this.frequencyHz = 1000.0f // High frequency for more stiffness and less lag
             this.dampingRatio = 0.0f // Low damping ratio to eliminate damping and make it very responsive        }
         }
+
         if (world.isLocked) return
-        mouseJoint = world.createJoint(md) as MouseJoint
-        body.isAwake = true
+        (world.createJoint(md) as? MouseJoint)?.let {
+            mouseJoint = it
+            body.isAwake = true
+        }
     }
 
     private fun destroyMouseJoint() {
