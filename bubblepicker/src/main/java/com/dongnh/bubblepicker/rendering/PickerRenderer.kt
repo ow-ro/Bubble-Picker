@@ -206,17 +206,25 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
     }
 
-    fun resize(x: Float, y: Float, resizeOnDeselect: Boolean) = getItem(Vec2(x, glView.height - y))?.apply {
-        if (engine.resize(this, resizeOnDeselect)) {
-            listener?.let {
-                if (circleBody.increased) {
-                    it.onBubbleDeselected(pickerItem)
-                } else {
-                    it.onBubbleSelected(pickerItem)
+    fun resize(x: Float, y: Float, resizeOnDeselect: Boolean) {
+        val item = getItem(Vec2(x, glView.height - y))?.apply {
+            if (engine.resize(this, resizeOnDeselect)) {
+                listener?.let {
+                    if (circleBody.increased) {
+                        it.onBubbleDeselected(pickerItem)
+                    } else {
+                        it.onBubbleSelected(pickerItem)
+                    }
                 }
+            } else if (this == engine.selectedItem && !resizeOnDeselect) {
+                listener?.onBubbleDeselected(pickerItem)
             }
-        } else if (this == engine.selectedItem && !resizeOnDeselect) {
-            listener?.onBubbleDeselected(pickerItem)
+        }
+
+        if (item == null) {
+            engine.selectedItem?.let {
+                engine.resize(it, true)
+            }
         }
     }
 
