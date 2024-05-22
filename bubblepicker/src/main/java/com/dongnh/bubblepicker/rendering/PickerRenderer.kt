@@ -200,10 +200,16 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         getItem(Vec2(x, glView.height - y))
     )
 
-    private fun getItem(position: Vec2) = position.let { vec2 ->
-        val x = vec2.x.convertPoint(glView.width, scaleX)
-        val y = vec2.y.convertPoint(glView.height, scaleY)
-        circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
+    fun longClick(x: Float, y: Float) {
+        getItem(Vec2(x, glView.height - y))?.let {
+            listener?.onBubbleLongClick(it.pickerItem)
+        }
+    }
+
+    private fun getItem(position: Vec2): Item? {
+        val x = position.x.convertPoint(glView.width, scaleX)
+        val y = position.y.convertPoint(glView.height, scaleY)
+        return circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
     }
 
     fun resize(x: Float, y: Float, resizeOnDeselect: Boolean) {

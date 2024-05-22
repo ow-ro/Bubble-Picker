@@ -11,4 +11,6 @@ interface BubblePickerListener {
 
     fun onBubbleDeselected(item: PickerItem)
 
+    fun onBubbleLongClick(item: PickerItem) {}
+
 }

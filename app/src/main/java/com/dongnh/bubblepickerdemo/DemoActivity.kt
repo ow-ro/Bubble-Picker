@@ -154,6 +154,10 @@ class DemoActivity : AppCompatActivity() {
 
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
+
+                override fun onBubbleLongClick(item: PickerItem) {
+                    toast("${item.title} long clicked")
+                }
             })
         }, 300)
     }

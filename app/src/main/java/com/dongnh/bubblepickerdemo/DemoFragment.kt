@@ -162,6 +162,10 @@ class DemoFragment : Fragment() {
 
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
+
+                override fun onBubbleLongClick(item: PickerItem) {
+                    toast("${item.title} long clicked")
+                }
             })
         }
     }
@@ -224,6 +228,10 @@ class DemoFragment : Fragment() {
 
                 override fun onBubbleDeselected(item: PickerItem) =
                     toast("${item.title} deselected")
+
+                override fun onBubbleLongClick(item: PickerItem) {
+                    toast("${item.title} long clicked")
+                }
             })
         }
     }

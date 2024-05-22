@@ -8,6 +8,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import androidx.annotation.ColorInt
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.BubblePickerOnTouchListener
 import com.dongnh.bubblepicker.R
@@ -15,6 +17,12 @@ import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
 import com.dongnh.bubblepicker.model.Color
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.Engine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -36,6 +44,16 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     private var previousY = 0f
     private var minBubbleSize: Float = 0.1f
     private var maxBubbleSize: Float = 0.8f
+    private var isLongPress = false
+    private var longPressJob: Job? = null
+    private val coroutineScope by lazy {
+        if (this.findViewTreeLifecycleOwner()?.lifecycleScope != null) {
+            this.findViewTreeLifecycleOwner()!!.lifecycleScope
+        } else {
+            CoroutineScope(Dispatchers.Main + SupervisorJob())
+        }
+    }
+
     @ColorInt
     var background: Int = 0
         set(value) {
@@ -118,21 +136,27 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                Log.i("BubblePicker", "ACTION_DOWN")
                 startX = event.x
                 startY = event.y
                 previousX = event.x
                 previousY = event.y
+                isLongPress = false
+
+                longPressJob = coroutineScope.launch {
+                    delay(300)
+                    renderer.longClick(startX, startY)
+                    isLongPress = true
+                }
             }
             MotionEvent.ACTION_UP -> {
-                Log.i("BubblePicker", "ACTION_UP")
-                if (isClick(event)) renderer.resize(event.x, event.y, resizeOnDeselect)
+                longPressJob?.cancel()
+                if (isClick(event) && !isLongPress) renderer.resize(event.x, event.y, resizeOnDeselect)
                 touchListener?.onTouchUp(event)
                 renderer.release()
             }
             MotionEvent.ACTION_MOVE -> {
-                Log.i("BubblePicker", "ACTION_MOVE")
                 if (isSwipe(event)) {
+                    longPressJob?.cancel()
                     touchListener?.onTouchMove(event)
                     renderer.swipe(event.x, event.y)
                     previousX = event.x
@@ -141,6 +165,7 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
             }
             else -> {
                 renderer.release()
+                longPressJob?.cancel()
             }
         }
 
@@ -148,10 +173,10 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     }
 
     private fun isClick(event: MotionEvent) =
-        abs(event.x - startX) < 5 && abs(event.y - startY) < 5
+        abs(event.x - startX) < 10 && abs(event.y - startY) < 10
 
     private fun isSwipe(event: MotionEvent) =
-        abs(event.x - previousX) > 5 || abs(event.y - previousY) > 5
+        abs(event.x - previousX) > 10 || abs(event.y - previousY) > 10
 
     private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
