@@ -166,7 +166,7 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     private fun setRadii(items: List<PickerItem>) {
         val sum = items.sumOf { it.value.toDouble() }.toFloat()
         // Prevent division by zero
-        val totalValue = if (sum != 0f) sum else 1f
+        val totalValue = if (sum > items.size) sum else items.size.toFloat()
         val lesserDimension = min(adapter?.width!!, adapter?.height!!)
         // Increasing the area allows the bubbles to grow closer to the bubble picker view height
         val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 2.5f

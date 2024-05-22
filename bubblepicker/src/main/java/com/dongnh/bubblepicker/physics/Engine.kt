@@ -40,7 +40,6 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
-    var horizontalSwipeOnly = false
     var margin = 0.001f
     var mode: Mode = Mode.MAIN
         set(newMode) {
