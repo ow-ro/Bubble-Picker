@@ -23,7 +23,6 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     private val STEP = 0.0009f
     private val RESIZE_STEP = 0.009f
     private val circleBodies: ArrayList<CircleBody> = ArrayList()
-    private val gravityCenterFixed = Vec2(0f, 0f)
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
     private val standardIncreasedGravity = interpolate(800f, 300f, 0.5f)
     private var world = World(Vec2(0f, 0f), false)
@@ -98,15 +97,14 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     private fun move(body: CircleBody) {
         body.physicalBody?.apply {
             body.position = position
-            val centerDirection = gravityCenterFixed.sub(position)
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
             if (!body.isBeingDragged) {
                 if (distance > STEP * 200 && body != selectedItem?.circleBody) {
                     applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
-                } else if (body == selectedItem?.circleBody && centerDirection.length() > STEP * 50) {
-                    applyForce(centerDirection.mul(7f * standardIncreasedGravity), position)
+                } else if (body == selectedItem?.circleBody && direction.length() > STEP * 50) {
+                    applyForce(direction.mul(7f * standardIncreasedGravity), position)
                 }
             }
         }
@@ -245,7 +243,12 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
 
     fun swipe(x: Float, y: Float, item: Item?) {
         if (item != null && !item.isBodyDestroyed) {
-            item.circleBody.isBeingDragged = true
+            item.let {
+                it.circleBody.isBeingDragged = true
+                if (it != selectedItem) {
+                    selectedItem?.circleBody?.isBeingDragged = false
+                }
+            }
             if (mouseJoint == null) {
                 createMouseJoint(item.circleBody, Vec2(x, y))
             } else {
