@@ -239,5 +239,8 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         }
     }
 
-    fun release() = engine.release()
+    fun release() {
+        currentlyTouchedItem = null
+        engine.release()
+    }
 }
