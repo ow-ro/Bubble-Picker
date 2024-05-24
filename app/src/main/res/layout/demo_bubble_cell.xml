@@ -7,7 +7,7 @@
     <LinearLayout
         android:id="@+id/picker_container"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="275dp"
         android:layout_marginVertical="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"

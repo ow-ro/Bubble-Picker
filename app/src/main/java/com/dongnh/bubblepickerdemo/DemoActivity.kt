@@ -12,31 +12,24 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
-import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation
-import com.bumptech.glide.load.resource.bitmap.CircleCrop
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
-import com.dongnh.bubblepicker.model.BubbleGradient
+import com.dongnh.bubblepicker.getPixelRadii
+import com.dongnh.bubblepicker.getScreenHeight
+import com.dongnh.bubblepicker.getScreenWidth
+import com.dongnh.bubblepicker.model.Item
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.BubblePicker
-import com.example.libavif.AvifDrawableTransformation
 import com.example.libavif.AvifLoader
-import com.example.libavif.Utils.loadAvif
 import com.example.libavif.Utils.toAvifSupportedSource
 import com.example.libavif.targets.AvifStreamTarget
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.executeAsync
-import java.nio.ByteBuffer
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -48,9 +41,7 @@ class DemoActivity : AppCompatActivity() {
     private val mediumTypeface by lazy { Typeface.createFromAsset(assets, ROBOTO_MEDIUM) }
 
     companion object {
-        private const val ROBOTO_BOLD = "roboto_bold.ttf"
         private const val ROBOTO_MEDIUM = "roboto_medium.ttf"
-        private const val ROBOTO_REGULAR = "roboto_regular.ttf"
     }
 
     lateinit var images: TypedArray
@@ -116,6 +107,16 @@ class DemoActivity : AppCompatActivity() {
 
     private fun buildPicker(frameInfos: List<List<AvifLoader.FrameInfo>>) {
         images = resources.obtainTypedArray(R.array.images)
+        val items = frameInfos.map {
+            Item(
+                "Item",
+                images.getResourceId(frameInfos.indexOf(it), 0),
+                it,
+                IntRange(50, 150).random().toFloat()
+            )
+        }
+        val lesserDimension = getScreenWidth()
+        val pixelRadii = getPixelRadii(items, lesserDimension, (lesserDimension * getScreenHeight()).toFloat())
 
         Handler(Looper.getMainLooper()).postDelayed({
             picker = BubblePicker(this, null)
@@ -125,13 +126,10 @@ class DemoActivity : AppCompatActivity() {
                 override val totalItemCount = frameInfos.size
                 override val mainItemCount = frameInfos.size
 
-                // nonsense values
-                override val width = 300
-                override val height = 300
-
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
-                        value = 50f + (position * 10)
+                        // Since it takes up whole screen use greater instead of lesser dimension
+                        value = pixelRadii[position] / lesserDimension
                         typeface = mediumTypeface
                         // If you want to use image url, you need using glide load it and pass to this param
                         imgDrawable = ContextCompat.getDrawable(

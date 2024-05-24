@@ -24,10 +24,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * Created by irinagalata on 1/19/17.
@@ -42,16 +38,10 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
-    private var minBubbleSize: Float = 0.1f
-    private var maxBubbleSize: Float = 0.8f
     private var isLongPress = false
     private var longPressJob: Job? = null
     private val coroutineScope by lazy {
-        if (this.findViewTreeLifecycleOwner()?.lifecycleScope != null) {
-            this.findViewTreeLifecycleOwner()!!.lifecycleScope
-        } else {
-            CoroutineScope(Dispatchers.Main + SupervisorJob())
-        }
+        this.findViewTreeLifecycleOwner()?.lifecycleScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob())
     }
 
     @ColorInt
@@ -68,18 +58,12 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
                     .map { value.getMainItem(it) }
                     .sortedByDescending { it.value }
 
-                // Transition values into radii
-                setRadii(mainPickerItems)
-
                 val secondaryPickerItems = mutableListOf<PickerItem>()
                 value.secondaryItemCount?.let { secondaryCount ->
                     secondaryPickerItems.addAll((0 until secondaryCount)
                         .map { value.getSecondaryItem(it) }
                         .sortedByDescending { it.value }
                     )
-
-                    // Transition values into radii
-                    setRadii(secondaryPickerItems)
 
                     // Add secondaryRadius if item exists in both lists
                     mainPickerItems.forEach { mainItem ->
@@ -188,52 +172,12 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
         array.recycle()
     }
 
-    private fun setRadii(items: List<PickerItem>) {
-        val sum = items.sumOf { it.value.toDouble() }.toFloat()
-        // Prevent division by zero
-        val totalValue = if (sum > items.size) sum else items.size.toFloat()
-        val lesserDimension = min(adapter?.width!!, adapter?.height!!)
-        // Increasing the area allows the bubbles to grow closer to the bubble picker view height
-        val totalArea = (adapter?.width?.times(adapter?.height ?: 0) ?: 0) * 2.5f
-        val maxArea = (Math.PI * (maxBubbleSize * lesserDimension).pow(2)).toFloat()
-        val minArea = (Math.PI * (minBubbleSize * lesserDimension).pow(2)).toFloat()
-        // Make each radius based on area
-        items.forEach {
-            val value = if (it.value == 0f) 1f else it.value
-            val ratio = value / totalValue
-            val area = totalArea * ratio
-            val finalArea = max(minArea, min(maxArea, area))
-            val radius = sqrt(finalArea / Math.PI).toFloat()
-            it.value = radius / lesserDimension
-        }
-    }
-
     fun showMainItems() {
         engine.mode = Engine.Mode.MAIN
     }
 
     fun showSecondaryItems() {
         engine.mode = Engine.Mode.SECONDARY
-    }
-
-    /**
-     * This function sets the max size of the bubble as a percentage
-     * of the lesser dimension of the view the BubblePicker is displayed in.
-     *
-     * @param size The maximum size of the bubble, default is 0.4f (40% of smaller dimension).
-     */
-    fun setMaxBubbleSize(size: Float) {
-        maxBubbleSize = size
-    }
-
-    /**
-     * This function sets the min size of the bubble as a percentage
-     * of the lesser dimension of the view the BubblePicker is displayed in.
-     *
-     * @param size The minimum size of the bubble, default is 0.1f (10% of smaller dimension).
-     */
-    fun setMinBubbleSize(size: Float) {
-        minBubbleSize = size
     }
 
     fun setSelectedBorderColor(color: FloatArray) {

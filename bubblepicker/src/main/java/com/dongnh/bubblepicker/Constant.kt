@@ -13,6 +13,6 @@ object Constant {
         1f, 1f  // Top right
     )
 
-    val FLOAT_SIZE = 4
+    const val FLOAT_SIZE = 4
 
 }

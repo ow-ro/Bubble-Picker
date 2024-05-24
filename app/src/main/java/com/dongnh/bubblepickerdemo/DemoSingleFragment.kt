@@ -10,21 +10,17 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.dongnh.bubblepicker.BubblePickerListener
 import com.dongnh.bubblepicker.adapter.BubblePickerAdapter
+import com.dongnh.bubblepicker.model.Item
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.rendering.BubblePicker
+import com.dongnh.bubblepicker.getPixelRadii
 import com.dongnh.bubblepickerdemo.databinding.FragmentSingleDemoBinding
 import com.dongnh.bubblepickerdemo.databinding.FragmentSingleDemoBinding.*
 
 class DemoSingleFragment : Fragment() {
 
     private lateinit var binding: FragmentSingleDemoBinding
-
-    data class Item(
-        val title: String,
-        val imgResId: Int,
-        val value: Float
-    )
 
     lateinit var primaryItems: MutableList<Item>
     lateinit var secondaryItems: MutableList<Item>
@@ -54,6 +50,7 @@ class DemoSingleFragment : Fragment() {
                 Item(
                     title,
                     primaryImages.getResourceId(index, 0),
+                    null,
                     IntRange(50, 150).random().toFloat()
                 )
             )
@@ -67,6 +64,7 @@ class DemoSingleFragment : Fragment() {
                 Item(
                     title,
                     secondaryImages.getResourceId(index, 0),
+                    null,
                     IntRange(1, 25).random().toFloat()
                 )
             )
@@ -86,24 +84,31 @@ class DemoSingleFragment : Fragment() {
             return
         }
 
+        val lesserDimension = minOf(container.width, container.height)
+        val primaryItemPixelValues = getPixelRadii(
+            primaryItems,
+            lesserDimension,
+            container.width * container.height.toFloat(),
+        )
+        val secondaryItemPixelValues = getPixelRadii(
+            secondaryItems,
+            lesserDimension,
+            container.width * container.height.toFloat(),
+        )
+
         firstPicker = BubblePicker(Engine.Mode.MAIN, false, this.requireContext(), null)
         firstPicker!!.apply {
             // This must be set before setting the adapter
-            setMaxBubbleSize(0.8f)
-            setMinBubbleSize(0.1f)
             adapter = object : BubblePickerAdapter {
 
                 override val totalItemCount = primaryItems.size + secondaryItems.size
                 override val mainItemCount = primaryItems.size
                 override val secondaryItemCount = secondaryItems.size
 
-                override val width = container.width
-                override val height = container.height
-
                 override fun getMainItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         val mainItem = primaryItems[position]
-                        value = mainItem.value
+                        value = primaryItemPixelValues[position] / lesserDimension
                         title = mainItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoSingleFragment.requireContext(),
@@ -116,7 +121,7 @@ class DemoSingleFragment : Fragment() {
                 override fun getSecondaryItem(position: Int): PickerItem {
                     return PickerItem().apply {
                         val secondaryItem = secondaryItems[position]
-                        value = secondaryItem.value
+                        value = secondaryItemPixelValues[position] / lesserDimension
                         title = secondaryItem.title
                         imgDrawable = ContextCompat.getDrawable(
                             this@DemoSingleFragment.requireContext(),
