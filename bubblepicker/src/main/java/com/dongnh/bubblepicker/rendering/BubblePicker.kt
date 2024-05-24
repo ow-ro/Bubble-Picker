@@ -122,19 +122,20 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
             MotionEvent.ACTION_DOWN -> {
                 startX = event.x
                 startY = event.y
+                renderer.setCurrentTouchedItem(startX, startY)
                 previousX = event.x
                 previousY = event.y
                 isLongPress = false
 
                 longPressJob = coroutineScope.launch {
                     delay(300)
-                    renderer.longClick(startX, startY)
+                    renderer.longClick()
                     isLongPress = true
                 }
             }
             MotionEvent.ACTION_UP -> {
                 longPressJob?.cancel()
-                if (isClick(event) && !isLongPress) renderer.resize(event.x, event.y, resizeOnDeselect)
+                if (isClick(event) && !isLongPress) renderer.resize(resizeOnDeselect)
                 touchListener?.onTouchUp(event)
                 renderer.release()
             }

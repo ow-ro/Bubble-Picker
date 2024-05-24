@@ -46,6 +46,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
     var allPickerItems: List<PickerItem> = ArrayList()
+    var currentlyTouchedItem: Item? = null
 
     // Gravity
     var speedBackToCenter = 50f
@@ -194,26 +195,30 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
         glCompileShader(this)
     }
 
-    fun swipe(x: Float, y: Float) = engine.swipe(
-        x.convertPoint(glView.width, scaleX),
-        (glView.height - y).convertPoint(glView.height, scaleY),
-        getItem(Vec2(x, glView.height - y))
-    )
-
-    fun longClick(x: Float, y: Float) {
-        getItem(Vec2(x, glView.height - y))?.let {
-            listener?.onBubbleLongClick(it.pickerItem)
-        }
-    }
-
     private fun getItem(position: Vec2): Item? {
         val x = position.x.convertPoint(glView.width, scaleX)
         val y = position.y.convertPoint(glView.height, scaleY)
         return circles.find { !it.isBodyDestroyed && sqrt(((x - it.x!!).sqr() + (y - it.y!!).sqr()).toDouble()) <= it.radius }
     }
 
-    fun resize(x: Float, y: Float, resizeOnDeselect: Boolean) {
-        val item = getItem(Vec2(x, glView.height - y))?.apply {
+    fun swipe(x: Float, y: Float) = engine.swipe(
+        x.convertPoint(glView.width, scaleX),
+        (glView.height - y).convertPoint(glView.height, scaleY),
+        currentlyTouchedItem
+    )
+
+    fun longClick() {
+        currentlyTouchedItem?.let {
+            listener?.onBubbleLongClick(it.pickerItem)
+        }
+    }
+
+    fun setCurrentTouchedItem(x: Float, y: Float) {
+        currentlyTouchedItem = getItem(Vec2(x, glView.height - y))
+    }
+
+    fun resize(resizeOnDeselect: Boolean) {
+        currentlyTouchedItem?.apply {
             if (engine.resize(this, resizeOnDeselect)) {
                 listener?.let {
                     if (circleBody.increased) {
@@ -227,7 +232,7 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
             }
         }
 
-        if (item == null) {
+        if (currentlyTouchedItem == null) {
             engine.selectedItem?.let {
                 engine.resize(it, true)
             }
