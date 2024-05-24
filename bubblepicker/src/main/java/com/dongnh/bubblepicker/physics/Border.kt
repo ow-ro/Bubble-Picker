@@ -14,7 +14,7 @@ class Border(world: World, var position: Vec2, var view: Int) {
         const val VERTICAL: Int = 1
     }
 
-    var itemBody: Body
+    private var itemBody: Body
 
     private val shape: PolygonShape
         get() {

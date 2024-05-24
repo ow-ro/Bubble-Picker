@@ -10,8 +10,8 @@ import com.dongnh.bubblepicker.physics.Engine
 import com.dongnh.bubblepicker.rendering.BubbleShader.A_POSITION
 import com.dongnh.bubblepicker.rendering.BubbleShader.A_UV
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_BACKGROUND
-import com.dongnh.bubblepicker.rendering.BubbleShader.fragmentShader
-import com.dongnh.bubblepicker.rendering.BubbleShader.vertexShader
+import com.dongnh.bubblepicker.rendering.BubbleShader.FRAGMENT_SHADER
+import com.dongnh.bubblepicker.rendering.BubbleShader.VERTEX_SHADER
 import org.jbox2d.common.Vec2
 import java.lang.ref.WeakReference
 import java.nio.FloatBuffer
@@ -177,8 +177,8 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
 
     private fun attachShaders() {
         programId = createProgram(
-            createShader(GL_VERTEX_SHADER, vertexShader),
-            createShader(GL_FRAGMENT_SHADER, fragmentShader)
+            createShader(GL_VERTEX_SHADER, VERTEX_SHADER),
+            createShader(GL_FRAGMENT_SHADER, FRAGMENT_SHADER)
         )
         glUseProgram(programId)
     }

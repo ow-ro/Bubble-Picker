@@ -4,7 +4,6 @@ package com.dongnh.bubblepicker
  * Created by irinagalata on 3/8/17.
  */
 object Constant {
-
     val TEXTURE_VERTICES = floatArrayOf(
         // X, Y
         0f, 0f, // Bottom left
@@ -14,5 +13,4 @@ object Constant {
     )
 
     const val FLOAT_SIZE = 4
-
 }

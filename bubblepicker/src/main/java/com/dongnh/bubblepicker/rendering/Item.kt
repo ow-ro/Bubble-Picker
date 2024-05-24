@@ -9,7 +9,6 @@ import android.opengl.Matrix
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
-import com.dongnh.bubblepicker.model.BubbleGradient
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.physics.CircleBody
 import com.dongnh.bubblepicker.rendering.BubbleShader.U_MATRIX
@@ -61,20 +60,6 @@ data class Item(
     private val visibilityLocation by lazy { glGetUniformLocation(programId, BubbleShader.U_VISIBILITY) }
     private val matrixLocation by lazy { glGetUniformLocation(programId, U_MATRIX) }
 
-    private val gradient: LinearGradient?
-        get() {
-            return pickerItem.gradient?.let {
-                val horizontal = it.direction == BubbleGradient.HORIZONTAL
-                LinearGradient(
-                    if (horizontal) 0f else heightImage / 2f,
-                    if (horizontal) widthImage / 2f else 0f,
-                    if (horizontal) widthImage else heightImage / 2f,
-                    if (horizontal) widthImage / 2f else heightImage,
-                    it.startColor, it.endColor, Shader.TileMode.CLAMP
-                )
-            }
-        }
-
     private fun maybeUpdateAnimatedFrame(): Float {
         pickerItem.animatedFrames?.let { frames ->
             val frame = frames[currentFrameIndex]
@@ -123,15 +108,6 @@ data class Item(
         texture = bindTexture(textureIds, index * 2 + 1)
     }
 
-    private fun applyStrokeToFrame(sourceImage: Bitmap): Bitmap {
-        val modifiedBitmap = Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(modifiedBitmap)
-        val bitmapDrawable = BitmapDrawable(context.get()?.resources, sourceImage)
-        drawImage(bitmapDrawable, canvas)
-        drawStrokeSelect(canvas)
-        return modifiedBitmap
-    }
-
     private fun createBitmap(): Bitmap {
         var bitmap: Bitmap =
             Bitmap.createBitmap(widthImage.toInt(), heightImage.toInt(), Bitmap.Config.ARGB_8888)
@@ -172,7 +148,6 @@ data class Item(
         val bgPaint = Paint()
         bgPaint.style = Paint.Style.FILL
         pickerItem.color?.let { bgPaint.color = pickerItem.color!! }
-        pickerItem.gradient?.let { bgPaint.shader = gradient }
         bgPaint.alpha = (pickerItem.overlayAlpha * 255).toInt()
         canvas.drawRect(0f, 0f, widthImage, heightImage, bgPaint)
     }

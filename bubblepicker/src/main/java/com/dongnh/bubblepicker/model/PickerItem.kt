@@ -14,7 +14,6 @@ data class PickerItem @JvmOverloads constructor(
     var icon: Drawable? = null,
     var iconOnTop: Boolean = true,
     @ColorInt var color: Int? = null,
-    var gradient: BubbleGradient? = null,
     var value: Float = 0f,
     var secondaryValue: Float? = null,
     var overlayAlpha: Float = 0f,
