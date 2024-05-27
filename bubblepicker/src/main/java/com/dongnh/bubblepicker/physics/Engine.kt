@@ -110,11 +110,6 @@ class Engine() {
         }
     }
 
-    // Extension function for linear interpolation
-    private fun Vec2.lerp(target: Vec2, alpha: Float): Vec2 {
-        return this.mul(1 - alpha).add(target.mul(alpha))
-    }
-
     private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
 
     private fun getScale(): Float {

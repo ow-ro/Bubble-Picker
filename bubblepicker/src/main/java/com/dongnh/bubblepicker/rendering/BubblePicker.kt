@@ -34,15 +34,16 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
 
     private val engine: Engine = Engine()
     private val renderer: PickerRenderer = PickerRenderer(this, engine, touchListener, startMode)
+    private val coroutineScope by lazy {
+        this.findViewTreeLifecycleOwner()?.lifecycleScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob())
+    }
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f
     private var previousY = 0f
     private var isLongPress = false
     private var longPressJob: Job? = null
-    private val coroutineScope by lazy {
-        this.findViewTreeLifecycleOwner()?.lifecycleScope ?: CoroutineScope(Dispatchers.Main + SupervisorJob())
-    }
+    private var isSwiping = false
 
     @ColorInt
     var background: Int = 0
@@ -138,15 +139,26 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
                 if (isClick(event) && !isLongPress) renderer.resize(resizeOnDeselect)
                 touchListener?.onTouchUp(event)
                 renderer.release()
+                isSwiping = false
             }
             MotionEvent.ACTION_MOVE -> {
-                if (isSwipe(event)) {
+                Log.i("BubblePicker", "xDiff: ${event.x - previousX}, yDiff: ${event.y - previousY}")
+                if (isSwiping && isGranularSwipe(event, 30)) {
+                    renderer.swipe(event.x, event.y)
+                    previousX = event.x
+                    previousY = event.y
+                } else if (isSwiping) {
+                    renderer.swipe(event.x, event.y)
+                    previousX = event.x
+                    previousY = event.y
+                } else if (isSwipe(event)) {
+                    isSwiping = true
                     longPressJob?.cancel()
-                    touchListener?.onTouchMove(event)
                     renderer.swipe(event.x, event.y)
                     previousX = event.x
                     previousY = event.y
                 }
+                touchListener?.onTouchMove(event)
             }
             else -> {
                 renderer.release()
@@ -162,6 +174,9 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
 
     private fun isSwipe(event: MotionEvent) =
         abs(event.x - previousX) > 10 || abs(event.y - previousY) > 10
+
+    private fun isGranularSwipe(event: MotionEvent, coordDiff: Int) =
+        abs(event.x - previousX) > coordDiff || abs(event.y - previousY) > coordDiff
 
     private fun retrieveAttributes(attrs: AttributeSet) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.BubblePicker)
