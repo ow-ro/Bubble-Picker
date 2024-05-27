@@ -5,17 +5,14 @@ import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
 import com.dongnh.bubblepicker.sqr
 import org.jbox2d.common.Vec2
-import org.jbox2d.dynamics.BodyDef
 import org.jbox2d.dynamics.World
-import org.jbox2d.dynamics.joints.MouseJoint
-import org.jbox2d.dynamics.joints.MouseJointDef
 import java.util.Collections.synchronizedSet
 import kotlin.collections.ArrayList
 
 /**
  * Created by irinagalata on 1/26/17.
  */
-class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
+class Engine() {
     enum class Mode {
         MAIN, SECONDARY
     }
@@ -26,16 +23,13 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
     private val toBeResized = synchronizedSet<Item>(mutableSetOf())
     private val standardIncreasedGravity = interpolate(800f, 300f, 0.5f)
     private var world = World(Vec2(0f, 0f), false)
-    private var groundBody = world.createBody(BodyDef())
     private var worldBorders: ArrayList<Border> = ArrayList()
     private var scaleX = 0f
     private var scaleY = 0f
     private var gravityCenter = Vec2(0f, 0f)
     private var stepsCount = 0
     private var didModeChange = false
-    private var mouseJoint: MouseJoint? = null
-    private var targetBody: CircleBody? = null
-    private var shouldDestroyJoint: Boolean = false
+    private var currentlyTouchedItem: Item? = null
     var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
@@ -45,7 +39,6 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
             // Don't do anything if the mode is the same
             if (newMode != field) {
                 field = newMode
-                shouldDestroyJoint = true
                 selectedItem = null
                 allItems.forEach {
                     it.circleBody.apply {
@@ -96,54 +89,30 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
 
     private fun move(body: CircleBody) {
         body.physicalBody?.apply {
-            body.position = position
+            if (!body.isBeingDragged) {
+                body.position = position
+            }
+
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
+
             if (!body.isBeingDragged) {
                 if (distance > STEP * 200 && body != selectedItem?.circleBody) {
                     applyForce(direction.mul(gravity * 3 * distance.sqr()), position)
                 } else if (body == selectedItem?.circleBody && direction.length() > STEP * 50) {
                     applyForce(direction.mul(7f * standardIncreasedGravity), position)
                 }
+            } else {
+                val touchDirection = body.position.sub(position)
+                linearVelocity = touchDirection.mul(1000f)
             }
         }
     }
 
-    private fun createMouseJoint(circleBody: CircleBody, target: Vec2) {
-        if (world.isLocked) return
-        destroyMouseJoint()
-
-        targetBody = circleBody
-        touchListener?.onTouchDown()
-
-        val body = circleBody.physicalBody ?: return
-        val touchOffset = body.position.sub(target) // Calculate the offset from the touch point to the body center
-
-        val md = MouseJointDef().apply {
-            this.bodyA = groundBody
-            this.bodyB = body
-            this.target.set(target.add(touchOffset))
-            this.maxForce = 50000 * body.mass // Very high max force to make it "stick" to the target
-            this.frequencyHz = 1000.0f // High frequency for more stiffness and less lag
-            this.dampingRatio = 0.0f // Low damping ratio to eliminate damping and make it very responsive        }
-        }
-
-        if (world.isLocked) return
-        (world.createJoint(md) as? MouseJoint)?.let {
-            mouseJoint = it
-            body.isAwake = true
-        }
-    }
-
-    private fun destroyMouseJoint() {
-        mouseJoint?.let {
-            if (world.isLocked) return
-            world.destroyJoint(it)
-            mouseJoint = null
-            targetBody = null
-            shouldDestroyJoint = false
-        }
+    // Extension function for linear interpolation
+    private fun Vec2.lerp(target: Vec2, alpha: Float): Vec2 {
+        return this.mul(1 - alpha).add(target.mul(alpha))
     }
 
     private fun interpolate(start: Float, end: Float, f: Float) = start + f * (end - start)
@@ -232,9 +201,6 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
         synchronized(toBeResized) {
             toBeResized.forEach { it.circleBody.resize(RESIZE_STEP) }
             world.step(STEP, 11, 11)
-            if (shouldDestroyJoint && !world.isLocked) {
-                destroyMouseJoint()
-            }
             circleBodies.forEach { move(it) }
             toBeResized.removeAll(toBeResized.filter { it.circleBody.finished }.toSet())
             stepsCount++
@@ -245,21 +211,14 @@ class Engine(private val touchListener: BubblePickerOnTouchListener? = null) {
         if (item != null && !item.isBodyDestroyed) {
             item.let {
                 it.circleBody.isBeingDragged = true
-                if (it != selectedItem) {
-                    selectedItem?.circleBody?.isBeingDragged = false
-                }
-            }
-            if (mouseJoint == null) {
-                createMouseJoint(item.circleBody, Vec2(x, y))
-            } else {
-                mouseJoint?.target = Vec2(x, y)
+                it.circleBody.position = Vec2(x, y)
+                currentlyTouchedItem = it
             }
         }
     }
 
     fun release() {
-        shouldDestroyJoint = true
-        circleBodies.forEach { it.isBeingDragged = false }
+        currentlyTouchedItem?.circleBody?.isBeingDragged = false
     }
 
     fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {

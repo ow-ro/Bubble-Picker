@@ -32,8 +32,8 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
 
     constructor(context: Context?, attrs: AttributeSet? = null) : this(Engine.Mode.MAIN, true, context, attrs)
 
-    private val engine: Engine = Engine(touchListener)
-    private val renderer: PickerRenderer = PickerRenderer(this, engine, startMode)
+    private val engine: Engine = Engine()
+    private val renderer: PickerRenderer = PickerRenderer(this, engine, touchListener, startMode)
     private var startX = 0f
     private var startY = 0f
     private var previousX = 0f

@@ -22,7 +22,7 @@ import kotlin.math.sqrt
 /**
  * Created by irinagalata on 1/19/17.
  */
-class PickerRenderer(private val glView: View, private val engine: Engine, private val startMode: Engine.Mode) : GLSurfaceView.Renderer {
+class PickerRenderer(private val glView: View, private val engine: Engine, private val touchListener: BubblePickerOnTouchListener? = null, private val startMode: Engine.Mode) : GLSurfaceView.Renderer {
 
     private val scaleX: Float get() = if (glView.width < glView.height) {
         1f
@@ -43,10 +43,10 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
     private var textureIds: IntArray? = null
     private var widthImage = 256f
     private var heightImage = 256f
+    private var currentlyTouchedItem: Item? = null
     var backgroundColor: Color? = null
     var listener: BubblePickerListener? = null
     var allPickerItems: List<PickerItem> = ArrayList()
-    var currentlyTouchedItem: Item? = null
 
     // Gravity
     var speedBackToCenter = 50f
@@ -215,6 +215,9 @@ class PickerRenderer(private val glView: View, private val engine: Engine, priva
 
     fun setCurrentTouchedItem(x: Float, y: Float) {
         currentlyTouchedItem = getItem(Vec2(x, glView.height - y))
+        currentlyTouchedItem?.let {
+            touchListener?.onTouchDown()
+        }
     }
 
     fun resize(resizeOnDeselect: Boolean) {
