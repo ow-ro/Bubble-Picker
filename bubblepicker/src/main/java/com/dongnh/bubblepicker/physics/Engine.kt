@@ -34,6 +34,7 @@ class Engine() {
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
     var margin = 0.001f
+    var touchCoords = Vec2(0f, 0f)
     var mode: Mode = Mode.MAIN
         set(newMode) {
             // Don't do anything if the mode is the same
@@ -104,7 +105,7 @@ class Engine() {
                     applyForce(direction.mul(7f * standardIncreasedGravity), position)
                 }
             } else {
-                val touchDirection = body.position.sub(position)
+                val touchDirection = touchCoords.sub(position)
                 linearVelocity = touchDirection.mul(1000f)
             }
         }
@@ -206,7 +207,7 @@ class Engine() {
         if (item != null && !item.isBodyDestroyed) {
             item.let {
                 it.circleBody.isBeingDragged = true
-                it.circleBody.position = Vec2(x, y)
+                touchCoords = Vec2(x, y)
                 currentlyTouchedItem = it
             }
         }
@@ -214,6 +215,8 @@ class Engine() {
 
     fun release() {
         currentlyTouchedItem?.circleBody?.isBeingDragged = false
+        currentlyTouchedItem = null
+        touchCoords = Vec2(0f, 0f)
     }
 
     fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {
