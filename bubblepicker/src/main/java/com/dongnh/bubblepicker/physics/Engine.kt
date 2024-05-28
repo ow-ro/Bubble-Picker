@@ -107,7 +107,7 @@ class Engine() {
                 }
             } else {
                 val touchDirection = touchCoords.sub(position)
-                val scaledVelocity = interpolate(100f, 500f, speed / 10).coerceAtMost(500f) * speedScale
+                val scaledVelocity = interpolate(100f, 700f, speed / 10).coerceAtMost(700f) * speedScale
                 if (speedScale < 1f) {
                     speedScale += 1 / 30f
                 }
