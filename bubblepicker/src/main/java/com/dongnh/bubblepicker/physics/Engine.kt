@@ -31,11 +31,11 @@ class Engine() {
     private var didModeChange = false
     private var currentlyTouchedItem: Item? = null
     private var touchCoords = Vec2(0f, 0f)
+    private var speedScale = 1 / 30f
     var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
     var margin = 0.001f
-    var speed: Float = 0f
     var mode: Mode = Mode.MAIN
         set(newMode) {
             // Don't do anything if the mode is the same
@@ -105,7 +105,10 @@ class Engine() {
                 }
             } else {
                 val touchDirection = touchCoords.sub(position)
-                val scaledVelocity = (speed * 100).coerceAtMost(1000f)
+                val scaledVelocity = speedScale * 1000f
+                if (speedScale < 1f) {
+                    speedScale += 1 / 30f
+                }
                 linearVelocity = touchDirection.mul(scaledVelocity)
             }
         }
@@ -216,6 +219,7 @@ class Engine() {
     fun release() {
         currentlyTouchedItem?.circleBody?.isBeingDragged = false
         currentlyTouchedItem = null
+        speedScale = 1 / 30f
     }
 
     fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {
