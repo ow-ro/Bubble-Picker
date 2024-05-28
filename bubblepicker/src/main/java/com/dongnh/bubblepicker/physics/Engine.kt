@@ -37,6 +37,7 @@ class Engine() {
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
     var margin = 0.001f
+    var speed: Float = 0f
     var mode: Mode = Mode.MAIN
         set(newMode) {
             // Don't do anything if the mode is the same

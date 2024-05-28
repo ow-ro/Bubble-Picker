@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.opengl.GLSurfaceView
+import android.os.SystemClock
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -44,6 +45,10 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
     private var isLongPress = false
     private var longPressJob: Job? = null
     private var isSwiping = false
+    private var initialX = 0f
+    private var initialY = 0f
+    private var initialTime: Long = 0
+    private var speed = 0f
 
     @ColorInt
     var background: Int = 0
@@ -127,6 +132,7 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
                 previousX = event.x
                 previousY = event.y
                 isLongPress = false
+                initialTime = SystemClock.elapsedRealtime()
 
                 longPressJob = coroutineScope.launch {
                     delay(500)
@@ -140,8 +146,30 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
                 touchListener?.onTouchUp(event)
                 renderer.release()
                 isSwiping = false
+                initialX = 0f
+                initialY = 0f
+                initialTime = 0
+                speed = 0f
             }
             MotionEvent.ACTION_MOVE -> {
+                val currentTime = SystemClock.elapsedRealtime()
+                // Calculate the distance
+                val distanceX = event.x - initialX
+                val distanceY = event.y - initialY
+                val distance = kotlin.math.sqrt(distanceX * distanceX + distanceY * distanceY)
+
+                // Calculate the time difference
+                val timeDifference = currentTime - initialTime
+
+                // Calculate the speed (distance per millisecond)
+                speed = distance / timeDifference
+
+                // Update the initial values for the next calculation
+                initialX = event.x
+                initialY = event.y
+                initialTime = currentTime
+
+                engine.speed = speed
                 if (isSwiping && isGranularSwipe(event, 20)) {
                     renderer.swipe(event.x, event.y)
                     previousX = event.x
