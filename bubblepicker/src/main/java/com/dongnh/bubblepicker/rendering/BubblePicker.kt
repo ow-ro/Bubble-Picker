@@ -129,7 +129,7 @@ class BubblePicker(startMode: Engine.Mode, private val resizeOnDeselect: Boolean
                 isLongPress = false
 
                 longPressJob = coroutineScope.launch {
-                    delay(300)
+                    delay(500)
                     renderer.longClick()
                     isLongPress = true
                 }

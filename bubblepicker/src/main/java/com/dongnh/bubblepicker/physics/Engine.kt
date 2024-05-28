@@ -1,5 +1,6 @@
 package com.dongnh.bubblepicker.physics
 
+import android.util.Log
 import com.dongnh.bubblepicker.BubblePickerOnTouchListener
 import com.dongnh.bubblepicker.model.PickerItem
 import com.dongnh.bubblepicker.rendering.Item
@@ -105,7 +106,7 @@ class Engine() {
                 }
             } else {
                 val touchDirection = touchCoords.sub(position)
-                val scaledVelocity = speedScale * 1000f
+                val scaledVelocity = interpolate(100f, 1000f, (speed * speedScale) / 10).coerceAtMost(1000f)
                 if (speedScale < 1f) {
                     speedScale += 1 / 30f
                 }
