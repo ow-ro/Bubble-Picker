@@ -30,11 +30,12 @@ class Engine() {
     private var stepsCount = 0
     private var didModeChange = false
     private var currentlyTouchedItem: Item? = null
+    private var touchCoords = Vec2(0f, 0f)
     var selectedItem: Item? = null
     var allItems: ArrayList<Item> = arrayListOf()
     var speedToCenter = 16f
     var margin = 0.001f
-    var touchCoords = Vec2(0f, 0f)
+    var speed: Float = 0f
     var mode: Mode = Mode.MAIN
         set(newMode) {
             // Don't do anything if the mode is the same
@@ -90,10 +91,8 @@ class Engine() {
 
     private fun move(body: CircleBody) {
         body.physicalBody?.apply {
-            if (!body.isBeingDragged) {
-                body.position = position
-            }
 
+            body.position = position
             val direction = gravityCenter.sub(position)
             val distance = direction.length()
             val gravity = if (body.increased) 1.2f * speedToCenter else speedToCenter
@@ -106,7 +105,8 @@ class Engine() {
                 }
             } else {
                 val touchDirection = touchCoords.sub(position)
-                linearVelocity = touchDirection.mul(1000f)
+                val scaledVelocity = (speed * 100).coerceAtMost(1000f)
+                linearVelocity = touchDirection.mul(scaledVelocity)
             }
         }
     }
@@ -216,7 +216,6 @@ class Engine() {
     fun release() {
         currentlyTouchedItem?.circleBody?.isBeingDragged = false
         currentlyTouchedItem = null
-        touchCoords = Vec2(0f, 0f)
     }
 
     fun resize(item: Item, resizeOnDeselect: Boolean): Boolean {
